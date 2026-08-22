@@ -1,0 +1,15 @@
+{
+  "_note": "Representative Onshape assembly /massproperties response. All SI: mass kg, centroid m, inertia kg*m^2 (27-element; first 9 = row-major centroidal 3x3 tensor).",
+  "mass": [2.5, 2.45, 2.55],
+  "volume": [0.0003, 0.00029, 0.00031],
+  "centroid": [0.10, 0.00, 0.05, 0, 0, 0, 0, 0, 0],
+  "inertia": [
+    0.020, 0.000, 0.000,
+    0.000, 0.030, 0.000,
+    0.000, 0.000, 0.040,
+    0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0
+  ],
+  "hasMass": true,
+  "massMissingCount": 0
+}

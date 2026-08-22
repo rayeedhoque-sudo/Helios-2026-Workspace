@@ -1,0 +1,39 @@
+# ---- Credentials: never commit ----
+.onshape.json
+*.onshape-key
+.env
+.env.*
+**/.onshape-cache/
+
+# ---- Disabled sub-repo histories (absorbed into this repo) ----
+**/.git-old/
+
+# ---- Build output ----
+**/build/
+**/bin/
+**/dist/
+**/.gradle/
+**/node_modules/
+*.jar
+*.pdb
+
+# ---- Logs & telemetry captures (hundreds of MB, regenerated on the robot) ----
+**/logs/
+*.log
+*.hoot
+*.wpilog
+cap*.json
+
+# ---- Large FRC tool binaries / images ----
+tools/*.exe
+tools/roborio-images/
+*.img
+*.img.zip
+
+# ---- Redundant archive: same content as extracted/2026-Helios-Code-main/ ----
+2026-Helios-Code-main.zip
+
+# ---- Editor / OS cruft ----
+.vscode/settings.json
+.DS_Store
+Thumbs.db

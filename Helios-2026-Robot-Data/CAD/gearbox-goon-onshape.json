@@ -1,0 +1,306 @@
+﻿{
+  "input": {
+    "url": "https://cad.onshape.com/documents/e5843f80827566d656536e4a/v/307372e77bc2ce584ace8b4a/e/5cbf771d82b29d6972f1b0b6",
+    "did": "e5843f80827566d656536e4a",
+    "wvm": "v",
+    "wvmid": "307372e77bc2ce584ace8b4a",
+    "eid": "5cbf771d82b29d6972f1b0b6",
+    "configuration": null
+  },
+  "mode": "all",
+  "gearRatios": [],
+  "dimensions": [],
+  "bom": [
+    {
+      "name": "Part 128",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/e5843f80827566d656536e4a/v/307372e77bc2ce584ace8b4a/e/b630b2215091c6a8f7e99a4b?configuration=default",
+        "configuration": "default",
+        "documentId": "e5843f80827566d656536e4a",
+        "elementId": "b630b2215091c6a8f7e99a4b",
+        "partId": "ZsABD",
+        "wvmId": "307372e77bc2ce584ace8b4a",
+        "partIdentity": "2f5a05b3b71b97bb521ccf3e",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1a6893428ba2ac8e63d3068a",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 127",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/e5843f80827566d656536e4a/v/307372e77bc2ce584ace8b4a/e/b630b2215091c6a8f7e99a4b?configuration=default",
+        "configuration": "default",
+        "documentId": "e5843f80827566d656536e4a",
+        "elementId": "b630b2215091c6a8f7e99a4b",
+        "partId": "ZrABD",
+        "wvmId": "307372e77bc2ce584ace8b4a",
+        "partIdentity": "e79ec20439ef2c188ae3169a",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1a6893428ba2ac8e63d3068a",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" ThunderHex (1.686 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/e5843f80827566d656536e4a/v/307372e77bc2ce584ace8b4a/e/b630b2215091c6a8f7e99a4b?configuration=default",
+        "configuration": "default",
+        "documentId": "e5843f80827566d656536e4a",
+        "elementId": "b630b2215091c6a8f7e99a4b",
+        "partId": "ZvABD",
+        "wvmId": "307372e77bc2ce584ace8b4a",
+        "partIdentity": "0fc0b38b1ad1e05f2687fe31",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1a6893428ba2ac8e63d3068a",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" ThunderHex (1.686 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/e5843f80827566d656536e4a/v/307372e77bc2ce584ace8b4a/e/b630b2215091c6a8f7e99a4b?configuration=default",
+        "configuration": "default",
+        "documentId": "e5843f80827566d656536e4a",
+        "elementId": "b630b2215091c6a8f7e99a4b",
+        "partId": "ZMBBD",
+        "wvmId": "307372e77bc2ce584ace8b4a",
+        "partIdentity": "89c817abcc5804e88830adcf",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1a6893428ba2ac8e63d3068a",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Rounded Hex (13.75mm) ID Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "partNumber": "1/2\" Rounded Hex (13.75mm) ID Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "description": "1/2\" Rounded Hex (13.75mm) ID Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "quantity": 4.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/836cd26e60025118646fa104/v/70b37b037ae6b9421831d995/e/cfbd251bf34e4159e9b98da2?configuration=default",
+        "configuration": "default",
+        "documentId": "836cd26e60025118646fa104",
+        "elementId": "cfbd251bf34e4159e9b98da2",
+        "partId": "JTD",
+        "wvmId": "70b37b037ae6b9421831d995",
+        "partIdentity": "4106a3864afd45cdacc7f062",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "d9fedf390c3f20ea6ec70a0d",
+        "fullConfiguration": "List_RoqEXBA4BSMIR1=_0_375__ID_x_0_875__OD_x_0_281__WD__Radial_;List_ov2tlpSsgPV0v3=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "NEO 2.0 Brushless Motor",
+      "partNumber": "REV-21-1653",
+      "description": "NEO 2.0 Brushless Motor",
+      "quantity": 3.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/1e490f667f2060acc06d66b0/v/580994f32a95c226098573a1/e/1a8ba92802371b4fd7dbfef0?configuration=default",
+        "configuration": "default",
+        "documentId": "1e490f667f2060acc06d66b0",
+        "elementId": "1a8ba92802371b4fd7dbfef0",
+        "partId": "RSBD",
+        "wvmId": "580994f32a95c226098573a1",
+        "partIdentity": "ed21a6cfe4f30152fa16850c",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "2970a2a71f35f8e04526861b",
+        "fullConfiguration": "Simplified_Model=true",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "20DP NEO Pinion Gear - 15T Spline - 10T(REV-21-4014)",
+      "partNumber": "REV-21-4014",
+      "description": "20DP NEO Pinion Gear - 15T Spline - 10 Tooth",
+      "quantity": 3.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/979a43a465479c212d3ed4da/v/216951fdb2ac95f0fd39ed17/e/9637da1508eaa145da2ca6bb?configuration=default",
+        "configuration": "default",
+        "documentId": "979a43a465479c212d3ed4da",
+        "elementId": "9637da1508eaa145da2ca6bb",
+        "partId": "JFD",
+        "wvmId": "216951fdb2ac95f0fd39ed17",
+        "partIdentity": "80ae81a93beb94dd1d91bf22",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1daef391131e119d63db135b",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "60t Pocketed Aluminum Spur Gear (20 DP, 1/2\" Hex Bore)",
+      "partNumber": "WCP-0121",
+      "description": "60t Pocketed Aluminum Spur Gear (20 DP, 1/2\" Hex Bore)",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/8ca1bcd2ce433ef31ae559db/v/54619c055324749a35ba1ad7/e/77cc8576a7ce824614e92f59?configuration=List_wpSQZw5n6q1AZY%3D_60t_Pocketed_Aluminum",
+        "configuration": "List_wpSQZw5n6q1AZY=_60t_Pocketed_Aluminum",
+        "documentId": "8ca1bcd2ce433ef31ae559db",
+        "elementId": "77cc8576a7ce824614e92f59",
+        "partId": "JID",
+        "wvmId": "54619c055324749a35ba1ad7",
+        "partIdentity": "704eec064cd4c33821ef5a6b",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "90bcc924a5376d710fa1067b",
+        "fullConfiguration": "List_wpSQZw5n6q1AZY=_60t_Pocketed_Aluminum",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "18t Aluminum Pulley (HTD 5mm, 9mm Wide, 1/2\" Hex Bore)",
+      "partNumber": "WCP-0563",
+      "description": "18t Aluminum Pulley (HTD 5mm, 9mm Wide, 1/2\" Hex Bore)",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/7348c911d6b36d3b222c1dfe/v/bb1e46a8453a5c9a0b5fc665/e/b568cf62768f549c2f067e7c?configuration=List_b49DPDa7oomn2X%3D_18t_x_9mm_Wide",
+        "configuration": "List_b49DPDa7oomn2X=_18t_x_9mm_Wide",
+        "documentId": "7348c911d6b36d3b222c1dfe",
+        "elementId": "b568cf62768f549c2f067e7c",
+        "partId": "JHD",
+        "wvmId": "bb1e46a8453a5c9a0b5fc665",
+        "partIdentity": "e62f12d91429c13795c7c2fd",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "29af61aea809ba3560c6d428",
+        "fullConfiguration": "List_b49DPDa7oomn2X=_18t_x_9mm_Wide",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.562\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Bore_Size%3D0.012750800000000001%2Bmeter%3BLength%3D0.01427226%2Bmeter",
+        "configuration": "Bore_Size=0.012750800000000001+meter;Length=0.01427226+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.012750800000000001+meter;G=64.0;Length=0.01427226+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.5\" OD,0.864\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 3.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Bore_Size%3D0.00889%2Bmeter%3BLength%3D0.021942907600000002%2Bmeter%3BList_1ZOEEEsgs5jPoF%3DRound%3BOD%3D0.012700000000000001%2Bmeter",
+        "configuration": "Bore_Size=0.00889+meter;Length=0.021942907600000002+meter;List_1ZOEEEsgs5jPoF=Round;OD=0.012700000000000001+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.00889+meter;G=64.0;Length=0.021942907600000002+meter;List_1ZOEEEsgs5jPoF=Round;OD=0.012700000000000001+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "3/8\" ThunderHex (1.31 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 3.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/e5843f80827566d656536e4a/v/307372e77bc2ce584ace8b4a/e/b630b2215091c6a8f7e99a4b?configuration=default",
+        "configuration": "default",
+        "documentId": "e5843f80827566d656536e4a",
+        "elementId": "b630b2215091c6a8f7e99a4b",
+        "partId": "ZzBBD",
+        "wvmId": "307372e77bc2ce584ace8b4a",
+        "partIdentity": "54d09bf040277fdf5133b982",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1a6893428ba2ac8e63d3068a",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "3/8\" ThunderHex (1.31 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/e5843f80827566d656536e4a/v/307372e77bc2ce584ace8b4a/e/b630b2215091c6a8f7e99a4b?configuration=default",
+        "configuration": "default",
+        "documentId": "e5843f80827566d656536e4a",
+        "elementId": "b630b2215091c6a8f7e99a4b",
+        "partId": "ZQCBD",
+        "wvmId": "307372e77bc2ce584ace8b4a",
+        "partIdentity": "609b173279d26abe1de39f6a",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1a6893428ba2ac8e63d3068a",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    }
+  ],
+  "massProperties": {
+    "mass_kg": 1.659085582350599,
+    "centroid_m": [
+      -0.20304508868776122,
+      0.12940179330935384,
+      0.07914247186865113
+    ],
+    "inertiaTensor_kgm2": [
+      0.006623331106650507,
+      2.8799087965885484e-06,
+      0.00021199840743714934,
+      2.879908796588613e-06,
+      0.0015129182930082976,
+      7.999322021243736e-05,
+      0.0002119984074371494,
+      7.999322021243737e-05,
+      0.007033843923383616
+    ],
+    "hasMass": true,
+    "massMissingCount": 0,
+    "confidence": "high",
+    "momentOfInertia_kgm2": 0.007033843923383616,
+    "axis": "z",
+    "centroidalMOI_kgm2": 0.007033843923383616,
+    "appliedParallelAxis": false,
+    "offset_m": 0.0
+  },
+  "relationParameterIdsSeen": [],
+  "apiCallsUsed": 5,
+  "quotaExhausted": false,
+  "warnings": []
+}

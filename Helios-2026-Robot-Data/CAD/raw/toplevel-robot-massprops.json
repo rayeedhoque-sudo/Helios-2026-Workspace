@@ -1,0 +1,47 @@
+{
+  "input": {
+    "url": "https://cad.onshape.com/documents/303789bd62fb0d9d609c14b6/w/a87ec714c13eeda7135bab77/e/07728cb84454d25bab1e0df4",
+    "did": "303789bd62fb0d9d609c14b6",
+    "wvm": "w",
+    "wvmid": "a87ec714c13eeda7135bab77",
+    "eid": "07728cb84454d25bab1e0df4",
+    "configuration": null
+  },
+  "mode": "massprops",
+  "gearRatios": [],
+  "dimensions": [],
+  "bom": [],
+  "massProperties": {
+    "mass_kg": 680.2533304602644,
+    "centroid_m": [
+      0.002140798069816916,
+      0.0044234730824789705,
+      0.09054596987947162
+    ],
+    "inertiaTensor_kgm2": [
+      84.35700671981522,
+      0.13667623873224385,
+      -0.12501048132417253,
+      0.13667623873224385,
+      53.021497257111065,
+      -0.2865177621308773,
+      -0.12501048132417258,
+      -0.2865177621308773,
+      131.30389897865817
+    ],
+    "hasMass": true,
+    "massMissingCount": 26,
+    "confidence": "low",
+    "momentOfInertia_kgm2": 131.30389897865817,
+    "axis": "z",
+    "centroidalMOI_kgm2": 131.30389897865817,
+    "appliedParallelAxis": false,
+    "offset_m": 0.0
+  },
+  "relationParameterIdsSeen": [],
+  "apiCallsUsed": 1,
+  "quotaExhausted": false,
+  "warnings": [
+    "mass/inertia unreliable: model has unassigned material(s); Onshape used a default density (massMissingCount=26). Assign materials or verify against measured spin-up."
+  ]
+}

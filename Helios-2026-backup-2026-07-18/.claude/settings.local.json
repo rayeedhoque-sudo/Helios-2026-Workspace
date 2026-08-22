@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp C:/FRC/extracted/2026-Helios-Code-main/vendordeps/Phoenix6-26.1.0.json C:/FRC/Helios-2026/vendordeps/Phoenix6-26.1.0.json)",
+      "Bash(cp C:/FRC/extracted/2026-Helios-Code-main/vendordeps/REVLib.json C:/FRC/Helios-2026/vendordeps/REVLib.json)",
+      "Bash(cp C:/FRC/extracted/2026-Helios-Code-main/vendordeps/PathplannerLib.json C:/FRC/Helios-2026/vendordeps/PathplannerLib.json)",
+      "Skill(update-config)"
+    ]
+  }
+}

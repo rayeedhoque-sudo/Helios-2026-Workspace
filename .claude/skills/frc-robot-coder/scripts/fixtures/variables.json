@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Variables",
+    "variables": [
+      { "type": "NUMBER", "name": "gearRatio", "value": "9", "expression": "9" },
+      { "type": "NUMBER", "name": "shooterReduction", "value": "1.5", "expression": "1.5" },
+      { "type": "LENGTH", "name": "wheelDiameter", "value": "0.1016 meter", "expression": "4*inch" },
+      { "type": "LENGTH", "name": "trackWidth", "value": "0.6 meter", "expression": "0.6*meter" },
+      { "type": "ANGLE", "name": "restAngle", "value": "0.5 radian", "expression": "30*deg" }
+    ]
+  }
+]

@@ -1,0 +1,62 @@
+{
+  "_note": "DERIVED COPY. cots-ratio-reference.md governs; regenerate this file from it. These are documented vendor ratios used by onshape_fetch.py ONLY to attach a LOW-CONFIDENCE candidate to a BOM/part row. Claude does the real resolution against the markdown and the user confirms before any value is trusted. Omitted/uncertain configs live under needsConfirmation and must NOT be guessed.",
+  "_schema": {
+    "swerve.<KEY>": {
+      "aliases": "lowercase substrings matched against a part name",
+      "steerRatio": "azimuth/steer reduction (motor:module), dimensionless",
+      "driveRatios": "map of config-code -> drive reduction (motor:wheel), dimensionless",
+      "source": "citation"
+    },
+    "planetary.<KEY>": {
+      "aliases": "lowercase substrings",
+      "cartridgeStages": "available single-cartridge ratios; NET = product of the stacked cartridges",
+      "netRule": "how to combine",
+      "source": "citation"
+    }
+  },
+  "swerve": {
+    "SDS_MK4": {
+      "aliases": ["mk4 ", "mk-4 ", "mk4_", "swerve mk4", "module mk4"],
+      "steerRatio": 12.8,
+      "driveRatios": { "L1": 8.14, "L2": 6.75, "L3": 6.12, "L4": 5.14 },
+      "source": "Swerve Drive Specialties MK4 product page; YAGSL standard conversion factors"
+    },
+    "SDS_MK4i": {
+      "aliases": ["mk4i", "mk-4i", "mk4 i"],
+      "steerRatio": 21.4286,
+      "steerRatioExact": "150/7",
+      "driveRatios": { "L1": 8.14, "L2": 6.75, "L3": 6.12 },
+      "source": "Swerve Drive Specialties MK4i product page; YAGSL standard conversion factors"
+    },
+    "REV_MAXSwerve": {
+      "aliases": ["maxswerve", "max swerve", "max-swerve"],
+      "steerRatio": 46.42,
+      "steerRatioExact": "9424/203",
+      "driveRatios": { "12T": 5.5, "13T": 5.08, "14T": 4.71 },
+      "driveRatioNote": "pinion-tooth dependent: 12T=Low, 13T=Medium, 14T=High",
+      "source": "REV MAXSwerve documentation; YAGSL standard conversion factors"
+    }
+  },
+  "planetary": {
+    "REV_MAXPlanetary": {
+      "aliases": ["maxplanetary", "max planetary", "max-planetary"],
+      "cartridgeStages": [3, 4, 5, 9],
+      "netRule": "NET ratio = product of the stacked cartridge ratios (e.g. 9:1 + 4:1 cartridges = 36:1). The 9:1 is a first-stage-only cartridge.",
+      "source": "REV MAXPlanetary documentation"
+    },
+    "VEX_VersaPlanetary": {
+      "aliases": ["versaplanetary", "versa planetary", "versa-planetary", "versaplanet"],
+      "cartridgeStages": [3, 4, 5, 7, 10],
+      "netRule": "NET ratio = product of the stacked stage ratios",
+      "source": "VEXpro VersaPlanetary documentation"
+    }
+  },
+  "needsConfirmation": {
+    "_note": "Ratios NOT embedded because they are config-heavy or I am not confident of the exact documented value. Do NOT guess these — read the vendor datasheet / ratio table and confirm with the user.",
+    "SDS_MK4n": { "steerRatio": 18.75, "driveRatios": "read SDS MK4n ratio table" },
+    "SDS_MK4c": { "steerRatio": 12.8, "driveRatios": "read SDS MK4c ratio table" },
+    "SDS_MK4i_plus": { "note": "L1+/L2+/L3+ use a 16T drive pinion (~14% faster than the 14T base). Read the SDS ratio table; do not reuse the base L1/L2/L3 numbers." },
+    "WCP_SwerveX_family": { "note": "WCP Swerve X / X2 / XS: many gear-set x pinion configs. Hand-enter from the WCP product ratio table." },
+    "ThriftyBot_Swerve": { "note": "See YAGSL standard conversion factors / ThriftyBot docs." }
+  }
+}

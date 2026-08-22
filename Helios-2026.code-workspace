@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "Helios-2026 (robot code)",
+			"path": "Helios-2026"
+		},
+		{
+			"name": "Robot Data (reference)",
+			"path": "Helios-2026-Robot-Data"
+		}
+	],
+	"settings": {}
+}

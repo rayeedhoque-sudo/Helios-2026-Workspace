@@ -1,0 +1,43 @@
+{
+  "_note": "Shape of an Onshape assembly-definition response (includeMateFeatures=true) with gear relations. Mirrors real data: a GEAR relation carries BOTH relationRatio (active) and relationLength (inactive default); parameter ids confirmed api-verified. A relation also lives in a sub-assembly to exercise the sub-assembly walk.",
+  "rootAssembly": {
+    "features": [
+      {
+        "typeName": "BTMMateRelation",
+        "message": {
+          "featureType": "mateRelation",
+          "name": "Gear 1",
+          "parameters": [
+            { "typeName": "BTMParameterEnum", "message": { "parameterId": "relationType", "value": "GEAR" } },
+            { "typeName": "BTMParameterQueryList", "message": { "parameterId": "matesQuery" } },
+            { "typeName": "BTMParameterQuantity", "message": { "parameterId": "relationRatio", "expression": "24/180" } },
+            { "typeName": "BTMParameterQuantity", "message": { "parameterId": "relationLength", "expression": "1 in" } },
+            { "typeName": "BTMParameterBoolean", "message": { "parameterId": "reverseDirection", "value": false } }
+          ]
+        }
+      },
+      {
+        "typeName": "BTMMate",
+        "message": { "featureType": "mate", "name": "Fastened 1", "parameters": [] }
+      }
+    ]
+  },
+  "subAssemblies": [
+    {
+      "features": [
+        {
+          "typeName": "BTMMateRelation",
+          "message": {
+            "featureType": "mateRelation",
+            "name": "Rack relation",
+            "parameters": [
+              { "typeName": "BTMParameterEnum", "message": { "parameterId": "relationType", "value": "RACK_AND_PINION" } },
+              { "typeName": "BTMParameterQuantity", "message": { "parameterId": "relationRatio", "expression": "1" } },
+              { "typeName": "BTMParameterQuantity", "message": { "parameterId": "relationLength", "expression": "0.05*meter" } }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

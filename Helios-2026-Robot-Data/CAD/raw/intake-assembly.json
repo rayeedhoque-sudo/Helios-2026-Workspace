@@ -1,0 +1,1846 @@
+{
+  "input": {
+    "url": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a55e4e29195b7ca807f24ae1",
+    "did": "13ee370048fd8ffd56bbee96",
+    "wvm": "v",
+    "wvmid": "2f243b30b721e9c736969a31",
+    "eid": "a55e4e29195b7ca807f24ae1",
+    "configuration": null
+  },
+  "mode": "all",
+  "gearRatios": [
+    {
+      "value": 5.0,
+      "units": "dimensionless",
+      "source": "bom-name",
+      "sourceName": "MAXPlanetary 5:1 Slice",
+      "confidence": "low",
+      "raw": "MAXPlanetary 5:1 Slice REV-21-2103 MAXPlanetary 5:1 Slice",
+      "context": "ratio parsed from BOM text"
+    }
+  ],
+  "dimensions": [],
+  "bom": [
+    {
+      "name": "1/2\" ThunderHex (1.125 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RYFD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "6046b0e356ff0105628b673a",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" ThunderHex (31 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "R6ED",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "f0c8e9aa1830a25c5e7f0593",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 7",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RLCD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "5a6b5b4621afc1cc58b12c34",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 8",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RFDD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "ccfd6dc38d95cb9caafcb867",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 9",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RKDD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "e0ad9751ed7241ce4a6e5d15",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 10",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RWDD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "f95a32d3b357db8dfc574ea9",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 11",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RWDH",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "ae4582a7ea35750dce00b69c",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 12",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RWDL",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "a2a726bf3cb237c39be3055f",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Rounded Hex (13.75mm) ID Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "partNumber": "WCP-0785",
+      "description": "1/2\" Rounded Hex (13.75mm) ID Bearing (1.125\" OD, 0.313\" WD, Shielded, Flanged)",
+      "quantity": 22.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/836cd26e60025118646fa104/v/70b37b037ae6b9421831d995/e/cfbd251bf34e4159e9b98da2?configuration=List_ov2tlpSsgPV0v3%3DWest_Coast_Products",
+        "configuration": "List_ov2tlpSsgPV0v3=West_Coast_Products",
+        "documentId": "836cd26e60025118646fa104",
+        "elementId": "cfbd251bf34e4159e9b98da2",
+        "partId": "JTD",
+        "wvmId": "70b37b037ae6b9421831d995",
+        "partIdentity": "4106a3864afd45cdacc7f062",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "d9fedf390c3f20ea6ec70a0d",
+        "fullConfiguration": "List_RoqEXBA4BSMIR1=_0_375__ID_x_0_875__OD_x_0_281__WD__Radial_;List_ov2tlpSsgPV0v3=West_Coast_Products",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Kraken X44 Brushless Motor",
+      "partNumber": "WCP-0941",
+      "description": "Kraken X44 Brushless Motor",
+      "quantity": 1.0,
+      "itemSource": {
+        "distinctConfigurations": [
+          "Include_Back_Cap=false;List_8SlhIsDr34jl3l=Default;Simplified_Model=true"
+        ],
+        "viewHref": "https://cad.onshape.com/documents/15710549e439233462c28b22/v/0e07f3459c9ac0ebda166357/e/a34a21b2bfa0e199c0b98c91?configuration=default",
+        "configuration": "default",
+        "documentId": "15710549e439233462c28b22",
+        "elementId": "a34a21b2bfa0e199c0b98c91",
+        "partId": "RWCH",
+        "wvmId": "0e07f3459c9ac0ebda166357",
+        "partIdentity": "4ddb37aa9d3c13b87e891b48",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "04b2a3d70207181b1ea9a913",
+        "fullConfiguration": "Include_Back_Cap=true;List_8SlhIsDr34jl3l=Default;Simplified_Model=true",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 15",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RxDD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "100892796ff4d64c80c4396b",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "12t Aluminum Pulley (HTD 5mm, 9mm Wide, 8mm SplineXS Bore)",
+      "partNumber": "WCP-1017",
+      "description": "12t Aluminum Pulley (HTD 5mm, 9mm Wide, 8mm SplineXS Bore)",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/7348c911d6b36d3b222c1dfe/v/bb1e46a8453a5c9a0b5fc665/e/5ea64a3dc2f13b11ee4ae1ed?configuration=List_X6MBcLsuyfMsDH%3DDefault",
+        "configuration": "List_X6MBcLsuyfMsDH=Default",
+        "documentId": "7348c911d6b36d3b222c1dfe",
+        "elementId": "5ea64a3dc2f13b11ee4ae1ed",
+        "partId": "JHD",
+        "wvmId": "bb1e46a8453a5c9a0b5fc665",
+        "partIdentity": "c8f2d10012bc15ea3d1afb1e",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "0d4f859fc154a81708a9da0a",
+        "fullConfiguration": "List_X6MBcLsuyfMsDH=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "24t Aluminum Pulley (HTD 5mm, 9mm Wide, 1/2\" Hex Bore)",
+      "partNumber": "WCP-0564",
+      "description": "24t Aluminum Pulley (HTD 5mm, 9mm Wide, 1/2\" Hex Bore)",
+      "quantity": 3.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/7348c911d6b36d3b222c1dfe/v/bb1e46a8453a5c9a0b5fc665/e/b568cf62768f549c2f067e7c?configuration=List_b49DPDa7oomn2X%3D_24t_x",
+        "configuration": "List_b49DPDa7oomn2X=_24t_x",
+        "documentId": "7348c911d6b36d3b222c1dfe",
+        "elementId": "b568cf62768f549c2f067e7c",
+        "partId": "JHD",
+        "wvmId": "bb1e46a8453a5c9a0b5fc665",
+        "partIdentity": "e62f12d91429c13795c7c2fd",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "29af61aea809ba3560c6d428",
+        "fullConfiguration": "List_b49DPDa7oomn2X=_24t_x",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,1\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 4.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BR%3D175.0",
+        "configuration": "B=188.0;G=85.0;R=175.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.025400000000000002+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=175.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "4InchSquishWheel",
+      "partNumber": "",
+      "description": "",
+      "quantity": 5.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/93f9d3c612b0585bdd6654ea/v/78dabec0939007c232438ed0/e/64928c1a11b54187283c60b2?configuration=default",
+        "configuration": "default",
+        "documentId": "93f9d3c612b0585bdd6654ea",
+        "elementId": "64928c1a11b54187283c60b2",
+        "partId": "JFD",
+        "wvmId": "78dabec0939007c232438ed0",
+        "partIdentity": "1645466d9f9197ef5b52c89e",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "5dd4b7f4d1381af87b5594e5",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Core",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/93f9d3c612b0585bdd6654ea/v/78dabec0939007c232438ed0/e/64928c1a11b54187283c60b2?configuration=default",
+        "configuration": "default",
+        "documentId": "93f9d3c612b0585bdd6654ea",
+        "elementId": "64928c1a11b54187283c60b2",
+        "partId": "JFH",
+        "wvmId": "78dabec0939007c232438ed0",
+        "partIdentity": "5f2385bddc561cd99c3ef02a",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "5dd4b7f4d1381af87b5594e5",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.938\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BLength%3D0.023812500000000004%2Bmeter%3BR%3D175.0",
+        "configuration": "B=188.0;G=85.0;Length=0.023812500000000004+meter;R=175.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.023812500000000004+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=175.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,1.375\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BLength%3D0.034925000000000005%2Bmeter%3BR%3D175.0",
+        "configuration": "B=188.0;G=85.0;Length=0.034925000000000005+meter;R=175.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.034925000000000005+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=175.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,2.25\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BLength%3D0.057150000000000006%2Bmeter%3BR%3D175.0",
+        "configuration": "B=188.0;G=85.0;Length=0.057150000000000006+meter;R=175.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.057150000000000006+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=175.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "10t Steel Spur Gear (10 DP, 1/2\" Hex Bore)",
+      "partNumber": "WCP-0750",
+      "description": "10T Steel Spur Gear (10 DP, 1/2\" Hex Bore)",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/8ca1bcd2ce433ef31ae559db/v/54619c055324749a35ba1ad7/e/07e6944fe89c0aca35b9df4e?configuration=default",
+        "configuration": "default",
+        "documentId": "8ca1bcd2ce433ef31ae559db",
+        "elementId": "07e6944fe89c0aca35b9df4e",
+        "partId": "JHD",
+        "wvmId": "54619c055324749a35ba1ad7",
+        "partIdentity": "2d49065a97bdd1959c6065df",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "a99f4a6efd7fe28b3dce4d80",
+        "fullConfiguration": "List_6s7mczplvX20rM=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "3/8\" Hex (31.75 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "R3MD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "a7c0fd6a7307a67584127603",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "50T 5M 9mm Wide Belt",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RNND",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "a1648c3bc99b7b4ba36f27bb",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "24t Aluminum Pulley (HTD 5mm, 15mm Wide, 1/2\" Hex Bore)-Mirrored",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/8f17343679a40a0e74af35fd/v/dcfe4582ccba5d4bbffe8e37/e/ba9ab58918de03799e24ffbc?configuration=List_b49DPDa7oomn2X%3D_24t_x_15mm_Width",
+        "configuration": "List_b49DPDa7oomn2X=_24t_x_15mm_Width",
+        "documentId": "8f17343679a40a0e74af35fd",
+        "elementId": "ba9ab58918de03799e24ffbc",
+        "partId": "JcD",
+        "wvmId": "dcfe4582ccba5d4bbffe8e37",
+        "partIdentity": "f6a80489784e7a3fd258fa97",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "b467a15f038f9c0f922570e4",
+        "fullConfiguration": "List_b49DPDa7oomn2X=_24t_x_15mm_Width",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "24t Aluminum Pulley (HTD 5mm, 9mm Wide, 1/2\" Hex Bore)-Mirrored",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/8f17343679a40a0e74af35fd/v/dcfe4582ccba5d4bbffe8e37/e/ba9ab58918de03799e24ffbc?configuration=List_b49DPDa7oomn2X%3D_24t_x",
+        "configuration": "List_b49DPDa7oomn2X=_24t_x",
+        "documentId": "8f17343679a40a0e74af35fd",
+        "elementId": "ba9ab58918de03799e24ffbc",
+        "partId": "JcD",
+        "wvmId": "dcfe4582ccba5d4bbffe8e37",
+        "partIdentity": "f6a80489784e7a3fd258fa97",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "b467a15f038f9c0f922570e4",
+        "fullConfiguration": "List_b49DPDa7oomn2X=_24t_x",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "45T 5M 9mm Wide Belt",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RjDD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "ee67e688fe9a32ff2203a3bb",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" ThunderHex (1.98 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RFRD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "31e2b1297a2921b0c3d6220e",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" ThunderHex (1.63 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "R5FD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "9a68f52ea284d7011d0bdbc0",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Spur gear (20 teeth)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RQHD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "08af610ecb11a6319e8ea23e",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "50t 15mm Belt",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "R5SD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "628eba35cfa410632fef35a5",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "3/8\" Rounded Hex (10.25mm) ID Bearing (0.875\" OD, 0.281\" WD, Shielded, Flanged)",
+      "partNumber": "3/8\" Rounded Hex (10.25mm) ID Bearing (0.875\" OD, 0.28\" WD, Shielded, Flanged)",
+      "description": "3/8\" Rounded Hex (10.25mm) ID Bearing (0.875\" OD, 0.28\" WD, Shielded, Flanged)",
+      "quantity": 3.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/836cd26e60025118646fa104/v/70b37b037ae6b9421831d995/e/cfbd251bf34e4159e9b98da2?configuration=List_RoqEXBA4BSMIR1%3D_0_500__ID_x_1_125__OD_x_0_313__WD__Radial_",
+        "configuration": "List_RoqEXBA4BSMIR1=_0_500__ID_x_1_125__OD_x_0_313__WD__Radial_",
+        "documentId": "836cd26e60025118646fa104",
+        "elementId": "cfbd251bf34e4159e9b98da2",
+        "partId": "JTD",
+        "wvmId": "70b37b037ae6b9421831d995",
+        "partIdentity": "4106a3864afd45cdacc7f062",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "d9fedf390c3f20ea6ec70a0d",
+        "fullConfiguration": "List_RoqEXBA4BSMIR1=_0_500__ID_x_1_125__OD_x_0_313__WD__Radial_;List_ov2tlpSsgPV0v3=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "#10-32 x 1-1/4\" L BHCS (Steel, Black Oxide)",
+      "partNumber": "WCP-0256",
+      "description": "#10-32 x 1-1/4\" L BHCS (Steel, Black Oxide)",
+      "quantity": 12.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/77461d97ef7c9d816f0c7351/v/9a619db8335247d5ff4994ac/e/113e395e64f6e204464342e4?configuration=List_ztF5Nwo3ZVISRf%3D_1_25_",
+        "configuration": "List_ztF5Nwo3ZVISRf=_1_25_",
+        "documentId": "77461d97ef7c9d816f0c7351",
+        "elementId": "113e395e64f6e204464342e4",
+        "partId": "JID",
+        "wvmId": "9a619db8335247d5ff4994ac",
+        "partIdentity": "24965e97c91a031eb158fbab",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "b7f4e9c33f44a4d28280b2b3",
+        "fullConfiguration": "List_5GpG8SQ4jcTSSF=Default;List_TmRH7NJBvedWLl=Default;List_rtxRa7CTeUKBGP=_3_8;List_ztF5Nwo3ZVISRf=_1_25_",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "0.188\" ID Bearing (0.5\" OD, 0.196\" WD, Shielded)",
+      "partNumber": "R3ZZ",
+      "description": "R3ZZ",
+      "quantity": 16.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/836cd26e60025118646fa104/v/70b37b037ae6b9421831d995/e/764b23c2e1d9ccb67cfe8eb6?configuration=List_RoqEXBA4BSMIR1%3D_3_8__Rounded_Hex__10_25mm_ID_x_0_875__OD_x_0_280__WD__Flanged_",
+        "configuration": "List_RoqEXBA4BSMIR1=_3_8__Rounded_Hex__10_25mm_ID_x_0_875__OD_x_0_280__WD__Flanged_",
+        "documentId": "836cd26e60025118646fa104",
+        "elementId": "764b23c2e1d9ccb67cfe8eb6",
+        "partId": "JSD",
+        "wvmId": "70b37b037ae6b9421831d995",
+        "partIdentity": "4f5b06ff397ef94ee7a04592",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "a29713f07c181cf271caabe9",
+        "fullConfiguration": "List_RoqEXBA4BSMIR1=_3_8__Rounded_Hex__10_25mm_ID_x_0_875__OD_x_0_280__WD__Flanged_;List_ov2tlpSsgPV0v3=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "0.25\" ID Flanged Bronze Bushing (0.5\" OD, 0.313\" WD)",
+      "partNumber": "N/A",
+      "description": "0.25\" ID Flanged Bronze Bushing (0.5\" OD, 0.313\" WD)",
+      "quantity": 5.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/836cd26e60025118646fa104/v/70b37b037ae6b9421831d995/e/cc56166393300da5561c023f?configuration=List_6NyGa5gyitSbIX%3DDefault",
+        "configuration": "List_6NyGa5gyitSbIX=Default",
+        "documentId": "836cd26e60025118646fa104",
+        "elementId": "cc56166393300da5561c023f",
+        "partId": "JND",
+        "wvmId": "70b37b037ae6b9421831d995",
+        "partIdentity": "781caf0100258daf9c1cab90",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "5cc233f082a775f459e18a6a",
+        "fullConfiguration": "List_24h7uw0br82pR5=Default;List_6NyGa5gyitSbIX=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Socket button head cap screw 1/4-20 x 1.5",
+      "partNumber": "",
+      "description": "Socket button head cap screw 1/4-20 x 1.5 Stainless Steel ",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/7479c87e19f72f75c56eb9ca/v/f683f0f80476a9cc7b545a73/e/1ccce0034c76747d17af53e8?configuration=JTQwc2NwPVhoMGtjJTJGeEJDSmF6YiUyRm54bXNyS3BNcGpyMDR5bkFjblY1YUpjTER0RDdjJTNEO0Jhc2ljRGlhbWV0ZXI9MC4wMDYzNTAwMDAwMDAwMDAwMDErbWV0ZXI7RmlsbGV0VHJhbnNpdGlvbkRpYW1ldGVyPTAuMDA3MzY2K21ldGVyO0hlYWREaWFtZXRlcj0wLjAxMTA5OTgwMDAwMDAwMDAwMittZXRlcjtIZWFkSGVpZ2h0PTAuMDAzMzUyODAwMDAwMDAwMDAwNCttZXRlcjtIZWFkU2lkZUhlaWdodD03Ljg3NDAwMDAwMDAwMDAwMUUtNCttZXRlcjtMZW5ndGg9MC4wMzgxK21ldGVyO1BpdGNoPTAuMDAxMjcwMDAwMDAwMDAwMDAwMyttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzk2MjQwMDAwMDAwMDAwMDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9MC4wMDEwOTk4NTIyNTgwMDAwMDAyK21ldGVy",
+        "configuration": "JTQwc2NwPVhoMGtjJTJGeEJDSmF6YiUyRm54bXNyS3BNcGpyMDR5bkFjblY1YUpjTER0RDdjJTNEO0Jhc2ljRGlhbWV0ZXI9MC4wMDYzNTAwMDAwMDAwMDAwMDErbWV0ZXI7RmlsbGV0VHJhbnNpdGlvbkRpYW1ldGVyPTAuMDA3MzY2K21ldGVyO0hlYWREaWFtZXRlcj0wLjAxMTA5OTgwMDAwMDAwMDAwMittZXRlcjtIZWFkSGVpZ2h0PTAuMDAzMzUyODAwMDAwMDAwMDAwNCttZXRlcjtIZWFkU2lkZUhlaWdodD03Ljg3NDAwMDAwMDAwMDAwMUUtNCttZXRlcjtMZW5ndGg9MC4wMzgxK21ldGVyO1BpdGNoPTAuMDAxMjcwMDAwMDAwMDAwMDAwMyttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzk2MjQwMDAwMDAwMDAwMDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9MC4wMDEwOTk4NTIyNTgwMDAwMDAyK21ldGVy",
+        "documentId": "7479c87e19f72f75c56eb9ca",
+        "elementId": "1ccce0034c76747d17af53e8",
+        "partId": "JHD",
+        "wvmId": "f683f0f80476a9cc7b545a73",
+        "partIdentity": "0bf83e68272f0de1f742da7f",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "5f64b1bd34d9fa9036e5b143",
+        "fullConfiguration": "JTQwc2NwPVhoMGtjJTJGeEJDSmF6YiUyRm54bXNyS3BNcGpyMDR5bkFjblY1YUpjTER0RDdjJTNEO0Jhc2ljRGlhbWV0ZXI9MC4wMDYzNTAwMDAwMDAwMDAwMDErbWV0ZXI7RmlsbGV0VHJhbnNpdGlvbkRpYW1ldGVyPTAuMDA3MzY2K21ldGVyO0hlYWREaWFtZXRlcj0wLjAxMTA5OTgwMDAwMDAwMDAwMittZXRlcjtIZWFkSGVpZ2h0PTAuMDAzMzUyODAwMDAwMDAwMDAwNCttZXRlcjtIZWFkU2lkZUhlaWdodD03Ljg3NDAwMDAwMDAwMDAwMUUtNCttZXRlcjtMZW5ndGg9MC4wMzgxK21ldGVyO1BpdGNoPTAuMDAxMjcwMDAwMDAwMDAwMDAwMyttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzk2MjQwMDAwMDAwMDAwMDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9MC4wMDEwOTk4NTIyNTgwMDAwMDAyK21ldGVy",
+        "isStandardContent": true
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Hex thin lock nut with nylon insert 1/4-20",
+      "partNumber": "",
+      "description": "Hex thin lock nut with nylon insert 1/4-20 Stainless Steel ",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/d79f0cc63876e51bb8bcf187/v/622f58febee7b2026440ee06/e/d09ec4d9acdc4245ef88bef1?configuration=JTQwc2NwPVI2NEplVEhOVlhlalJFcGRoN2NWakNqJTJCaXZCSGtscEc2dVNLbEk3cTZqQSUzRDtIZWlnaHQ9MC4wMDUzODQ4K21ldGVyO01ham9yRGlhbWV0ZXI9MC4wMDYzNTAwMDAwMDAwMDAwMDErbWV0ZXI7TWlub3JEaWFtZXRlcj0wLjAwNTcxNTAwMDAwMDAwMDAwMDUrbWV0ZXI7T3ZlcmFsbEhlaWdodD0wLjAwNzMxNTIrbWV0ZXI7UGl0Y2g9MC4wMDEyNzAwMDAwMDAwMDAwMDAzK21ldGVyO1dpZHRoQWNyb3NzRmxhdHM9MC4wMTExNTA2MDAwMDAwMDAwMDIrbWV0ZXI",
+        "configuration": "JTQwc2NwPVI2NEplVEhOVlhlalJFcGRoN2NWakNqJTJCaXZCSGtscEc2dVNLbEk3cTZqQSUzRDtIZWlnaHQ9MC4wMDUzODQ4K21ldGVyO01ham9yRGlhbWV0ZXI9MC4wMDYzNTAwMDAwMDAwMDAwMDErbWV0ZXI7TWlub3JEaWFtZXRlcj0wLjAwNTcxNTAwMDAwMDAwMDAwMDUrbWV0ZXI7T3ZlcmFsbEhlaWdodD0wLjAwNzMxNTIrbWV0ZXI7UGl0Y2g9MC4wMDEyNzAwMDAwMDAwMDAwMDAzK21ldGVyO1dpZHRoQWNyb3NzRmxhdHM9MC4wMTExNTA2MDAwMDAwMDAwMDIrbWV0ZXI",
+        "documentId": "d79f0cc63876e51bb8bcf187",
+        "elementId": "d09ec4d9acdc4245ef88bef1",
+        "partId": "JHD",
+        "wvmId": "622f58febee7b2026440ee06",
+        "partIdentity": "bca69522ae05387237769860",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1710962b0f949d7f94aa976b",
+        "fullConfiguration": "JTQwc2NwPVI2NEplVEhOVlhlalJFcGRoN2NWakNqJTJCaXZCSGtscEc2dVNLbEk3cTZqQSUzRDtIZWlnaHQ9MC4wMDUzODQ4K21ldGVyO01ham9yRGlhbWV0ZXI9MC4wMDYzNTAwMDAwMDAwMDAwMDErbWV0ZXI7TWlub3JEaWFtZXRlcj0wLjAwNTcxNTAwMDAwMDAwMDAwMDUrbWV0ZXI7T3ZlcmFsbEhlaWdodD0wLjAwNzMxNTIrbWV0ZXI7UGl0Y2g9MC4wMDEyNzAwMDAwMDAwMDAwMDAzK21ldGVyO1dpZHRoQWNyb3NzRmxhdHM9MC4wMTExNTA2MDAwMDAwMDAwMDIrbWV0ZXI",
+        "isStandardContent": true
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Bottom Roller Spacer",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RoND",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "2c8d6759ddf04ac8b5e1347f",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "3/8\" ThunderHex (30.5 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "R6ND",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "1060d56f307aee020c4039ce",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "#10-32 Aluminum Standoff (3/8\" Hex, 0.75\" L)",
+      "partNumber": "REV-21-2062",
+      "description": "#10-32 Aluminum Standoff (3/8\" Hex, 0.75\" L)",
+      "quantity": 4.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/32208e83e803f946a0de2b7c?configuration=default",
+        "configuration": "default",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "32208e83e803f946a0de2b7c",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "d431d0f3fa1ccc1ef8e54d0b",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "7812d5b23d81950e2ff81c0b",
+        "fullConfiguration": "List_Wstj2lqgwUHYCL=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 29",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RVOD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "3b101115de19ad69d9cf3dda",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "24t Aluminum Pulley (HTD 5mm, 15mm Wide, 1/2\" Hex Bore)",
+      "partNumber": "WCP-0992",
+      "description": "24t Aluminum Pulley (HTD 5mm, 15mm Wide, 1/2\" Hex Bore)",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/7348c911d6b36d3b222c1dfe/v/bb1e46a8453a5c9a0b5fc665/e/b568cf62768f549c2f067e7c?configuration=List_b49DPDa7oomn2X%3D_24t_x_15mm_Width",
+        "configuration": "List_b49DPDa7oomn2X=_24t_x_15mm_Width",
+        "documentId": "7348c911d6b36d3b222c1dfe",
+        "elementId": "b568cf62768f549c2f067e7c",
+        "partId": "JHD",
+        "wvmId": "bb1e46a8453a5c9a0b5fc665",
+        "partIdentity": "e62f12d91429c13795c7c2fd",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "29af61aea809ba3560c6d428",
+        "fullConfiguration": "List_b49DPDa7oomn2X=_24t_x_15mm_Width",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "MAXPlanetary Input Slice",
+      "partNumber": "REV-21-2106",
+      "description": "MAXPlanetary Input Slice",
+      "quantity": 1.0,
+      "itemSource": {
+        "distinctConfigurations": [
+          "List_32BtIwRbywmglD=Default;List_GgcAFb5ReBsUov=Default;S1=true;S2=false;S3=false"
+        ],
+        "viewHref": "https://cad.onshape.com/documents/253b208e677fb77810c38163/v/178b4196598b35976a206c86/e/294f189f10f0ab5f39f92720?configuration=default",
+        "configuration": "default",
+        "documentId": "253b208e677fb77810c38163",
+        "elementId": "294f189f10f0ab5f39f92720",
+        "partId": "JHD",
+        "wvmId": "178b4196598b35976a206c86",
+        "partIdentity": "b855fce08b4e47d527ec65d0",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "d1b5b49dbd6656475f1e2d09",
+        "fullConfiguration": "List_32BtIwRbywmglD=Default;List_GgcAFb5ReBsUov=Default;S1=true;S2=true;S3=true",
+        "isStandardContent": false
+      },
+      "candidateRatio": {
+        "family": "REV_MAXPlanetary",
+        "kind": "planetary",
+        "code": null,
+        "value": null,
+        "cartridgeStages": [
+          3,
+          4,
+          5,
+          9
+        ],
+        "confidence": "low",
+        "source": "REV MAXPlanetary documentation",
+        "note": "NET ratio = product of the stacked cartridge ratios (e.g. 9:1 + 4:1 cartridges = 36:1). The 9:1 is a first-stage-only cartridge."
+      }
+    },
+    {
+      "name": "8mm Keyed MAXPlanetary Input Coupler",
+      "partNumber": "REV-21-2108",
+      "description": "8mm Keyed MAXPlanetary Input Coupler",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/253b208e677fb77810c38163/v/178b4196598b35976a206c86/e/88813ad42e7fc6bee35971e5?configuration=default",
+        "configuration": "default",
+        "documentId": "253b208e677fb77810c38163",
+        "elementId": "88813ad42e7fc6bee35971e5",
+        "partId": "JSD",
+        "wvmId": "178b4196598b35976a206c86",
+        "partIdentity": "c72a7a604e051f45afbb08a8",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "45c8045c2015216461eeec9c",
+        "fullConfiguration": "List_MwZD611EkluvMD=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": {
+        "family": "REV_MAXPlanetary",
+        "kind": "planetary",
+        "code": null,
+        "value": null,
+        "cartridgeStages": [
+          3,
+          4,
+          5,
+          9
+        ],
+        "confidence": "low",
+        "source": "REV MAXPlanetary documentation",
+        "note": "NET ratio = product of the stacked cartridge ratios (e.g. 9:1 + 4:1 cartridges = 36:1). The 9:1 is a first-stage-only cartridge."
+      }
+    },
+    {
+      "name": "#10-32 x 0.375\" L SHCS (Steel, Black Oxide)",
+      "partNumber": "REV-29-2912",
+      "description": "#10-32 x 0.375\" L SHCS (Steel, Black Oxide)",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/77461d97ef7c9d816f0c7351/v/9a619db8335247d5ff4994ac/e/93c3530651df5e0132d23c03?configuration=List_747jXpWtQOIjyt%3D_1_4__Socket_Head0",
+        "configuration": "List_747jXpWtQOIjyt=_1_4__Socket_Head0",
+        "documentId": "77461d97ef7c9d816f0c7351",
+        "elementId": "93c3530651df5e0132d23c03",
+        "partId": "JID",
+        "wvmId": "9a619db8335247d5ff4994ac",
+        "partIdentity": "ce8042c526f31aebebbdf4f7",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "9f09560a6dfec5d20df87797",
+        "fullConfiguration": "List_747jXpWtQOIjyt=_1_4__Socket_Head0",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "MAXPlanetary 5:1 Slice",
+      "partNumber": "REV-21-2103",
+      "description": "MAXPlanetary 5:1 Slice",
+      "quantity": 1.0,
+      "itemSource": {
+        "distinctConfigurations": [
+          "List_rLfjV72lzoW3zG=_5_1;S1=true;S2=false;S3=false;Slot1=true;Slot2=false;Slot3=false"
+        ],
+        "viewHref": "https://cad.onshape.com/documents/253b208e677fb77810c38163/v/178b4196598b35976a206c86/e/3b2da398aad52affe396cac0?configuration=List_rLfjV72lzoW3zG%3D_5_1",
+        "configuration": "List_rLfjV72lzoW3zG=_5_1",
+        "documentId": "253b208e677fb77810c38163",
+        "elementId": "3b2da398aad52affe396cac0",
+        "partId": "JHD",
+        "wvmId": "178b4196598b35976a206c86",
+        "partIdentity": "38a91c5eab9b9df376fe12b0",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "153427e820594b962d883bc6",
+        "fullConfiguration": "List_rLfjV72lzoW3zG=_5_1;S1=true;S2=true;S3=true;Slot1=false;Slot2=false;Slot3=false",
+        "isStandardContent": false
+      },
+      "candidateRatio": {
+        "family": "REV_MAXPlanetary",
+        "kind": "planetary",
+        "code": null,
+        "value": null,
+        "cartridgeStages": [
+          3,
+          4,
+          5,
+          9
+        ],
+        "confidence": "low",
+        "source": "REV MAXPlanetary documentation",
+        "note": "NET ratio = product of the stacked cartridge ratios (e.g. 9:1 + 4:1 cartridges = 36:1). The 9:1 is a first-stage-only cartridge."
+      }
+    },
+    {
+      "name": "#10-32 x 1\" L SHCS (Steel, Black Oxide)",
+      "partNumber": "REV-29-2922-PK50",
+      "description": "#10-32 x 1\" L SHCS (Steel, Black Oxide)",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/253b208e677fb77810c38163/v/178b4196598b35976a206c86/e/e262ff970c014ec8af596d7e?configuration=S2%3Dfalse%3BS3%3Dfalse",
+        "configuration": "S2=false;S3=false",
+        "documentId": "253b208e677fb77810c38163",
+        "elementId": "e262ff970c014ec8af596d7e",
+        "partId": "JID",
+        "wvmId": "178b4196598b35976a206c86",
+        "partIdentity": "bb5b68a53a1ee266ac74c3e4",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "be98a97dde8cda0b526f02ce",
+        "fullConfiguration": "Brake=false;S1=true;S2=false;S3=false",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "MAXPlanetary Output Slice",
+      "partNumber": "REV-21-2104",
+      "description": "MAXPlanetary Output Slice",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/253b208e677fb77810c38163/v/178b4196598b35976a206c86/e/036acb9d9fa1d607b7d71017?configuration=default",
+        "configuration": "default",
+        "documentId": "253b208e677fb77810c38163",
+        "elementId": "036acb9d9fa1d607b7d71017",
+        "partId": "JHD",
+        "wvmId": "178b4196598b35976a206c86",
+        "partIdentity": "6ecdc5e3b86840069ef57ac9",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "87ddd4ba6a63a5bf63de9dae",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": {
+        "family": "REV_MAXPlanetary",
+        "kind": "planetary",
+        "code": null,
+        "value": null,
+        "cartridgeStages": [
+          3,
+          4,
+          5,
+          9
+        ],
+        "confidence": "low",
+        "source": "REV MAXPlanetary documentation",
+        "note": "NET ratio = product of the stacked cartridge ratios (e.g. 9:1 + 4:1 cartridges = 36:1). The 9:1 is a first-stage-only cartridge."
+      }
+    },
+    {
+      "name": "#10-32 x 0.5\" L BHCS (Steel, Black Oxide)",
+      "partNumber": "REV-29-2943",
+      "description": "#10-32 x 0.5\" L BHCS (Steel, Black Oxide)",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/77461d97ef7c9d816f0c7351/v/9a619db8335247d5ff4994ac/e/93c3530651df5e0132d23c03?configuration=List_747jXpWtQOIjyt%3D_1_2__Button_Head",
+        "configuration": "List_747jXpWtQOIjyt=_1_2__Button_Head",
+        "documentId": "77461d97ef7c9d816f0c7351",
+        "elementId": "93c3530651df5e0132d23c03",
+        "partId": "JID",
+        "wvmId": "9a619db8335247d5ff4994ac",
+        "partIdentity": "ce8042c526f31aebebbdf4f7",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "9f09560a6dfec5d20df87797",
+        "fullConfiguration": "List_747jXpWtQOIjyt=_1_2__Button_Head",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 30",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RzQD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "b217bee4eab1b2aeb2f5d92a",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Rounded Hex (1.812\" L, 13.75mm OD)",
+      "partNumber": "WCP-0914",
+      "description": "Hex Shaft (WCP)",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/360f7941a43b138116bd29b6/v/db0e96c3c7c6287fbbe1fef8/e/9f4aace5c3f38ced43b69179?configuration=Length%3D0.0460375%2Bmeter",
+        "configuration": "Length=0.0460375+meter",
+        "documentId": "360f7941a43b138116bd29b6",
+        "elementId": "9f4aace5c3f38ced43b69179",
+        "partId": "JHD",
+        "wvmId": "db0e96c3c7c6287fbbe1fef8",
+        "partIdentity": "1e401d1ba488062a41cb8dbc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "825cc2ff94834a4c0ae737ff",
+        "fullConfiguration": "Length=0.0460375+meter;List_YLoeLjLh7fa4tl=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "0.375\" ID Bearing (0.875\" OD, 0.281\" WD, Shielded)",
+      "partNumber": "R6ZZ",
+      "description": "R6ZZ",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/836cd26e60025118646fa104/v/70b37b037ae6b9421831d995/e/764b23c2e1d9ccb67cfe8eb6?configuration=default",
+        "configuration": "default",
+        "documentId": "836cd26e60025118646fa104",
+        "elementId": "764b23c2e1d9ccb67cfe8eb6",
+        "partId": "JSD",
+        "wvmId": "70b37b037ae6b9421831d995",
+        "partIdentity": "4f5b06ff397ef94ee7a04592",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "a29713f07c181cf271caabe9",
+        "fullConfiguration": "List_RoqEXBA4BSMIR1=_0_375__ID_x_0_875__OD_x_0_280_WD;List_ov2tlpSsgPV0v3=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" ThunderHex (30.125 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RdED",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "fd48ea9829d4cf4c33c25406",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 32",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RiRD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "98b145b0d3ffcc254d9913a1",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 33",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RlRD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "2fab31e9b80c2dd77c92b5d1",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "3/8\" ThunderHex (1.375 in)",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RoRD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "eb7fc8869c7c4ed9a5581bf2",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 2",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/41ebe1c9cd9024f643efc170?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "41ebe1c9cd9024f643efc170",
+        "partId": "JpD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "19e3143ddf93ca0da257cf65",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "4026475a58eaf0d389642196",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "44t Aluminum Spur Gear (20 DP, 1/2\" Hex Bore)",
+      "partNumber": "217-2710",
+      "description": "44t Aluminum Spur Gear (20 DP, 1/2\" Hex Bore)",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/8ca1bcd2ce433ef31ae559db/v/54619c055324749a35ba1ad7/e/5e0a5e8e991bf285cf21c91b?configuration=List_nRgoRvQdZzrBgV%3D_44t_Aluminum",
+        "configuration": "List_nRgoRvQdZzrBgV=_44t_Aluminum",
+        "documentId": "8ca1bcd2ce433ef31ae559db",
+        "elementId": "5e0a5e8e991bf285cf21c91b",
+        "partId": "JHD",
+        "wvmId": "54619c055324749a35ba1ad7",
+        "partIdentity": "c4772beee2bbc7fda0f086dc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "fd5a3fc365a5d319840eb39e",
+        "fullConfiguration": "List_nRgoRvQdZzrBgV=_44t_Aluminum",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "24t Steel Spur Gear (20 DP, 1/2\" Hex Bore)",
+      "partNumber": "am-4214",
+      "description": "24t Steel Spur Gear (20 DP, 1/2\" Hex Bore)",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/8ca1bcd2ce433ef31ae559db/v/54619c055324749a35ba1ad7/e/f83638c130304b94ce7b810a?configuration=List_OrpzKGMN77I8bO%3D_24t_Steel",
+        "configuration": "List_OrpzKGMN77I8bO=_24t_Steel",
+        "documentId": "8ca1bcd2ce433ef31ae559db",
+        "elementId": "f83638c130304b94ce7b810a",
+        "partId": "JHD",
+        "wvmId": "54619c055324749a35ba1ad7",
+        "partIdentity": "be68346af327faef21c4e0d2",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "e3173f8cf0a112cafd2ddec8",
+        "fullConfiguration": "List_OrpzKGMN77I8bO=_24t_Steel",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Rounded Hex (29.151\" L, 13.75mm OD)",
+      "partNumber": "WCP-0914",
+      "description": "Hex Shaft (WCP)",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/360f7941a43b138116bd29b6/v/db0e96c3c7c6287fbbe1fef8/e/9f4aace5c3f38ced43b69179?configuration=Length%3D0.7404354000000001%2Bmeter",
+        "configuration": "Length=0.7404354000000001+meter",
+        "documentId": "360f7941a43b138116bd29b6",
+        "elementId": "9f4aace5c3f38ced43b69179",
+        "partId": "JHD",
+        "wvmId": "db0e96c3c7c6287fbbe1fef8",
+        "partIdentity": "1e401d1ba488062a41cb8dbc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "825cc2ff94834a4c0ae737ff",
+        "fullConfiguration": "Length=0.7404354000000001+meter;List_YLoeLjLh7fa4tl=Default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.215\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BLength%3D0.005461000000000001%2Bmeter%3BR%3D175.0",
+        "configuration": "B=188.0;G=85.0;Length=0.005461000000000001+meter;R=175.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.005461000000000001+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=175.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 35",
+      "partNumber": "",
+      "description": "",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RSSD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "9f968c0cdcc57f2b350d104e",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Hex lock nut with nylon insert #10-32",
+      "partNumber": "",
+      "description": "Hex lock nut with nylon insert #10-32 Stainless Steel ",
+      "quantity": 18.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/58af2b9997611b8091ab8b56/v/37027f749111ab3d5058bee8/e/c1a47fec4a4513e2d04c99a8?configuration=JTQwc2NwPWg0aFVrRFptYVBhT1dCViUyRm45JTJCbzBoRlpRbGJFM3VPbzJYOHRWUno3YUYwJTNEO0hlaWdodD0wLjAwNTgxNjYwMDAwMDAwMDAwMSttZXRlcjtNYWpvckRpYW1ldGVyPTAuMDA0ODI2K21ldGVyO01pbm9yRGlhbWV0ZXI9MC4wMDM1NTYwMDAwMDAwMDAwMDA2K21ldGVyO092ZXJhbGxIZWlnaHQ9MC4wMDYzMjQ2MDAwMDAwMDAwMDA1K21ldGVyO1BpdGNoPTcuOTI0OEUtNCttZXRlcjtXaWR0aEFjcm9zc0ZsYXRzPTAuMDA5NTUwNCttZXRlcg",
+        "configuration": "JTQwc2NwPWg0aFVrRFptYVBhT1dCViUyRm45JTJCbzBoRlpRbGJFM3VPbzJYOHRWUno3YUYwJTNEO0hlaWdodD0wLjAwNTgxNjYwMDAwMDAwMDAwMSttZXRlcjtNYWpvckRpYW1ldGVyPTAuMDA0ODI2K21ldGVyO01pbm9yRGlhbWV0ZXI9MC4wMDM1NTYwMDAwMDAwMDAwMDA2K21ldGVyO092ZXJhbGxIZWlnaHQ9MC4wMDYzMjQ2MDAwMDAwMDAwMDA1K21ldGVyO1BpdGNoPTcuOTI0OEUtNCttZXRlcjtXaWR0aEFjcm9zc0ZsYXRzPTAuMDA5NTUwNCttZXRlcg",
+        "documentId": "58af2b9997611b8091ab8b56",
+        "elementId": "c1a47fec4a4513e2d04c99a8",
+        "partId": "JHD",
+        "wvmId": "37027f749111ab3d5058bee8",
+        "partIdentity": "9089c0a11f11543a70469ce8",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "d1cd794323ca9f1df2212003",
+        "fullConfiguration": "JTQwc2NwPWg0aFVrRFptYVBhT1dCViUyRm45JTJCbzBoRlpRbGJFM3VPbzJYOHRWUno3YUYwJTNEO0hlaWdodD0wLjAwNTgxNjYwMDAwMDAwMDAwMSttZXRlcjtNYWpvckRpYW1ldGVyPTAuMDA0ODI2K21ldGVyO01pbm9yRGlhbWV0ZXI9MC4wMDM1NTYwMDAwMDAwMDAwMDA2K21ldGVyO092ZXJhbGxIZWlnaHQ9MC4wMDYzMjQ2MDAwMDAwMDAwMDA1K21ldGVyO1BpdGNoPTcuOTI0OEUtNCttZXRlcjtXaWR0aEFjcm9zc0ZsYXRzPTAuMDA5NTUwNCttZXRlcg",
+        "isStandardContent": true
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Socket countersunk head cap screw #10-32 x 1",
+      "partNumber": "",
+      "description": "Socket countersunk head cap screw #10-32 x 1 Hardened Alloy Steel ",
+      "quantity": 10.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/a3383ed73d54c31e82ef7695/v/cfb0c49efb13ca72fa5cb4d4/e/077523be7a0d235864cf427d?configuration=JTQwc2NwPVlZMjIlMkJzdGtyS3ZZbVdRNTExYkltUnBHc3U1aFVjWEU3aDM3M3dyTUs3OCUzRDtCYXNpY0RpYW1ldGVyPTAuMDA0ODI2K21ldGVyO0ZpbGxldFRyYW5zaXRpb25EaWFtZXRlcj0wLjAwNTU4ODAwMDAwMDAwMDAwMSttZXRlcjtIZWFkRGlhbWV0ZXI9MC4wMDkxMTg2MDAwMDAwMDAwMDErbWV0ZXI7SGVhZEhlaWdodD0wLjAwMzIyNTgwMDAwMDAwMDAwMDUrbWV0ZXI7UGl0Y2g9Ny45MjQ4RS00K21ldGVyO1NvY2tldERlcHRoPTAuMDAyMjA5OCttZXRlcjtTb2NrZXRTaXplPTAuMDAzMTc1MDAwMDAwMDAwMDAwMyttZXRlcjtUcmlhbmdsZUhlaWdodD02Ljg2MzA3ODA4OTkyMDAwMUUtNCttZXRlcg",
+        "configuration": "JTQwc2NwPVlZMjIlMkJzdGtyS3ZZbVdRNTExYkltUnBHc3U1aFVjWEU3aDM3M3dyTUs3OCUzRDtCYXNpY0RpYW1ldGVyPTAuMDA0ODI2K21ldGVyO0ZpbGxldFRyYW5zaXRpb25EaWFtZXRlcj0wLjAwNTU4ODAwMDAwMDAwMDAwMSttZXRlcjtIZWFkRGlhbWV0ZXI9MC4wMDkxMTg2MDAwMDAwMDAwMDErbWV0ZXI7SGVhZEhlaWdodD0wLjAwMzIyNTgwMDAwMDAwMDAwMDUrbWV0ZXI7UGl0Y2g9Ny45MjQ4RS00K21ldGVyO1NvY2tldERlcHRoPTAuMDAyMjA5OCttZXRlcjtTb2NrZXRTaXplPTAuMDAzMTc1MDAwMDAwMDAwMDAwMyttZXRlcjtUcmlhbmdsZUhlaWdodD02Ljg2MzA3ODA4OTkyMDAwMUUtNCttZXRlcg",
+        "documentId": "a3383ed73d54c31e82ef7695",
+        "elementId": "077523be7a0d235864cf427d",
+        "partId": "JHD",
+        "wvmId": "cfb0c49efb13ca72fa5cb4d4",
+        "partIdentity": "05a60651300e2b0d98789889",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "3fcbd4c1f2869baeaf493cfa",
+        "fullConfiguration": "JTQwc2NwPVlZMjIlMkJzdGtyS3ZZbVdRNTExYkltUnBHc3U1aFVjWEU3aDM3M3dyTUs3OCUzRDtCYXNpY0RpYW1ldGVyPTAuMDA0ODI2K21ldGVyO0ZpbGxldFRyYW5zaXRpb25EaWFtZXRlcj0wLjAwNTU4ODAwMDAwMDAwMDAwMSttZXRlcjtIZWFkRGlhbWV0ZXI9MC4wMDkxMTg2MDAwMDAwMDAwMDErbWV0ZXI7SGVhZEhlaWdodD0wLjAwMzIyNTgwMDAwMDAwMDAwMDUrbWV0ZXI7TGVuZ3RoPTAuMDI1NDAwMDAwMDAwMDAwMDAyK21ldGVyO1BpdGNoPTcuOTI0OEUtNCttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzE3NTAwMDAwMDAwMDAwMDMrbWV0ZXI7VGhyZWFkTGVuZ3RoPTAuMDI1NDAwMDAwMDAwMDAwMDAyK21ldGVyO1RyaWFuZ2xlSGVpZ2h0PTYuODYzMDc4MDg5OTIwMDAxRS00K21ldGVy",
+        "isStandardContent": true
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Type A flat washer 5/16 Narrow",
+      "partNumber": "",
+      "description": "Type A flat washer 5/16 Narrow Stainless Steel ",
+      "quantity": 13.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/59a2c9aa7c88f582d7ce7cb9/v/2fd2d7be1cc8e433f332040b/e/ee7793f60fb19300c5ea8be9?configuration=JTQwc2NwPSUyRk91dXFSYlJlSGxNSVh3YUw1b3VSTWZVREZrSVN3UWx4aHNVMHF6bzJqYyUzRDtJbnNpZGVEaWFtZXRlcj0wLjAwODczNzYrbWV0ZXI7T3V0c2lkZURpYW1ldGVyPTAuMDE3NDc1MittZXRlcjtUaGlja25lc3M9MC4wMDE2NTEwMDAwMDAwMDAwMDAxK21ldGVy",
+        "configuration": "JTQwc2NwPSUyRk91dXFSYlJlSGxNSVh3YUw1b3VSTWZVREZrSVN3UWx4aHNVMHF6bzJqYyUzRDtJbnNpZGVEaWFtZXRlcj0wLjAwODczNzYrbWV0ZXI7T3V0c2lkZURpYW1ldGVyPTAuMDE3NDc1MittZXRlcjtUaGlja25lc3M9MC4wMDE2NTEwMDAwMDAwMDAwMDAxK21ldGVy",
+        "documentId": "59a2c9aa7c88f582d7ce7cb9",
+        "elementId": "ee7793f60fb19300c5ea8be9",
+        "partId": "JHD",
+        "wvmId": "2fd2d7be1cc8e433f332040b",
+        "partIdentity": "2d5377324575ebf58ae3799b",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "16a97dd3410e213b8e3f8db0",
+        "fullConfiguration": "JTQwc2NwPSUyRk91dXFSYlJlSGxNSVh3YUw1b3VSTWZVREZrSVN3UWx4aHNVMHF6bzJqYyUzRDtJbnNpZGVEaWFtZXRlcj0wLjAwODczNzYrbWV0ZXI7T3V0c2lkZURpYW1ldGVyPTAuMDE3NDc1MittZXRlcjtUaGlja25lc3M9MC4wMDE2NTEwMDAwMDAwMDAwMDAxK21ldGVy",
+        "isStandardContent": true
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Socket countersunk head cap screw #10-32 x 1.75",
+      "partNumber": "",
+      "description": "Socket countersunk head cap screw #10-32 x 1.75 Hardened Alloy Steel ",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/a3383ed73d54c31e82ef7695/v/cfb0c49efb13ca72fa5cb4d4/e/077523be7a0d235864cf427d?configuration=JTQwc2NwPSUyRnFoZE00UHc2dCUyRllJOHd5JTJGYnc4UWpJNHgwSlkzeFhubEdwRlhNU09UOFUlM0Q7QmFzaWNEaWFtZXRlcj0wLjAwNDgyNittZXRlcjtGaWxsZXRUcmFuc2l0aW9uRGlhbWV0ZXI9MC4wMDU1ODgwMDAwMDAwMDAwMDErbWV0ZXI7SGVhZERpYW1ldGVyPTAuMDA5MTE4NjAwMDAwMDAwMDAxK21ldGVyO0hlYWRIZWlnaHQ9MC4wMDMyMjU4MDAwMDAwMDAwMDA1K21ldGVyO0xlbmd0aD0wLjA0NDQ1K21ldGVyO1BpdGNoPTcuOTI0OEUtNCttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzE3NTAwMDAwMDAwMDAwMDMrbWV0ZXI7VGhyZWFkTGVuZ3RoPTAuMDQ0NDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9Ni44NjMwNzgwODk5MjAwMDFFLTQrbWV0ZXI",
+        "configuration": "JTQwc2NwPSUyRnFoZE00UHc2dCUyRllJOHd5JTJGYnc4UWpJNHgwSlkzeFhubEdwRlhNU09UOFUlM0Q7QmFzaWNEaWFtZXRlcj0wLjAwNDgyNittZXRlcjtGaWxsZXRUcmFuc2l0aW9uRGlhbWV0ZXI9MC4wMDU1ODgwMDAwMDAwMDAwMDErbWV0ZXI7SGVhZERpYW1ldGVyPTAuMDA5MTE4NjAwMDAwMDAwMDAxK21ldGVyO0hlYWRIZWlnaHQ9MC4wMDMyMjU4MDAwMDAwMDAwMDA1K21ldGVyO0xlbmd0aD0wLjA0NDQ1K21ldGVyO1BpdGNoPTcuOTI0OEUtNCttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzE3NTAwMDAwMDAwMDAwMDMrbWV0ZXI7VGhyZWFkTGVuZ3RoPTAuMDQ0NDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9Ni44NjMwNzgwODk5MjAwMDFFLTQrbWV0ZXI",
+        "documentId": "a3383ed73d54c31e82ef7695",
+        "elementId": "077523be7a0d235864cf427d",
+        "partId": "JHD",
+        "wvmId": "cfb0c49efb13ca72fa5cb4d4",
+        "partIdentity": "05a60651300e2b0d98789889",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "3fcbd4c1f2869baeaf493cfa",
+        "fullConfiguration": "JTQwc2NwPSUyRnFoZE00UHc2dCUyRllJOHd5JTJGYnc4UWpJNHgwSlkzeFhubEdwRlhNU09UOFUlM0Q7QmFzaWNEaWFtZXRlcj0wLjAwNDgyNittZXRlcjtGaWxsZXRUcmFuc2l0aW9uRGlhbWV0ZXI9MC4wMDU1ODgwMDAwMDAwMDAwMDErbWV0ZXI7SGVhZERpYW1ldGVyPTAuMDA5MTE4NjAwMDAwMDAwMDAxK21ldGVyO0hlYWRIZWlnaHQ9MC4wMDMyMjU4MDAwMDAwMDAwMDA1K21ldGVyO0xlbmd0aD0wLjA0NDQ1K21ldGVyO1BpdGNoPTcuOTI0OEUtNCttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzE3NTAwMDAwMDAwMDAwMDMrbWV0ZXI7VGhyZWFkTGVuZ3RoPTAuMDQ0NDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9Ni44NjMwNzgwODk5MjAwMDFFLTQrbWV0ZXI",
+        "isStandardContent": true
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.062\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Length%3D0.0015875000000000002%2Bmeter",
+        "configuration": "Length=0.0015875000000000002+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.012700000000000001+meter;G=64.0;Length=0.0015875000000000002+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1.187 in. Rounded Hex Shaft",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "RbSD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "d0101dfe02be14ca20d98ea6",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Socket button head cap screw 1/4-20 x 2",
+      "partNumber": "",
+      "description": "Socket button head cap screw 1/4-20 x 2 Stainless Steel ",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/7479c87e19f72f75c56eb9ca/v/f683f0f80476a9cc7b545a73/e/1ccce0034c76747d17af53e8?configuration=JTQwc2NwPXBFZWFYVlhUOEl6diUyRmJYZVZDaHhkbjdmV0VjVTdFMDFIZDNid3BOeWZmUSUzRDtCYXNpY0RpYW1ldGVyPTAuMDA2MzUwMDAwMDAwMDAwMDAxK21ldGVyO0ZpbGxldFRyYW5zaXRpb25EaWFtZXRlcj0wLjAwNzM2NittZXRlcjtIZWFkRGlhbWV0ZXI9MC4wMTEwOTk4MDAwMDAwMDAwMDIrbWV0ZXI7SGVhZEhlaWdodD0wLjAwMzM1MjgwMDAwMDAwMDAwMDQrbWV0ZXI7SGVhZFNpZGVIZWlnaHQ9Ny44NzQwMDAwMDAwMDAwMDFFLTQrbWV0ZXI7TGVuZ3RoPTAuMDUwODAwMDAwMDAwMDAwMDA1K21ldGVyO1BpdGNoPTAuMDAxMjcwMDAwMDAwMDAwMDAwMyttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzk2MjQwMDAwMDAwMDAwMDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9MC4wMDEwOTk4NTIyNTgwMDAwMDAyK21ldGVy",
+        "configuration": "JTQwc2NwPXBFZWFYVlhUOEl6diUyRmJYZVZDaHhkbjdmV0VjVTdFMDFIZDNid3BOeWZmUSUzRDtCYXNpY0RpYW1ldGVyPTAuMDA2MzUwMDAwMDAwMDAwMDAxK21ldGVyO0ZpbGxldFRyYW5zaXRpb25EaWFtZXRlcj0wLjAwNzM2NittZXRlcjtIZWFkRGlhbWV0ZXI9MC4wMTEwOTk4MDAwMDAwMDAwMDIrbWV0ZXI7SGVhZEhlaWdodD0wLjAwMzM1MjgwMDAwMDAwMDAwMDQrbWV0ZXI7SGVhZFNpZGVIZWlnaHQ9Ny44NzQwMDAwMDAwMDAwMDFFLTQrbWV0ZXI7TGVuZ3RoPTAuMDUwODAwMDAwMDAwMDAwMDA1K21ldGVyO1BpdGNoPTAuMDAxMjcwMDAwMDAwMDAwMDAwMyttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzk2MjQwMDAwMDAwMDAwMDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9MC4wMDEwOTk4NTIyNTgwMDAwMDAyK21ldGVy",
+        "documentId": "7479c87e19f72f75c56eb9ca",
+        "elementId": "1ccce0034c76747d17af53e8",
+        "partId": "JHD",
+        "wvmId": "f683f0f80476a9cc7b545a73",
+        "partIdentity": "0bf83e68272f0de1f742da7f",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "5f64b1bd34d9fa9036e5b143",
+        "fullConfiguration": "JTQwc2NwPXBFZWFYVlhUOEl6diUyRmJYZVZDaHhkbjdmV0VjVTdFMDFIZDNid3BOeWZmUSUzRDtCYXNpY0RpYW1ldGVyPTAuMDA2MzUwMDAwMDAwMDAwMDAxK21ldGVyO0ZpbGxldFRyYW5zaXRpb25EaWFtZXRlcj0wLjAwNzM2NittZXRlcjtIZWFkRGlhbWV0ZXI9MC4wMTEwOTk4MDAwMDAwMDAwMDIrbWV0ZXI7SGVhZEhlaWdodD0wLjAwMzM1MjgwMDAwMDAwMDAwMDQrbWV0ZXI7SGVhZFNpZGVIZWlnaHQ9Ny44NzQwMDAwMDAwMDAwMDFFLTQrbWV0ZXI7TGVuZ3RoPTAuMDUwODAwMDAwMDAwMDAwMDA1K21ldGVyO1BpdGNoPTAuMDAxMjcwMDAwMDAwMDAwMDAwMyttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjIwOTgrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzk2MjQwMDAwMDAwMDAwMDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9MC4wMDEwOTk4NTIyNTgwMDAwMDAyK21ldGVy",
+        "isStandardContent": true
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Hex lock nut with nylon insert 1/4-20",
+      "partNumber": "",
+      "description": "Hex lock nut with nylon insert 1/4-20 Stainless Steel ",
+      "quantity": 4.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/58af2b9997611b8091ab8b56/v/37027f749111ab3d5058bee8/e/c1a47fec4a4513e2d04c99a8?configuration=JTQwc2NwPVI2NEplVEhOVlhlalJFcGRoN2NWakNqJTJCaXZCSGtscEc2dVNLbEk3cTZqQSUzRDtIZWlnaHQ9MC4wMDU3MTUwMDAwMDAwMDAwMDA1K21ldGVyO01ham9yRGlhbWV0ZXI9MC4wMDYzNTAwMDAwMDAwMDAwMDErbWV0ZXI7TWlub3JEaWFtZXRlcj0wLjAwNTcxNTAwMDAwMDAwMDAwMDUrbWV0ZXI7T3ZlcmFsbEhlaWdodD0wLjAwNzU2OTIwMDAwMDAwMDAwMSttZXRlcjtQaXRjaD0wLjAwMTI3MDAwMDAwMDAwMDAwMDMrbWV0ZXI7V2lkdGhBY3Jvc3NGbGF0cz0wLjAxMTE1MDYwMDAwMDAwMDAwMittZXRlcg",
+        "configuration": "JTQwc2NwPVI2NEplVEhOVlhlalJFcGRoN2NWakNqJTJCaXZCSGtscEc2dVNLbEk3cTZqQSUzRDtIZWlnaHQ9MC4wMDU3MTUwMDAwMDAwMDAwMDA1K21ldGVyO01ham9yRGlhbWV0ZXI9MC4wMDYzNTAwMDAwMDAwMDAwMDErbWV0ZXI7TWlub3JEaWFtZXRlcj0wLjAwNTcxNTAwMDAwMDAwMDAwMDUrbWV0ZXI7T3ZlcmFsbEhlaWdodD0wLjAwNzU2OTIwMDAwMDAwMDAwMSttZXRlcjtQaXRjaD0wLjAwMTI3MDAwMDAwMDAwMDAwMDMrbWV0ZXI7V2lkdGhBY3Jvc3NGbGF0cz0wLjAxMTE1MDYwMDAwMDAwMDAwMittZXRlcg",
+        "documentId": "58af2b9997611b8091ab8b56",
+        "elementId": "c1a47fec4a4513e2d04c99a8",
+        "partId": "JHD",
+        "wvmId": "37027f749111ab3d5058bee8",
+        "partIdentity": "9089c0a11f11543a70469ce8",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "d1cd794323ca9f1df2212003",
+        "fullConfiguration": "JTQwc2NwPVI2NEplVEhOVlhlalJFcGRoN2NWakNqJTJCaXZCSGtscEc2dVNLbEk3cTZqQSUzRDtIZWlnaHQ9MC4wMDU3MTUwMDAwMDAwMDAwMDA1K21ldGVyO01ham9yRGlhbWV0ZXI9MC4wMDYzNTAwMDAwMDAwMDAwMDErbWV0ZXI7TWlub3JEaWFtZXRlcj0wLjAwNTcxNTAwMDAwMDAwMDAwMDUrbWV0ZXI7T3ZlcmFsbEhlaWdodD0wLjAwNzU2OTIwMDAwMDAwMDAwMSttZXRlcjtQaXRjaD0wLjAwMTI3MDAwMDAwMDAwMDAwMDMrbWV0ZXI7V2lkdGhBY3Jvc3NGbGF0cz0wLjAxMTE1MDYwMDAwMDAwMDAwMittZXRlcg",
+        "isStandardContent": true
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Socket head cap screw #10-32 x 1.75",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/ea77839b068c59a025dddcb5/v/fd3157c3dc88191217dbabc0/e/d2ecd262d80c0846c485aa24?configuration=JTQwc2NwPThqZUZpWFR4YmY2cmh0THhzaXBkNXFZVjFTeWVackVxYkhHMHR1Y2slMkJVQSUzRDtCYXNpY0RpYW1ldGVyPTAuMDA0ODI2K21ldGVyO0RyaWxsSG9sZTI9ZmFsc2U7RHJpbGxIb2xlND1mYWxzZTtEcmlsbEhvbGU2PWZhbHNlO0ZpbGxldFJhZGl1cz0xLjUyNDAwMDAwMDAwMDAwMDJFLTQrbWV0ZXI7SGVhZENoYW1mZXI9NC41NzJFLTQrbWV0ZXI7SGVhZERpYW1ldGVyPTAuMDA3OTI0ODAwMDAwMDAwMDAxK21ldGVyO0hlYWRIZWlnaHQ9MC4wMDQ4MjYrbWV0ZXI7SG9sZUNlbnRlckRpc3RhbmNlPTAuMDAxNjUxMDAwMDAwMDAwMDAwMSttZXRlcjtMZW5ndGg9MC4wNDQ0NSttZXRlcjtQaXRjaD03LjkyNDhFLTQrbWV0ZXI7U29ja2V0RGVwdGg9MC4wMDIyODYwMDAwMDAwMDAwMDAzK21ldGVyO1NvY2tldFNpemU9MC4wMDM5NjI0MDAwMDAwMDAwMDA1K21ldGVyO1RocmVhZExlbmd0aD0wLjA0NDQ1K21ldGVyO1RyaWFuZ2xlSGVpZ2h0PTYuODYzMDc4MDg5OTIwMDAxRS00K21ldGVy",
+        "configuration": "JTQwc2NwPThqZUZpWFR4YmY2cmh0THhzaXBkNXFZVjFTeWVackVxYkhHMHR1Y2slMkJVQSUzRDtCYXNpY0RpYW1ldGVyPTAuMDA0ODI2K21ldGVyO0RyaWxsSG9sZTI9ZmFsc2U7RHJpbGxIb2xlND1mYWxzZTtEcmlsbEhvbGU2PWZhbHNlO0ZpbGxldFJhZGl1cz0xLjUyNDAwMDAwMDAwMDAwMDJFLTQrbWV0ZXI7SGVhZENoYW1mZXI9NC41NzJFLTQrbWV0ZXI7SGVhZERpYW1ldGVyPTAuMDA3OTI0ODAwMDAwMDAwMDAxK21ldGVyO0hlYWRIZWlnaHQ9MC4wMDQ4MjYrbWV0ZXI7SG9sZUNlbnRlckRpc3RhbmNlPTAuMDAxNjUxMDAwMDAwMDAwMDAwMSttZXRlcjtMZW5ndGg9MC4wNDQ0NSttZXRlcjtQaXRjaD03LjkyNDhFLTQrbWV0ZXI7U29ja2V0RGVwdGg9MC4wMDIyODYwMDAwMDAwMDAwMDAzK21ldGVyO1NvY2tldFNpemU9MC4wMDM5NjI0MDAwMDAwMDAwMDA1K21ldGVyO1RocmVhZExlbmd0aD0wLjA0NDQ1K21ldGVyO1RyaWFuZ2xlSGVpZ2h0PTYuODYzMDc4MDg5OTIwMDAxRS00K21ldGVy",
+        "documentId": "ea77839b068c59a025dddcb5",
+        "elementId": "d2ecd262d80c0846c485aa24",
+        "partId": "JHD",
+        "wvmId": "fd3157c3dc88191217dbabc0",
+        "partIdentity": "ebbb0291eb36590215e0ff9b",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "16ae8163428c017e5c23bef2",
+        "fullConfiguration": "JTQwc2NwPThqZUZpWFR4YmY2cmh0THhzaXBkNXFZVjFTeWVackVxYkhHMHR1Y2slMkJVQSUzRDtCYXNpY0RpYW1ldGVyPTAuMDA0ODI2K21ldGVyO0RyaWxsSG9sZTI9ZmFsc2U7RHJpbGxIb2xlND1mYWxzZTtEcmlsbEhvbGU2PWZhbHNlO0ZpbGxldFJhZGl1cz0xLjUyNDAwMDAwMDAwMDAwMDJFLTQrbWV0ZXI7SGVhZENoYW1mZXI9NC41NzJFLTQrbWV0ZXI7SGVhZERpYW1ldGVyPTAuMDA3OTI0ODAwMDAwMDAwMDAxK21ldGVyO0hlYWRIZWlnaHQ9MC4wMDQ4MjYrbWV0ZXI7SG9sZUNlbnRlckRpc3RhbmNlPTAuMDAxNjUxMDAwMDAwMDAwMDAwMSttZXRlcjtIb2xlRGlhbWV0ZXI9MC4wMDExODExK21ldGVyO0xlbmd0aD0wLjA0NDQ1K21ldGVyO1BpdGNoPTcuOTI0OEUtNCttZXRlcjtTb2NrZXREZXB0aD0wLjAwMjI4NjAwMDAwMDAwMDAwMDMrbWV0ZXI7U29ja2V0U2l6ZT0wLjAwMzk2MjQwMDAwMDAwMDAwMDUrbWV0ZXI7VGhyZWFkTGVuZ3RoPTAuMDQ0NDUrbWV0ZXI7VHJpYW5nbGVIZWlnaHQ9Ni44NjMwNzgwODk5MjAwMDFFLTQrbWV0ZXI",
+        "isStandardContent": true
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Part 37",
+      "partNumber": "",
+      "description": "",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a8335502db02efe9c3feb8a9?configuration=default",
+        "configuration": "default",
+        "documentId": "13ee370048fd8ffd56bbee96",
+        "elementId": "a8335502db02efe9c3feb8a9",
+        "partId": "R2SD",
+        "wvmId": "2f243b30b721e9c736969a31",
+        "partIdentity": "8c35a295dc1bad94c34bb33f",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "250ff034cbe01a029ed9ea94",
+        "fullConfiguration": "default",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.125\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BLength%3D0.0031750000000000003%2Bmeter%3BR%3D174.0",
+        "configuration": "B=188.0;G=85.0;Length=0.0031750000000000003+meter;R=174.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.0031750000000000003+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=174.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.25\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Length%3D0.006350000000000001%2Bmeter",
+        "configuration": "Length=0.006350000000000001+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.012700000000000001+meter;G=64.0;Length=0.006350000000000001+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.5\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Length%3D0.012700000000000001%2Bmeter",
+        "configuration": "Length=0.012700000000000001+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.012700000000000001+meter;G=64.0;Length=0.012700000000000001+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.126\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Length%3D0.0032004000000000004%2Bmeter",
+        "configuration": "Length=0.0032004000000000004+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.012700000000000001+meter;G=64.0;Length=0.0032004000000000004+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.249\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Length%3D0.0063246000000000005%2Bmeter",
+        "configuration": "Length=0.0063246000000000005+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.012700000000000001+meter;G=64.0;Length=0.0063246000000000005+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.096\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Length%3D0.0024320500000000003%2Bmeter",
+        "configuration": "Length=0.0024320500000000003+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.012700000000000001+meter;G=64.0;Length=0.0024320500000000003+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.219\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Length%3D0.00555625%2Bmeter",
+        "configuration": "Length=0.00555625+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.012700000000000001+meter;G=64.0;Length=0.00555625+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.376\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=Length%3D0.0095504%2Bmeter",
+        "configuration": "Length=0.0095504+meter",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=64.0;Bore_Size=0.012700000000000001+meter;G=64.0;Length=0.0095504+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=64.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "NEO Brushless Motor V1.1",
+      "partNumber": "REV-21-1650",
+      "description": "NEO Brushless Motor V1.1",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/1e490f667f2060acc06d66b0/v/580994f32a95c226098573a1/e/44ea8a976ead8dcadb96d4a5?configuration=default",
+        "configuration": "default",
+        "documentId": "1e490f667f2060acc06d66b0",
+        "elementId": "44ea8a976ead8dcadb96d4a5",
+        "partId": "RLCD",
+        "wvmId": "580994f32a95c226098573a1",
+        "partIdentity": "20e9ca7290c56eb6d0c3b59a",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "3a90782c85007740819f8aec",
+        "fullConfiguration": "Cut_Shaft__VersaPlanetary_=false;List_BM4H9k4PYt7NUO=V1_1;List_wniqJa5lx4ledP=Default;Simplified_Model=true",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "4\" Mecanum Wheel (Left-Hand, 1/2\" Hex Bore)",
+      "partNumber": "217-3645",
+      "description": "4\" Mecanum Wheel (Left-Hand, 1/2\" Hex Bore)",
+      "quantity": 3.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/8293a9c30ec90f3f3078fde2/v/1bd3d842c5114cb22da91e78/e/8ceadcfbbc0d48392787282a?configuration=List_8nu1ZXXnnLGaWX%3D_4___Left_Hand",
+        "configuration": "List_8nu1ZXXnnLGaWX=_4___Left_Hand",
+        "documentId": "8293a9c30ec90f3f3078fde2",
+        "elementId": "8ceadcfbbc0d48392787282a",
+        "partId": "JHD",
+        "wvmId": "1bd3d842c5114cb22da91e78",
+        "partIdentity": "5a82207790c767e43e84b2a3",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "c231b347ffbef16bebaa6dfa",
+        "fullConfiguration": "List_4aPeg7Baq9o072=Default;List_8nu1ZXXnnLGaWX=_4___Left_Hand;Simplified_Model=true",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.554\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BLength%3D0.014080312200000002%2Bmeter%3BR%3D175.0",
+        "configuration": "B=188.0;G=85.0;Length=0.014080312200000002+meter;R=175.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.014080312200000002+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=175.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,1.25\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BLength%3D0.03175%2Bmeter%3BR%3D175.0",
+        "configuration": "B=188.0;G=85.0;Length=0.03175+meter;R=175.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.03175+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=175.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,0.563\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 1.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BLength%3D0.0143002%2Bmeter%3BR%3D175.0",
+        "configuration": "B=188.0;G=85.0;Length=0.0143002+meter;R=175.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.0143002+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=175.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "1/2\" Hex Bore Custom Spacer (0.75\" OD,1.812\" L)",
+      "partNumber": "N/A",
+      "description": "Custom Spacer",
+      "quantity": 2.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/c4dcc85e670893bc8e75e785/v/fa9fc7097ceb2866705b4e1c/e/080d3c4abf7eb0607b4edfdd?configuration=B%3D188.0%3BG%3D85.0%3BLength%3D0.0460375%2Bmeter%3BR%3D175.0",
+        "configuration": "B=188.0;G=85.0;Length=0.0460375+meter;R=175.0",
+        "documentId": "c4dcc85e670893bc8e75e785",
+        "elementId": "080d3c4abf7eb0607b4edfdd",
+        "partId": "JHD",
+        "wvmId": "fa9fc7097ceb2866705b4e1c",
+        "partIdentity": "353928c0846a3db8dcad9ddc",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "1232dd9bde253fe63755063e",
+        "fullConfiguration": "B=188.0;Bore_Size=0.012700000000000001+meter;G=85.0;Length=0.0460375+meter;List_1ZOEEEsgs5jPoF=Default;OD=0.01905+meter;R=175.0;SplineTolerance=1.2700000000000002E-4+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "Nut Strip (1\" L, 1/2\" Square, #10-32 Tapped, Alternating .5\" Hole Spacing",
+      "partNumber": "240111",
+      "description": "Nut Strip (1/2\" Square)",
+      "quantity": 2.0,
+      "itemSource": {
+        "distinctConfigurations": [
+          "Length=0.0762+meter;List_5jSebjaMmcBVL7=Default;Starting_Offset=0.0+meter"
+        ],
+        "viewHref": "https://cad.onshape.com/documents/b0e317da377b0565c96fc265/v/cbe157a805604f06ccc5535d/e/ec1ee75c39fcb52457ac2896?configuration=default",
+        "configuration": "default",
+        "documentId": "b0e317da377b0565c96fc265",
+        "elementId": "ec1ee75c39fcb52457ac2896",
+        "partId": "JHD",
+        "wvmId": "cbe157a805604f06ccc5535d",
+        "partIdentity": "83add51a32ed77a447a6dbe3",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "4497b0f30987553e6bc5d2b0",
+        "fullConfiguration": "Length=0.025400000000000002+meter;List_5jSebjaMmcBVL7=Default;Starting_Offset=0.0+meter",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    },
+    {
+      "name": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "partNumber": "am-3945_black",
+      "description": "3\" Compliant Wheel (60A, 1\" Wide, 1/2\" Hex Bore)",
+      "quantity": 3.0,
+      "itemSource": {
+        "viewHref": "https://cad.onshape.com/documents/8293a9c30ec90f3f3078fde2/v/1bd3d842c5114cb22da91e78/e/8e274a735cb1225bea5338ee?configuration=List_BMg6wo9NOdhJP7%3D_60A0%3BList_Nmm6kda72jgel2%3D_3_",
+        "configuration": "List_BMg6wo9NOdhJP7=_60A0;List_Nmm6kda72jgel2=_3_",
+        "documentId": "8293a9c30ec90f3f3078fde2",
+        "elementId": "8e274a735cb1225bea5338ee",
+        "partId": "JHD",
+        "wvmId": "1bd3d842c5114cb22da91e78",
+        "partIdentity": "e77b668916ab213708cd1d82",
+        "wvmType": "v",
+        "sourceElementMicroversionId": "a916f1cd1bd3521f976f66dd",
+        "fullConfiguration": "Custom_Colored=false;List_BMg6wo9NOdhJP7=_60A0;List_Nmm6kda72jgel2=_3_;List_oRQbij2QoduorH=Default;List_sNlKREsG05WCVb=_1_2__Hex",
+        "isStandardContent": false
+      },
+      "candidateRatio": null
+    }
+  ],
+  "massProperties": {
+    "mass_kg": 6.769499102375067,
+    "centroid_m": [
+      0.2907000308686087,
+      0.0072682485366145815,
+      0.1652871709840697
+    ],
+    "inertiaTensor_kgm2": [
+      0.6747950800381493,
+      0.022704590868724374,
+      -0.019283160039665282,
+      0.022704590868724363,
+      0.21310947098567645,
+      0.004416186090332415,
+      -0.019283160039665282,
+      0.0044161860903324185,
+      0.8145289992985549
+    ],
+    "hasMass": true,
+    "massMissingCount": 15,
+    "confidence": "low",
+    "momentOfInertia_kgm2": 0.8145289992985549,
+    "axis": "z",
+    "centroidalMOI_kgm2": 0.8145289992985549,
+    "appliedParallelAxis": false,
+    "offset_m": 0.0
+  },
+  "relationParameterIdsSeen": [],
+  "apiCallsUsed": 0,
+  "quotaExhausted": false,
+  "warnings": [
+    "mass/inertia unreliable: model has unassigned material(s); Onshape used a default density (massMissingCount=15). Assign materials or verify against measured spin-up."
+  ]
+}

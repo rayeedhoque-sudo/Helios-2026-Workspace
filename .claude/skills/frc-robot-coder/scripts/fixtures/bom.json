@@ -1,0 +1,24 @@
+{
+  "_note": "Real Onshape v10 BOM shape: headers carry propertyName (lowercase, e.g. 'name') and name (display, e.g. 'Name'); rows key headerIdToValue by the header 'id'. Values may be strings, numbers, or objects.",
+  "headers": [
+    { "id": "hItem", "propertyId": null, "propertyName": "item", "name": "Item" },
+    { "id": "hQty", "propertyId": null, "propertyName": "quantity", "name": "Quantity" },
+    { "id": "hName", "propertyId": null, "propertyName": "name", "name": "Name" },
+    { "id": "hPN", "propertyId": null, "propertyName": "partNumber", "name": "Part number" },
+    { "id": "hDesc", "propertyId": null, "propertyName": "description", "name": "Description" }
+  ],
+  "rows": [
+    {
+      "headerIdToValue": { "hQty": 4, "hName": "MK4i Module L2", "hPN": "SDS-MK4I-L2", "hDesc": "Swerve module" },
+      "itemSource": { "documentId": "dddddddddddddddddddddddd", "elementId": "eeeeeeeeeeeeeeeeeeeeeeee", "partId": "JHD" }
+    },
+    {
+      "headerIdToValue": { "hQty": 1, "hName": "Custom Shooter Gearbox", "hPN": "", "hDesc": "9:1 reduction, NEO 550" },
+      "itemSource": { "documentId": "dddddddddddddddddddddddd", "elementId": "eeeeeeeeeeeeeeeeeeeeeeee", "partId": "JID" }
+    },
+    {
+      "headerIdToValue": { "hQty": 2, "hName": "MAXPlanetary Gearbox", "hPN": "REV-21-2100", "hDesc": "stacked cartridges" },
+      "itemSource": { "documentId": "dddddddddddddddddddddddd", "elementId": "eeeeeeeeeeeeeeeeeeeeeeee", "partId": "JKD" }
+    }
+  ]
+}
