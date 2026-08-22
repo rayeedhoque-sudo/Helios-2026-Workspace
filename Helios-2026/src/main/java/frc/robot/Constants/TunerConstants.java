@@ -81,14 +81,25 @@ public class TunerConstants {
         // The stator/traction limit comes from kSlipCurrent, which the swerve factory copies
         // into StatorCurrentLimit. If accel feels soft WITH a fresh battery, raise toward 45;
         // hardware sheet cap is 70 supply -- do not exceed.
+        // CUT 30% ON 2026-08-22 (team request: lower drive current usage by 30%): burst
+        // 40 -> 28 A, sustained 30 -> 21 A. New budget: 28 x4 = 112 A burst folding to
+        // 21 x4 = 84 A sustained, so with steer's unchanged 120 A ceiling the drivetrain
+        // worst case falls from ~280 A to ~232 A -- well clear of the ~290 A that sags a
+        // healthy pack to the RIO2 brownout floor.
+        // TRADEOFF, expect it: less supply current is less torque. Acceleration will be
+        // softer, pushing matches weaker, and climbing a defended lane harder. That is
+        // inherent to the request, not a bug. Speed was NOT changed -- a speed cap barely
+        // affects current, because the draw comes from accelerating and pushing, not from
+        // cruising. If the robot needs to be SLOWER as well, that is MaxSpeed in
+        // RobotContainer (currently 0.8 of kSpeedAt12Volts).
         .withCurrentLimits(new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(Amps.of(40))
+            .withSupplyCurrentLimit(Amps.of(28))
             // Burst-then-fall-back: 40 A is allowed for accelerations, but sustained draw
             // (pushing matches, stalls) drops to 30 A after 0.25 s. Window shortened 0.5 ->
             // 0.25 s (2026-07-18): teleop is a stream of fresh transients that each re-arm
             // the window, so a 0.5 s window meant the drives lived at full burst and the
             // fold-back never engaged during a full-stick reversal (which also lasted 0.5 s).
-            .withSupplyCurrentLowerLimit(Amps.of(30))
+            .withSupplyCurrentLowerLimit(Amps.of(21))
             .withSupplyCurrentLowerTime(Seconds.of(0.25))
             .withSupplyCurrentLimitEnable(true));
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
