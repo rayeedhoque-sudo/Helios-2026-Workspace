@@ -403,7 +403,14 @@ public class SubsystemConstants {
                 //       stroke where over-travel into the bottom would be roughest.
                 // TODO tune on robot: raise UP toward 12 if the lift is still sluggish; LOWER it if
                 // high-angle shots over-extend past MAX_ANGLE and skip the belt.
-                public static double HOOD_MAX_UP_VOLTAGE = 10.0;   // raising (fights gravity)
+                // LOWERED 10.0 -> 8.0 on 2026-08-22 (team request: the steps were too big and too
+                // fast). Breakaway is 7.5 V, so a 10 V ceiling meant every slip had up to 2.5 V of
+                // surplus behind it -- the hood lunged. At 8.0 the surplus is 0.5 V, so it creeps
+                // through each step instead. This is the knob for step VIOLENCE; the FF is the knob
+                // for step FREQUENCY. TODO on robot: if the hood stalls near the TOP of its travel
+                // (gravity load is worst there) raise toward 8.5-9.0 -- 8.0 is only 0.5 V over
+                // breakaway, which is not much margin.
+                public static double HOOD_MAX_UP_VOLTAGE = 8.0;   // raising (fights gravity)
                 public static double HOOD_MAX_DOWN_VOLTAGE = 6.0;  // lowering (gravity-assisted, gentle)
                 // Hood gravity LIFT feedforward (volts), added to the angle-PID output ONLY while the
                 // hood is still below its target (raising). The hood loop is pure-P (kP 0.275), so at a
