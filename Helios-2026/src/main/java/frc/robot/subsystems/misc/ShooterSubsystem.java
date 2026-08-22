@@ -93,6 +93,11 @@ public class ShooterSubsystem extends SubsystemBase{
             private final GenericEntry currentVelEntry;
             private final GenericEntry desiredVelEntry;
             private final GenericEntry currentAngleEntry;
+            // MEASURED flywheel speed in motor RPM (2026-08-22). Current Velocity is the same
+            // reading in m/s of SURFACE speed -- the units the shot model works in -- but the
+            // DPAD trims in RPM and RPM is what the team reads off the shooter, so publish both
+            // rather than making anyone convert.
+            private final GenericEntry currentRpmEntry;
             private final GenericEntry desiredAngleEntry;
             private final GenericEntry targetDistanceEntry;
             private final GenericEntry targetClassEntry;
@@ -249,6 +254,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 currentVelEntry = ShooterSubsystemTab.add("Current Velocity", 0.0).getEntry();
                 desiredVelEntry = ShooterSubsystemTab.add("Desired Velocity", 0.0).getEntry();
                 currentAngleEntry = ShooterSubsystemTab.add("Current Angle", 0.0).getEntry();
+                currentRpmEntry = ShooterSubsystemTab.add("Current Flywheel (motor RPM)", 0.0).getEntry();
                 desiredAngleEntry = ShooterSubsystemTab.add("Desired Angle", 0.0).getEntry();
                 targetDistanceEntry = ShooterSubsystemTab.add("Target Distance", 0.0).getEntry();
                 targetClassEntry = ShooterSubsystemTab.add("Target Class", TargetClass.NONE.name()).getEntry();
@@ -1100,6 +1106,7 @@ public class ShooterSubsystem extends SubsystemBase{
         // "Desired Velocity Reached" at their boot values while disabled).
             currentVelEntry.setDouble(getShooterFlywheelVelocity());
             currentAngleEntry.setDouble(getShooterAngleDegrees());
+            currentRpmEntry.setDouble(getShooterFlywheelVelocity() / surfaceSpeedForMotorRpm(1.0));
             targetDistanceEntry.setDouble(target_distance);
             targetClassEntry.setString(targetClass.name());
             shotSetpointEntry.setDouble(desired_Velocity);
