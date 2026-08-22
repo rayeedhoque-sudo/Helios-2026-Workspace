@@ -565,11 +565,11 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     ],
   },
   {
-    group: 'Intake — DISABLED 2026-08-22 (rollers + slider, team request)',
+    group: 'Intake — slider + rollers (hold-to-run; slider stows on release)',
     rows: [
-      { btn: 'LT', desc: 'Intake — DISABLED (unbound in teleop; rollers stay braked, slider never commanded)', off: 'disabled' },
-      { btn: 'Y', desc: 'Outtake — DISABLED', off: 'disabled' },
-      { btn: 'X', desc: 'Manual stow — DISABLED (the slider can still be moved in TEST mode)', off: 'disabled' },
+      { btn: 'LT', desc: 'Hold: intake — slider out to stall, THEN rollers in + belts (kicker stays OFF; feed only while rolling, never while sliding); release = rollers/belts stop, then slider retracts to stall' },
+      { btn: 'Y', desc: 'Hold: outtake — same choreography, rollers out' },
+      { btn: 'X', desc: 'Manual stow: rollers stop immediately, then retract to stall' },
     ],
   },
   {

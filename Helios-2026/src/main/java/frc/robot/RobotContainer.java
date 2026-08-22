@@ -155,7 +155,9 @@ public class RobotContainer {
         // binding list — no other keybinds may exist):
         //   L stick     = translate (field-centric)      R stick X = rotate  (reverted 2026-07-17)
         //   LB          = toggle X-lock brake
-        //   LT / Y / X  = intake in / out / stow -- ALL DISABLED 2026-08-22 (team request)
+        //   LT (hold)   = intake (slider out -> rollers + belts; kicker stays OFF); release = stow
+        //   Y (hold)    = outtake (same choreography, rollers out); release = stow
+        //   X           = manual stow
         //   RT (hold)   = flywheels-only shot (2026-08-22): fixed flywheel speed, belts always,
         //                 kicker at-speed-gated, HOOD NOT COMMANDED (set by hand on DPAD L/R).
         //                 Full drive + intake lockout; no vision, no auto-aim.
@@ -254,21 +256,18 @@ public class RobotContainer {
             // (RT/RB/B) the group cancels WITHOUT onFalse firing -- without this the roller
             // state machine stays latched in periodic() with no command owning intakeSS.
             // Redundant on normal release (stowCommand stops rollers again), harmless.
-            // INTAKE DISABLED 2026-08-22 (team request): rollers AND slider. LT / Y / X are
-            // unbound in teleop -- with no command owning intakeSS the state machine stays
-            // in STOW_STATE, so periodic() just holds the rollers braked and never commands
-            // the slider. Restore by uncommenting; nothing else changed.
-            // joystick2.leftTrigger().and(RobotModeTriggers.teleop())
-            //     .whileTrue(intakeSS.intakeCommand().andThen(hopperSS.intakeFeedCommand())
-            //         .finallyDo(intakeSS::stopRollers))
-            //     .onFalse(intakeSS.stowCommand());
-            // // Y (hold) = outtake: same choreography, rollers out.
-            // joystick2.y().and(RobotModeTriggers.teleop())
-            //     .whileTrue(intakeSS.outtakeCommand().andThen(hopperSS.intakeFeedCommand())
-            //         .finallyDo(intakeSS::stopRollers))
-            //     .onFalse(intakeSS.stowCommand());
-            // // X = manual stow: stop rollers immediately, then retract slider until stall.
-            // joystick2.x().and(RobotModeTriggers.teleop()).onTrue(intakeSS.stowCommand());
+            // RE-ENABLED 2026-08-22 (team request), exactly as it was before the disable.
+            joystick2.leftTrigger().and(RobotModeTriggers.teleop())
+                .whileTrue(intakeSS.intakeCommand().andThen(hopperSS.intakeFeedCommand())
+                    .finallyDo(intakeSS::stopRollers))
+                .onFalse(intakeSS.stowCommand());
+            // Y (hold) = outtake: same choreography, rollers out.
+            joystick2.y().and(RobotModeTriggers.teleop())
+                .whileTrue(intakeSS.outtakeCommand().andThen(hopperSS.intakeFeedCommand())
+                    .finallyDo(intakeSS::stopRollers))
+                .onFalse(intakeSS.stowCommand());
+            // X = manual stow: stop rollers immediately, then retract slider until stall.
+            joystick2.x().and(RobotModeTriggers.teleop()).onTrue(intakeSS.stowCommand());
             // B (hold) = MANUAL hopper run: belts ONLY, kicker stays OFF (team spec 2026-08-22).
             joystick2.b().and(RobotModeTriggers.teleop()).whileTrue(hopperSS.manualRunCommand());
             // VIEW (hold) = UNJAM: reverse belts + kicker at low duty to back a stuck ball out.
