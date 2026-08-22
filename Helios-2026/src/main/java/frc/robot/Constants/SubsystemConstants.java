@@ -414,13 +414,13 @@ public class SubsystemConstants {
                 // TODO tune on robot: raise UP if the hood still hesitates from a standstill, lower
                 // it if the ascent is too quick to place accurately; raise DOWN if the descent
                 // stalls, lower it if the hood drops too fast.
-                // SLOWED 2026-08-22 by team request. NOTE the up knob is nearly out of range:
-                // breakaway is ~7 V, so only the excess above that becomes motion -- 7.5 -> 7.0
-                // is most of the room there is, and anything near 6 V provably will not lift the
-                // hood at all. A genuinely slower ascent needs a velocity loop, not less voltage.
-                // Down was halved 2.0 -> 1.0; gravity does that stroke, so the change there is
-                // also smaller than it looks.
-                public static double HOOD_JOG_UP_VOLTS   = 7.0;
+                // BREAKAWAY MEASURED ON ROBOT 2026-08-22: 7.0 V does NOT move the hood, 7.5 V
+                // does. That is the whole up-volts range -- there is no room to slow the ascent
+                // by lowering voltage, because everything below 7.5 is a motor that does not
+                // turn. A genuinely slower ascent needs a velocity loop, not less voltage.
+                // DO NOT lower HOOD_JOG_UP_VOLTS below 7.5 without re-testing on the robot.
+                // Down stays at the halved 1.0 V; gravity does that stroke.
+                public static double HOOD_JOG_UP_VOLTS   = 7.5;
                 public static double HOOD_JOG_DOWN_VOLTS = 1.0;
                 // Surface-speed gate for the kicker, m/s. TIGHTENED 0.3 -> 0.2 (spec 6): at the
                 // 3.0 m minimum, 0.3 m/s maps to 0.30 m of along-track error -- more than the
