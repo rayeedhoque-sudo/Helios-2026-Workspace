@@ -294,6 +294,20 @@ public class ShooterSubsystem extends SubsystemBase{
                 && unwrapped <= ShooterSubsystemConstants.HOOD_RAW_SANE_MAX;
         }
 
+        // Gravity LIFT feedforward (volts) for a given angle error, target minus current.
+        // RAMPS from 0 V at ANGLE_TOLERANCE to HOOD_RAISE_FF_VOLTS at ANGLE_TOLERANCE +
+        // HOOD_FF_FADE_DEG. It used to be a step at ANGLE_TOLERANCE, which drove the hood in
+        // visible lurches on the DPAD jog (see HOOD_FF_FADE_DEG). Endpoints are deliberately
+        // unchanged: 0 V at/inside the target so the hood is never held against a stop by the
+        // FF, full 5 V at a large error so breakaway still clears gravity.
+        // Never negative -- lowering is gravity-assisted and stays FF-free.
+        // Package-private + static for HoodFeedforwardTest.
+        static double hoodLiftFeedforward(double errorDeg){
+            double aboveTolerance = errorDeg - ShooterSubsystemConstants.ANGLE_TOLERANCE;
+            double fraction = MathUtil.clamp(aboveTolerance / ShooterSubsystemConstants.HOOD_FF_FADE_DEG, 0, 1);
+            return fraction * ShooterSubsystemConstants.HOOD_RAISE_FF_VOLTS;
+        }
+
         private double getShooterAngleDegrees(){
             return hoodDegreesFromRaw(shooterAngleEncoder.getPosition());
         }
@@ -776,14 +790,13 @@ public class ShooterSubsystem extends SubsystemBase{
                 if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid) {
                     double anglePID = shooterAnglePID.calculate(currentHoodAngle, hoodTarget);
                     // Gravity LIFT feedforward: the pure-P loop under-drives against gravity at modest
-                    // errors (a 20 deg error only asks 5.5 V, below the ~7 V breakaway), so add a
-                    // constant up-bias while the hood is still meaningfully BELOW its target. Gated on
-                    // error > ANGLE_TOLERANCE so it drops to 0 at the target -- the hood can never be
-                    // driven PAST the target into the MAX_ANGLE belt-skip zone by this term. Off while
-                    // lowering (error <= 0), so the gravity-assisted auto-descent stays gentle.
-                    double liftFF = (hoodTarget - currentHoodAngle) > ShooterSubsystemConstants.ANGLE_TOLERANCE
-                        ? ShooterSubsystemConstants.HOOD_RAISE_FF_VOLTS
-                        : 0;
+                    // errors (a 20 deg error only asks 5.5 V, below the ~7 V breakaway), so add an
+                    // up-bias while the hood is still BELOW its target. FADED IN across
+                    // HOOD_FF_FADE_DEG rather than stepped at ANGLE_TOLERANCE (2026-08-22) -- the step
+                    // made the DPAD jog lurch. Still 0 V at/inside the target, so the hood can never be
+                    // driven PAST the target into the MAX_ANGLE belt-skip zone by this term, and still
+                    // off while lowering (error <= 0), so the gravity-assisted descent stays gentle.
+                    double liftFF = hoodLiftFeedforward(hoodTarget - currentHoodAngle);
                     // ASYMMETRIC speed cap (2026-07-18): raising fights gravity, lowering is gravity-
                     // assisted, so the UP stroke gets more voltage (HOOD_MAX_UP_VOLTAGE) than the DOWN
                     // stroke (HOOD_MAX_DOWN_VOLTAGE). A symmetric 6 V could not lift the hood at all

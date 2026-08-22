@@ -393,6 +393,15 @@ public class SubsystemConstants {
                 // near the target. TODO tune on robot: raise toward 7 if the hood won't start from
                 // small errors; LOWER it if shots reach MAX_ANGLE too hard.
                 public static double HOOD_RAISE_FF_VOLTS = 5.0;
+                // FF FADE BAND (deg), 2026-08-22: the lift feedforward used to STEP from 0 to the
+                // full 5 V the instant error crossed ANGLE_TOLERANCE, which made the DPAD jog move
+                // in lurches -- nothing (PID alone is ~0.14 V at small error, far under breakaway),
+                // then a 5 V slam, then error collapses and the FF cuts out, repeat. The FF now
+                // ramps linearly from 0 at ANGLE_TOLERANCE to full at ANGLE_TOLERANCE + this band,
+                // so there is no discontinuity anywhere. Endpoints are unchanged: still 0 V at the
+                // target, still 5 V at a large error. Bigger = smoother but slower to break away;
+                // smaller = back toward the old lurch. TODO tune on robot.
+                public static double HOOD_FF_FADE_DEG = 2.0;
                 // Surface-speed gate for the kicker, m/s. TIGHTENED 0.3 -> 0.2 (spec 6): at the
                 // 3.0 m minimum, 0.3 m/s maps to 0.30 m of along-track error -- more than the
                 // 0.226 m half-window through the opening; 0.2 closes the budget exactly.
