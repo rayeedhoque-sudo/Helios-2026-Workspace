@@ -121,6 +121,10 @@ public class ShooterSubsystem extends SubsystemBase{
             // way to see it before. Current also shows a stall (driving hard, not moving).
             private final GenericEntry hoodVoltsEntry;
             private final GenericEntry hoodCurrentEntry;
+            // Tracker state (2026-08-22): the datum the angle is measured from, and how far the
+            // hood has travelled since. Without these the tracked angle is unfalsifiable.
+            private final GenericEntry hoodBaseAngleEntry;
+            private final GenericEntry hoodRelativeEntry;
 
     //Tracker Variables
        private boolean enableSubsystem;
@@ -259,6 +263,8 @@ public class ShooterSubsystem extends SubsystemBase{
                 rawHoodEncoderEntry = ShooterSubsystemTab.add("Hood Encoder Raw (rot)", 0.0).getEntry();
                 hoodVoltsEntry = ShooterSubsystemTab.add("Hood Volts (cmd)", 0.0).getEntry();
                 hoodCurrentEntry = ShooterSubsystemTab.add("Hood Current (A)", 0.0).getEntry();
+                hoodBaseAngleEntry = ShooterSubsystemTab.add("Hood Base Angle (deg)", 0.0).getEntry();
+                hoodRelativeEntry = ShooterSubsystemTab.add("Hood Travel Since Datum (deg)", 0.0).getEntry();
        }
 
     //Utility Methods
@@ -305,12 +311,16 @@ public class ShooterSubsystem extends SubsystemBase{
         // TODO on-robot: replace the zero test with the SPARK MAX's own sensor fault flag once
         // someone confirms which REVLib 2026 fault bit reports a missing absolute encoder.
         static boolean isHoodFeedbackValid(double raw){
-            if (raw == 0.0) {
-                return false; // dead encoder / no data -- NOT a real position
-            }
-            double unwrapped = unwrapHoodRaw(raw);
-            return unwrapped >= ShooterSubsystemConstants.HOOD_RAW_SANE_MIN
-                && unwrapped <= ShooterSubsystemConstants.HOOD_RAW_SANE_MAX;
+            // ONLY the dead-encoder test. The absolute band that used to live here was removed
+            // 2026-08-22: with the angle tracked RELATIVELY, no dial position is illegal -- the
+            // encoder drifts against the hood, so the band eventually rejects wherever the
+            // encoder has wandered to, forcing 0 V and leaving the hood dead on the DPAD. That
+            // is exactly the failure it caused: an angle of -32.96 deg with a +38 deg error that
+            // never produced a volt. Bad DATA is caught where it belongs now -- in the delta
+            // filters (hoodDeltaDegrees), which reject noise and glitches frame by frame.
+            //
+            // A silent SPARK MAX still publishes bit-exact 0.0, and that is not a position.
+            return raw != 0.0;
         }
 
         // Gravity LIFT feedforward (volts) for a given angle error, target minus current.
@@ -400,6 +410,24 @@ public class ShooterSubsystem extends SubsystemBase{
         // Capture a fresh datum HERE: this position becomes the reference every later reading
         // is measured against. Called on each disable -> enable transition, so a session's
         // accumulated encoder drift is discarded rather than carried into the next enable.
+        // Accumulate one loop's travel, holding the tracked angle inside the PHYSICAL stops.
+        // The hood cannot pass its stops, so an accumulation that would take the angle outside
+        // them is slip or noise, not motion -- letting it run is what produced a reported
+        // -32.96 deg on a hood whose travel is 3.2 to 44.5. Saturating instead of accumulating
+        // also means the travel guard still knows which way is blocked.
+        // Package-private + static for HoodTrackingTest.
+        static double accumulateHoodTravel(double relativeDeg, double baseAngleDeg, double deltaDeg){
+            double proposed = relativeDeg + deltaDeg;
+            double angle = baseAngleDeg + proposed;
+            if (angle > ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP) {
+                return ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP - baseAngleDeg;
+            }
+            if (angle < ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN) {
+                return ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN - baseAngleDeg;
+            }
+            return proposed;
+        }
+
         private void captureHoodDatum(double raw){
             hoodBaseAngleDeg = hoodDatumAngle(raw);
             hoodRelativeDeg = 0;
@@ -869,7 +897,8 @@ public class ShooterSubsystem extends SubsystemBase{
                 if (isHoodFeedbackValid(rawHood) && (!hoodDatumValid || (nowEnabled && !hoodWasEnabled))) {
                     captureHoodDatum(rawHood);
                 } else if (hoodDatumValid && isHoodFeedbackValid(rawHood)) {
-                    hoodRelativeDeg += hoodDeltaDegrees(shortestRawDelta(hoodLastRaw, rawHood));
+                    hoodRelativeDeg = accumulateHoodTravel(hoodRelativeDeg, hoodBaseAngleDeg,
+                        hoodDeltaDegrees(shortestRawDelta(hoodLastRaw, rawHood)));
                     hoodLastRaw = rawHood;
                 }
                 hoodWasEnabled = nowEnabled;
@@ -1008,6 +1037,8 @@ public class ShooterSubsystem extends SubsystemBase{
             rawHoodEncoderEntry.setDouble(shooterAngleEncoder.getPosition());
             hoodVoltsEntry.setDouble(lastHoodVolts);
             hoodCurrentEntry.setDouble(shooterAngle.getOutputCurrent());
+            hoodBaseAngleEntry.setDouble(hoodBaseAngleDeg);
+            hoodRelativeEntry.setDouble(hoodRelativeDeg);
             // Desired Velocity/Angle double as INPUTS in live-data mode (enableComp reads
             // them back above) -- only echo the real setpoints when NOT in that mode, so a
             // dashboard edit is never stomped mid-tune.

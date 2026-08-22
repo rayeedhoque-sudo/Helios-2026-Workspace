@@ -126,6 +126,45 @@ public class HoodTrackingTest {
             ShooterSubsystem.clampDesiredAngle(-999, 0, false), 1e-9);
     }
 
+    // ---- anti-windup: the tracked angle can never leave the physical stops ----
+
+    @Test
+    void travelSaturatesAtTheUpStop() {
+        double base = 40.0;
+        double relative = ShooterSubsystem.accumulateHoodTravel(4.0, base, 10.0);
+        assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP, base + relative, 1e-9,
+            "accumulation must saturate at the up stop, not run past it");
+    }
+
+    @Test
+    void travelSaturatesAtTheDownStop() {
+        double base = 5.0;
+        double relative = ShooterSubsystem.accumulateHoodTravel(-1.0, base, -40.0);
+        assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN, base + relative, 1e-9,
+            "a -32.96 deg reading on a 3.2-44.5 deg mechanism must be impossible");
+    }
+
+    @Test
+    void ordinaryTravelAccumulatesNormally() {
+        assertEquals(7.0, ShooterSubsystem.accumulateHoodTravel(5.0, 20.0, 2.0), 1e-9);
+    }
+
+    // ---- feedback validity is now ONLY the dead-encoder test ----
+
+    @Test
+    void anyDialPositionIsValidFeedback() {
+        // The old absolute band rejected these, which forced 0 V and left the hood dead.
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(103.6), "dead-band raw must be usable now");
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(60.0));
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(359.9));
+    }
+
+    @Test
+    void deadEncoderIsStillRejected() {
+        assertTrue(!ShooterSubsystem.isHoodFeedbackValid(0.0),
+            "bit-exact 0.0 is a silent controller, not a position");
+    }
+
     /** A datum far outside the soft band must not invert the window into an empty range. */
     @Test
     void degenerateWindowHoldsInsteadOfInverting() {

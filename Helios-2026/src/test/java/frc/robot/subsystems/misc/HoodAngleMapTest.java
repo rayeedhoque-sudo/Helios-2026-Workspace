@@ -108,11 +108,18 @@ public class HoodAngleMapTest {
             "bit-exact 0.0 is a dead encoder, not a position");
     }
 
-    /** Readings outside the measured travel are still rejected. */
+    /**
+     * Readings outside the old measured travel are now VALID. The absolute band was removed
+     * 2026-08-22: the encoder drifts against the hood, so a band eventually rejects wherever
+     * it has wandered to and forces 0 V -- which is what left the hood dead on the DPAD at a
+     * reported -32.96 deg. With the angle tracked relatively, only CHANGES matter, so any dial
+     * position is legal and bad data is caught by the delta filters instead (HoodTrackingTest).
+     */
     @Test
-    void outOfTravelReadingsAreRejected() {
-        assertTrue(!ShooterSubsystem.isHoodFeedbackValid(103.6), "dead-band reading must be invalid");
-        assertTrue(!ShooterSubsystem.isHoodFeedbackValid(140.0), "below the down anchor must be invalid");
-        assertTrue(!ShooterSubsystem.isHoodFeedbackValid(70.0), "past the up anchor must be invalid");
+    void anyDialPositionIsAcceptedNow() {
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(103.6),
+            "the old dead-band reading must be usable -- rejecting it killed hood control");
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(140.0));
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(70.0));
     }
 }
