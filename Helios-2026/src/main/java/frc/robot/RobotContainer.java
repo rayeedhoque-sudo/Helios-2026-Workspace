@@ -229,10 +229,13 @@ public class RobotContainer {
                     () -> drivetrain.getState().Pose.getRotation().getDegrees()
                           + shooterSS.getDegreesToAlignToTarget()));
 
-            // DPAD-LEFT/RIGHT = rotate exactly +90 (CCW) / -90 deg from the heading at press
-            // (rotateBy defers, so the snapshot happens at schedule time, not at boot).
-                joystick2.povLeft().and(RobotModeTriggers.teleop()).onTrue(drivetrain.rotateBy(90));
-                joystick2.povRight().and(RobotModeTriggers.teleop()).onTrue(drivetrain.rotateBy(-90));
+            // DPAD-LEFT/RIGHT (hold) = jog the hood DOWN / UP (team request 2026-08-22,
+            // replaced the +-90 deg rotateBy snaps). Identical closed-loop jog to the
+            // test-mode binding below -- see hoodJogCommand().
+                joystick2.povLeft().and(RobotModeTriggers.teleop())
+                    .whileTrue(hoodJogCommand(ShooterSubsystemConstants.MIN_ANGLE));
+                joystick2.povRight().and(RobotModeTriggers.teleop())
+                    .whileTrue(hoodJogCommand(ShooterSubsystemConstants.MAX_ANGLE));
 
             drivetrain.registerTelemetry(logger::telemeterize);
 
@@ -247,17 +250,21 @@ public class RobotContainer {
             // (RT/RB/B) the group cancels WITHOUT onFalse firing -- without this the roller
             // state machine stays latched in periodic() with no command owning intakeSS.
             // Redundant on normal release (stowCommand stops rollers again), harmless.
-            joystick2.leftTrigger().and(RobotModeTriggers.teleop())
-                .whileTrue(intakeSS.intakeCommand().andThen(hopperSS.intakeFeedCommand())
-                    .finallyDo(intakeSS::stopRollers))
-                .onFalse(intakeSS.stowCommand());
-            // Y (hold) = outtake: same choreography, rollers out.
-            joystick2.y().and(RobotModeTriggers.teleop())
-                .whileTrue(intakeSS.outtakeCommand().andThen(hopperSS.intakeFeedCommand())
-                    .finallyDo(intakeSS::stopRollers))
-                .onFalse(intakeSS.stowCommand());
-            // X = manual stow: stop rollers immediately, then retract slider until stall.
-            joystick2.x().and(RobotModeTriggers.teleop()).onTrue(intakeSS.stowCommand());
+            // INTAKE DISABLED 2026-08-22 (team request): rollers AND slider. LT / Y / X are
+            // unbound in teleop -- with no command owning intakeSS the state machine stays
+            // in STOW_STATE, so periodic() just holds the rollers braked and never commands
+            // the slider. Restore by uncommenting; nothing else changed.
+            // joystick2.leftTrigger().and(RobotModeTriggers.teleop())
+            //     .whileTrue(intakeSS.intakeCommand().andThen(hopperSS.intakeFeedCommand())
+            //         .finallyDo(intakeSS::stopRollers))
+            //     .onFalse(intakeSS.stowCommand());
+            // // Y (hold) = outtake: same choreography, rollers out.
+            // joystick2.y().and(RobotModeTriggers.teleop())
+            //     .whileTrue(intakeSS.outtakeCommand().andThen(hopperSS.intakeFeedCommand())
+            //         .finallyDo(intakeSS::stopRollers))
+            //     .onFalse(intakeSS.stowCommand());
+            // // X = manual stow: stop rollers immediately, then retract slider until stall.
+            // joystick2.x().and(RobotModeTriggers.teleop()).onTrue(intakeSS.stowCommand());
             // B (hold) = MANUAL hopper run: belts ONLY, kicker stays OFF (team spec 2026-08-22).
             joystick2.b().and(RobotModeTriggers.teleop()).whileTrue(hopperSS.manualRunCommand());
             // VIEW (hold) = UNJAM: reverse belts + kicker at low duty to back a stuck ball out.
@@ -381,13 +388,18 @@ public class RobotContainer {
             // parked at a precise angle to read the encoder anchors, handoff on-robot verify
             // item 2), so there is no .onFalse() reset.
             joystick2.povLeft().and(RobotModeTriggers.test())
-                .whileTrue(shooterSS.run(() -> shooterSS.setDesired_Angle(
-                        hoodJogLimiter.calculate(ShooterSubsystemConstants.MIN_ANGLE)))
-                    .beforeStarting(() -> hoodJogLimiter.reset(shooterSS.getDesiredAngle())));
+                .whileTrue(hoodJogCommand(ShooterSubsystemConstants.MIN_ANGLE));
             joystick2.povRight().and(RobotModeTriggers.test())
-                .whileTrue(shooterSS.run(() -> shooterSS.setDesired_Angle(
-                        hoodJogLimiter.calculate(ShooterSubsystemConstants.MAX_ANGLE)))
-                    .beforeStarting(() -> hoodJogLimiter.reset(shooterSS.getDesiredAngle())));
+                .whileTrue(hoodJogCommand(ShooterSubsystemConstants.MAX_ANGLE));
+    }
+
+    /**
+     * Hood jog toward targetAngle at kHoodJogRateDegPerSec. A fresh command instance per
+     * call -- one instance shared by two triggers would cross-cancel on release.
+     */
+    private Command hoodJogCommand(double targetAngle){
+        return shooterSS.run(() -> shooterSS.setDesired_Angle(hoodJogLimiter.calculate(targetAngle)))
+            .beforeStarting(() -> hoodJogLimiter.reset(shooterSS.getDesiredAngle()));
     }
 
     /**
