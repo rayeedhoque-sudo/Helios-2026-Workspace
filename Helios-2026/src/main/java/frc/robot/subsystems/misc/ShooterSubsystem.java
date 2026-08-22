@@ -959,15 +959,13 @@ public class ShooterSubsystem extends SubsystemBase{
                     desired_Velocity != 0 ? Math.abs(desired_Velocity-getShooterFlywheelVelocity()) < ShooterSubsystemConstants.SPEED_TOLERANCE : false;
                 angleReached =
                      desired_Angle != 0 ? Math.abs(desired_Angle-getShooterAngleDegrees()) < ShooterSubsystemConstants.ANGLE_TOLERANCE : false;
-            //Data (tuning entries only -- these double as dashboard INPUTS below, so they
-            // are written only while enabled; the read-only status entries moved to the
-            // always-published block at the bottom of periodic()).
-                shooterSpeed_kP.setDouble(shooterVelConfigs.kP);
-                shooterSpeed_kD.setDouble(shooterVelConfigs.kD);
-                shooterSpeed_kV.setDouble(shooterVelConfigs.kV);
-                shooterAngle_kP.setDouble(shooterAnglePID.getP());
-                shooterAngle_kI.setDouble(shooterAnglePID.getI());
-                shooterAngle_kD.setDouble(shooterAnglePID.getD());
+            //Data. The six gain entries are INPUTS ONLY -- they are seeded once at construction
+            // from the constants and never written again. They used to be echoed here every
+            // loop, a few lines above the block that READS them back, so a typed value survived
+            // only if it landed in the gap between the echo and the read in the same loop:
+            // dashboard tuning appeared to work, then silently reverted. Same fix the Desired
+            // Velocity/Angle entries already got. The gains still revert to the constants on
+            // reboot or redeploy -- write a keeper into SubsystemConstants.
                 debugEntry.setBoolean(enableComp);
 
             //Physics Lab: live-data mode reads setpoints straight off Shuffleboard. No else --
