@@ -170,16 +170,14 @@ public class HopperSubsystem extends SubsystemBase{
     }
 
     /**
-     * MANUAL RUN (B button, hold): belts + kicker together, UNGATED -- the kicker does
-     * not wait for flywheels-at-speed, so this works even with the shooter idle.
-     * Release = stop everything.
+     * MANUAL RUN (B button, hold): belts ONLY -- the kicker stays OFF (team spec
+     * 2026-08-22: the kicker runs only on a shot, once the flywheels are at speed).
+     * This also removes the stopped-flywheel CIM-stall exposure the old ungated
+     * kicker carried. Release = stop the belts (and re-assert the kicker stopped).
      */
     public Command manualRunCommand(){
         return runEnd(
-            () -> {
-                indexFuel();
-                kickFuel();
-            },
+            () -> indexFuel(),
             () -> {
                 stopIndex();
                 stopKickFuel();

@@ -160,7 +160,7 @@ public class RobotContainer {
         //   RB (hold)   = fixed feed shot (25 deg hood + fixed speed; belts always, kicker
         //                 at-speed-gated). Full drive + intake lockout (blind feed).
         //   (Kicker at-speed gate added 2026-07-18 by team request.)
-        //   B (hold)    = manual hopper belts + kicker, ungated
+        //   B (hold)    = manual hopper belts only (kicker OFF)
         //   VIEW (hold) = hopper unjam: reverse belts + kicker (added 2026-07-18)
         //   A / DPAD-UP (hold) = search-align to our alliance's scoring tag
         //   DPAD-LEFT/RIGHT    = rotate exactly +90 / -90 deg
@@ -258,7 +258,7 @@ public class RobotContainer {
                 .onFalse(intakeSS.stowCommand());
             // X = manual stow: stop rollers immediately, then retract slider until stall.
             joystick2.x().and(RobotModeTriggers.teleop()).onTrue(intakeSS.stowCommand());
-            // B (hold) = MANUAL hopper run: belts + kicker, UNGATED (works with shooter idle).
+            // B (hold) = MANUAL hopper run: belts ONLY, kicker stays OFF (team spec 2026-08-22).
             joystick2.b().and(RobotModeTriggers.teleop()).whileTrue(hopperSS.manualRunCommand());
             // VIEW (hold) = UNJAM: reverse belts + kicker at low duty to back a stuck ball out.
             // (Direction-test diagnostics removed 2026-07-18 after the fix was confirmed: the
