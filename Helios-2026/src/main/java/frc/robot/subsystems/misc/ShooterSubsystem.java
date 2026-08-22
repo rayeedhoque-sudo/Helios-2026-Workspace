@@ -141,6 +141,9 @@ public class ShooterSubsystem extends SubsystemBase{
        // Live RT flywheel target (m/s surface), trimmed by the DPAD UP/DOWN bindings. Seeded
        // from the constant and NOT persisted -- a reboot or redeploy returns it to the constant.
        private double rtSurfaceSpeed = ShooterSubsystemConstants.RT_FLYWHEEL_SURFACE_SPEED;
+       // True while the hood is parked inside its settle band and held at 0 V by the brake idle
+       // mode. Latches, so the loop cannot chatter at the band edge -- see hoodShouldHold().
+       private boolean hoodHolding;
        private double hoodBaseAngleDeg;   // absolute angle at the datum
        private double hoodRelativeDeg;    // signed degrees travelled since the datum
        private double hoodLastRaw;        // previous raw reading, for the delta
@@ -330,6 +333,20 @@ public class ShooterSubsystem extends SubsystemBase{
             //
             // A silent SPARK MAX still publishes bit-exact 0.0, and that is not a position.
             return raw != 0.0;
+        }
+
+        // Should the hood be HELD at 0 V (brake idle holding position) rather than driven?
+        // True once inside ANGLE_TOLERANCE of the target, and it STAYS true until the hood has
+        // drifted past the wider HOOD_REENGAGE_DEG -- hysteresis, so the loop cannot chatter on
+        // and off at a single threshold. This is what stops the hood hunting after a DPAD click:
+        // it arrives, the drive stops, and the brake holds it there.
+        // Package-private + static for HoodSettleTest.
+        static boolean hoodShouldHold(double errorDeg, boolean wasHolding){
+            double magnitude = Math.abs(errorDeg);
+            if (magnitude <= ShooterSubsystemConstants.ANGLE_TOLERANCE) {
+                return true;
+            }
+            return wasHolding && magnitude < ShooterSubsystemConstants.HOOD_REENGAGE_DEG;
         }
 
         // Gravity LIFT feedforward (volts) for a given angle error, target minus current.
@@ -975,7 +992,17 @@ public class ShooterSubsystem extends SubsystemBase{
                 boolean hoodFeedbackValid = isHoodFeedbackValid(rawHood);
                 double hoodVolts = 0; // kill switch / invalid feedback -> 0 V (brake idle holds)
                 if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid) {
-                    double anglePID = shooterAnglePID.calculate(currentHoodAngle, hoodTarget);
+                    // SETTLE BAND (2026-08-22, team requirement: a DPAD click moves the hood
+                    // 2 deg and it STAYS there). Once inside ANGLE_TOLERANCE the hood is driven
+                    // with 0 V and the brake idle mode holds it; without this it HUNTS -- it
+                    // breaks free at ~7.5 V, carries past the target, and the loop drives it
+                    // back down with up to 6 V plus gravity, a limit cycle around the setpoint.
+                    // Latching with a wider re-engage threshold (hysteresis) so the loop cannot
+                    // chatter on and off at the band edge -- see hoodShouldHold().
+                    hoodHolding = hoodShouldHold(hoodTarget - currentHoodAngle, hoodHolding);
+                    double anglePID = hoodHolding
+                        ? 0
+                        : shooterAnglePID.calculate(currentHoodAngle, hoodTarget);
                     // Gravity LIFT feedforward: the pure-P loop under-drives against gravity at modest
                     // errors (a 20 deg error only asks 5.5 V, below the ~7 V breakaway), so add an
                     // up-bias while the hood is still BELOW its target. FADED IN across
@@ -983,7 +1010,7 @@ public class ShooterSubsystem extends SubsystemBase{
                     // made the DPAD jog lurch. Still 0 V at/inside the target, so the hood can never be
                     // driven PAST the target into the MAX_ANGLE belt-skip zone by this term, and still
                     // off while lowering (error <= 0), so the gravity-assisted descent stays gentle.
-                    double liftFF = hoodLiftFeedforward(hoodTarget - currentHoodAngle);
+                    double liftFF = hoodHolding ? 0 : hoodLiftFeedforward(hoodTarget - currentHoodAngle);
                     // ASYMMETRIC speed cap (2026-07-18): raising fights gravity, lowering is gravity-
                     // assisted, so the UP stroke gets more voltage (HOOD_MAX_UP_VOLTAGE) than the DOWN
                     // stroke (HOOD_MAX_DOWN_VOLTAGE). A symmetric 6 V could not lift the hood at all

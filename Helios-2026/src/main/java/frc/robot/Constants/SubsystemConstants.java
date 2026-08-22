@@ -292,6 +292,20 @@ public class SubsystemConstants {
                 // buys roughly one clean step of the mechanism instead of a partial one it cannot
                 // act on. Still clamped by clampDesiredAngle (soft limits + travel window).
                 public static double HOOD_NUDGE_DEG = 2.0;
+                // SETTLE BAND (deg), 2026-08-22: once the hood is within ANGLE_TOLERANCE of its
+                // target it is driven with 0 V and the brake idle mode holds it. Without this the
+                // hood HUNTS after every click: it breaks free at ~7.5 V, carries past the target,
+                // error flips negative, and the loop drives it back DOWN with up to 6 V plus
+                // gravity -- a limit cycle around the setpoint. Team requirement: a click moves
+                // the hood 2 deg and it STAYS there.
+                //
+                // Re-engage is deliberately WIDER than settle (hysteresis). With one threshold the
+                // loop would chatter on and off at the boundary; the hood must drift a full
+                // HOOD_REENGAGE_DEG before the loop pushes again. That also means a click smaller
+                // than the re-engage band would do nothing, which is why HOOD_NUDGE_DEG (2.0)
+                // sits above it. TODO on robot: if the hood visibly sags and re-lifts while
+                // parked, raise this -- the sag is crossing the re-engage threshold.
+                public static double HOOD_REENGAGE_DEG = 1.5;
                 // Sanity band for the UNWRAPPED hood encoder reading (apply the wrap split FIRST):
                 // the anchors above +- ~1.5 deg of travel of slack. Outside this band the feedback
                 // is treated as FAULTED (dead encoder, boot-transient frames, wiring damage) and
