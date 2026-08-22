@@ -403,6 +403,19 @@ public class SubsystemConstants {
                 // target, still 5 V at a large error. Bigger = smoother but slower to break away;
                 // smaller = back toward the old lurch. TODO tune on robot.
                 public static double HOOD_FF_FADE_DEG = 2.0;
+                // OPEN-LOOP JOG volts (team request 2026-08-22: "make the NEO rotate at a constant
+                // rate rather than spinning in intervals"). The closed loop cannot do this: with a
+                // ~7 V breakaway and only 0.275 V/deg of P, it stick-slips on the way up no matter
+                // how the FF is shaped. A held DPAD now drives a FIXED voltage instead, so the hood
+                // moves continuously. UP must clear breakaway (~7 V; 6 V provably could not lift
+                // it); DOWN is gravity-assisted so it needs far less. Both stay under the
+                // HOOD_MAX_UP/DOWN_VOLTAGE caps. Constant volts is not exactly constant RATE -- the
+                // gravity load varies through the stroke -- but it is continuous, which is the ask.
+                // TODO tune on robot: raise UP if the hood still hesitates from a standstill, lower
+                // it if the ascent is too quick to place accurately; raise DOWN if the descent
+                // stalls, lower it if the hood drops too fast.
+                public static double HOOD_JOG_UP_VOLTS   = 7.5;
+                public static double HOOD_JOG_DOWN_VOLTS = 2.0;
                 // Surface-speed gate for the kicker, m/s. TIGHTENED 0.3 -> 0.2 (spec 6): at the
                 // 3.0 m minimum, 0.3 m/s maps to 0.30 m of along-track error -- more than the
                 // 0.226 m half-window through the opening; 0.2 closes the budget exactly.
