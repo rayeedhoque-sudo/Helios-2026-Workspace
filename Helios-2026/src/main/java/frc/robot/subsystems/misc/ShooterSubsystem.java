@@ -127,9 +127,6 @@ public class ShooterSubsystem extends SubsystemBase{
        // Last voltage actually commanded to the hood, for the telemetry block at the bottom of
        // periodic() (which publishes whether or not the subsystem is enabled).
        private double lastHoodVolts;
-       // Open-loop hood jog: volts commanded while a DPAD jog is held, 0 = normal closed-loop
-       // position control. Set by hoodJogCommand(); see the jog branch in periodic().
-       private double hoodJogVolts;
        private double desired_Velocity;
        private double desired_Angle;
        private double target_distance;
@@ -320,22 +317,6 @@ public class ShooterSubsystem extends SubsystemBase{
             double aboveTolerance = errorDeg - ShooterSubsystemConstants.ANGLE_TOLERANCE;
             double fraction = MathUtil.clamp(aboveTolerance / ShooterSubsystemConstants.HOOD_FF_FADE_DEG, 0, 1);
             return fraction * ShooterSubsystemConstants.HOOD_RAISE_FF_VOLTS;
-        }
-
-        // HARD TRAVEL GUARD for the open-loop jog: the closed loop's guard protects the PID
-        // path, and this protects the jog path, on the same rule -- at/above MAX never drive
-        // UP, at/below MIN never drive DOWN, whatever the driver is holding. Positive volts
-        // raise. This is the ONLY thing standing between a held button and a hard stop, which
-        // is why the jog is gated on valid feedback in periodic() before it is ever called.
-        // Package-private + static for HoodJogTest.
-        static double guardedHoodJogVolts(double jogVolts, double currentAngleDeg){
-            if (jogVolts > 0 && currentAngleDeg >= ShooterSubsystemConstants.MAX_ANGLE) {
-                return 0;
-            }
-            if (jogVolts < 0 && currentAngleDeg <= ShooterSubsystemConstants.MIN_ANGLE) {
-                return 0;
-            }
-            return jogVolts;
         }
 
         private double getShooterAngleDegrees(){
@@ -713,29 +694,6 @@ public class ShooterSubsystem extends SubsystemBase{
                 .beforeStarting(() -> heldClass = TargetClass.NONE);
         }
 
-        // DPAD LEFT/RIGHT (hold) = OPEN-LOOP hood jog at a fixed voltage (team request
-        // 2026-08-22: "make the NEO rotate at a constant rate rather than spinning in
-        // intervals"). The closed-loop setpoint jog stick-slipped on the way up -- breakaway is
-        // ~7 V and the position loop only reaches ~5.7 V at full feedforward, so the hood sat
-        // still until error piled up, then lurched.
-        //
-        // Guards that stay live: valid feedback is required (periodic() falls through to 0 V
-        // without it), the hard travel guard zeroes the jog at MIN/MAX, and the stow interlock
-        // blocks a downward jog into the stow region while the flywheels are still fast.
-        //
-        // On release the setpoint is re-anchored to where the hood ACTUALLY ended up, so the
-        // position loop holds it there instead of yanking it back to a stale desired_Angle.
-        public Command hoodJogCommand(boolean up){
-            return runEnd(
-                () -> hoodJogVolts = up
-                    ? ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS
-                    : -ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS,
-                () -> {
-                    hoodJogVolts = 0;
-                    setDesired_Angle(getShooterAngleDegrees());
-                });
-        }
-
         // RT (hold) = FLYWHEELS ONLY (team request 2026-08-22): spin to a fixed surface speed
         // and NEVER touch the hood -- the angle is whatever the DPAD jog left it at, which is
         // the whole point (manual range control). No vision, no model, no aim. The RT binding
@@ -840,20 +798,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 // limit. Out-of-band or NaN (comparisons fail) -> 0 V; brake idle holds the hood.
                 boolean hoodFeedbackValid = isHoodFeedbackValid(rawHood);
                 double hoodVolts = 0; // kill switch / invalid feedback -> 0 V (brake idle holds)
-                if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid && hoodJogVolts != 0) {
-                    // OPEN-LOOP JOG (DPAD held): a FIXED voltage, so the hood moves continuously
-                    // instead of stick-slipping the way the position loop does on the way up.
-                    // Both guards still apply -- the travel guard below via guardedHoodJogVolts,
-                    // and the stow interlock here, so a jog cannot recess the hood into the stow
-                    // region while the flywheels are still spinning fast.
-                    double jog = guardedHoodJogVolts(hoodJogVolts, currentHoodAngle);
-                    if (jog < 0
-                            && currentHoodAngle < ShooterSubsystemConstants.HOOD_STOW_INTERLOCK_FLOOR_DEG
-                            && Math.abs(getShooterFlywheelVelocity()) > ShooterSubsystemConstants.HOOD_LOWER_MAX_SURFACE_SPEED) {
-                        jog = 0;
-                    }
-                    hoodVolts = jog;
-                } else if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid) {
+                if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid) {
                     double anglePID = shooterAnglePID.calculate(currentHoodAngle, hoodTarget);
                     // Gravity LIFT feedforward: the pure-P loop under-drives against gravity at modest
                     // errors (a 20 deg error only asks 5.5 V, below the ~7 V breakaway), so add an
