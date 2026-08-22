@@ -506,6 +506,13 @@ public class ShooterSubsystem extends SubsystemBase{
             hoodRelativeDeg = 0;
             hoodLastRaw = raw;
             hoodDatumValid = true;
+            // SEED THE SETPOINT TO WHERE THE HOOD ACTUALLY IS (2026-08-22). Without this the
+            // setpoint keeps whatever stale value it had -- measured on the robot: the hood sat
+            // at 34.84 deg with desired_Angle still 17 from an earlier session, so eight +2 deg
+            // clicks only walked the target from 17 to 33, still BELOW the hood. Every click
+            // registered and the hood never moved up, because the loop was trying to go DOWN
+            // the whole time. Seeding here means a click is always 2 deg from where the hood is.
+            setDesired_Angle(hoodBaseAngleDeg);
         }
 
         // Own alliance for the tag partition. DriverStation may not know yet (no FMS / DS
