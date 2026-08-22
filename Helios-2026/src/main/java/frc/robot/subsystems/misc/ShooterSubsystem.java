@@ -115,9 +115,18 @@ public class ShooterSubsystem extends SubsystemBase{
             // rebuilding getShooterAngleDegrees(). Hand-move the hood to each hard stop (robot
             // DISABLED) and record this at min + max; if it never changes, the encoder isn't tracking.
             private final GenericEntry rawHoodEncoderEntry;
+            // Hood drive telemetry (2026-08-22): the commanded volts and the measured current,
+            // published every loop. Added to tune the ascent out of stick-slip -- the volts at
+            // the instant the hood starts moving IS the breakaway threshold, and there was no
+            // way to see it before. Current also shows a stall (driving hard, not moving).
+            private final GenericEntry hoodVoltsEntry;
+            private final GenericEntry hoodCurrentEntry;
 
     //Tracker Variables
        private boolean enableSubsystem;
+       // Last voltage actually commanded to the hood, for the telemetry block at the bottom of
+       // periodic() (which publishes whether or not the subsystem is enabled).
+       private double lastHoodVolts;
        private double desired_Velocity;
        private double desired_Angle;
        private double target_distance;
@@ -240,6 +249,8 @@ public class ShooterSubsystem extends SubsystemBase{
                 desiredAngleReachedEntry = ShooterSubsystemTab.add("Desired Angle Reached", false).getEntry();
                 debugEntry = ShooterSubsystemTab.add("Debug Field", true).getEntry();
                 rawHoodEncoderEntry = ShooterSubsystemTab.add("Hood Encoder Raw (rot)", 0.0).getEntry();
+                hoodVoltsEntry = ShooterSubsystemTab.add("Hood Volts (cmd)", 0.0).getEntry();
+                hoodCurrentEntry = ShooterSubsystemTab.add("Hood Current (A)", 0.0).getEntry();
        }
 
     //Utility Methods
@@ -816,6 +827,7 @@ public class ShooterSubsystem extends SubsystemBase{
                     }
                 }
                 shooterAngle.setVoltage(hoodVolts);
+                lastHoodVolts = hoodVolts;
             //At-speed / at-angle kicker gates -- instance state (the mutable statics in
             // ShooterSubsystemConstants are DELETED; the hopper polls isReadyToShoot()).
                 velReached =
@@ -871,6 +883,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 // Brake idle mode holds the angle).
                 shooterA.setControl(m_flywheelCoast);
                 shooterAngle.setVoltage(0);
+                lastHoodVolts = 0;
                 desired_Velocity = 0;
                 // Drop the kicker gates too: these flags latch the last enabled-loop value,
                 // and the hopper's kicker fires on isReadyToShoot() -- a disable mid-shot must
@@ -897,6 +910,8 @@ public class ShooterSubsystem extends SubsystemBase{
             desiredVelReachedEntry.setBoolean(velReached);
             desiredAngleReachedEntry.setBoolean(angleReached);
             rawHoodEncoderEntry.setDouble(shooterAngleEncoder.getPosition());
+            hoodVoltsEntry.setDouble(lastHoodVolts);
+            hoodCurrentEntry.setDouble(shooterAngle.getOutputCurrent());
             // Desired Velocity/Angle double as INPUTS in live-data mode (enableComp reads
             // them back above) -- only echo the real setpoints when NOT in that mode, so a
             // dashboard edit is never stomped mid-tune.
