@@ -173,6 +173,15 @@ public class SubsystemConstants {
             // flywheels are at speed (ShooterSubsystem.isReadyToShoot), and the shooter was disabled.
             public static final int KICKER_MOTOR_ID = 17;
             
+            // Belt smart current limit (A) on the two NEO 2.0s. Normal = 20 A
+            // (conservative start, Hardware-Data-Sheet sec.7). During a shot feed the belts
+            // push a full hopper against the kicker, so the limit is raised 20% for the
+            // duration of feedShooterCommand only (team request 2026-08-22) and dropped back
+            // on release. TODO verify on robot: watch "Hopper A/B Current" during RT -- if the
+            // belts sit pinned at 24 A they are jammed, not under-powered.
+                public static final int HOPPER_CURRENT_LIMIT_A = 20;
+                public static final int HOPPER_SHOT_CURRENT_LIMIT_A = 24;
+
             //SPEED CONSTANTS
                 public static final double INDEXER_SPEED = 0.75;
                 // Kicker spin-up delay (s) for the RT shot, team request 2026-08-22: hold the

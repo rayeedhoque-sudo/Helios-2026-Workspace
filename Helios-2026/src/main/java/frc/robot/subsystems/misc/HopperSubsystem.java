@@ -78,7 +78,7 @@ public class HopperSubsystem extends SubsystemBase{
             // the motor -> check CAN 20/21 wiring + power; output ~0.5 / current high = fighting or
             // jammed).
             SparkMaxConfig hopperConfig = new SparkMaxConfig();
-            hopperConfig.smartCurrentLimit(20);
+            hopperConfig.smartCurrentLimit(HopperSubsystemConstants.HOPPER_CURRENT_LIMIT_A);
             hopperConfig.idleMode(IdleMode.kCoast);
             // 0.25 s open-loop ramp, same inrush softening every sibling motor already has
             // (kicker, intake roller/slider) -- the belts were the one unramped pair
@@ -200,7 +200,23 @@ public class HopperSubsystem extends SubsystemBase{
             () -> {
                 stopIndex();
                 stopKickFuel();
-            });
+                setBeltCurrentLimit(HopperSubsystemConstants.HOPPER_CURRENT_LIMIT_A);
+            })
+            // Raise the belt limit 20% for the shot only (team request 2026-08-22), restored
+            // in end() above -- runs once per press, not every loop.
+            .beforeStarting(() -> setBeltCurrentLimit(HopperSubsystemConstants.HOPPER_SHOT_CURRENT_LIMIT_A));
+    }
+
+    /**
+     * Re-apply just the smart current limit to both belt motors, leaving every other
+     * configured field (idle mode, ramp, inversion, follower-disable) untouched:
+     * kNoResetSafeParameters + kNoPersistParameters = a live tweak, nothing flashed.
+     */
+    private void setBeltCurrentLimit(int amps){
+        SparkMaxConfig cfg = new SparkMaxConfig();
+        cfg.smartCurrentLimit(amps);
+        hopperMotorA.configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        hopperMotorB.configure(cfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     /**
