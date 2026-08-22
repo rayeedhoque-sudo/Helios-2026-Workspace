@@ -251,6 +251,32 @@ public class SubsystemConstants {
                 // the split sits at that band's midpoint -- as far from either end of travel as
                 // possible. A raw reading below the split is past the rollover and gets +360.
                 public static double HOOD_RAW_WRAP_SPLIT = 103.5;
+                // CONTINUOUS TRACKING (2026-08-22). The absolute reading cannot be trusted on its
+                // own: the encoder drifts against the hood over a session (the hood physically
+                // cannot pass its up stop at raw ~55-71, yet readings wander toward the split),
+                // and interpreting one reading through a FIXED split is catastrophic near it --
+                // raw 103.4 reads +52.0 deg, raw 103.6 reads -4.3 deg, a 56 deg flip across one
+                // count. At -4.3 the travel guard thinks the hood is at the bottom, so it drives
+                // UP at full feedforward: the "hood shoots up and cannot be controlled" symptom.
+                //
+                // So the angle is now tracked RELATIVELY: capture a datum when the robot enables,
+                // then accumulate shortest-path deltas. A 359 -> 0 step is a small delta, never a
+                // flip, and slow drift cannot move the hood because only CHANGES are counted.
+                //
+                // Degrees per raw unit, from the measured anchors: 41.276 deg / 263.6 units.
+                public static double HOOD_DEG_PER_RAW_UNIT = 0.15658;
+                // Ignore deltas smaller than this (raw units): measured encoder noise is +-0.08,
+                // and noise must never accumulate into phantom travel. 0.2 clears it with margin
+                // and costs 0.03 deg of resolution -- far below the 0.5 deg angle tolerance.
+                public static double HOOD_RAW_NOISE_DEADBAND = 0.2;
+                // Reject deltas bigger than this (raw units) as glitches, NOT motion: 20 units is
+                // 3.1 deg in one 20 ms loop = 157 deg/sec, far faster than the hood can physically
+                // travel. A dropped/garbled frame lands here instead of jumping the tracker.
+                public static double HOOD_RAW_MAX_STEP = 20.0;
+                // How far the hood may be commanded from its enable-time position (deg, team
+                // choice 2026-08-22). Matches the usable MIN_ANGLE..MAX_ANGLE band, so a setpoint
+                // can never ask for more travel than the mechanism has, wherever it was enabled.
+                public static double HOOD_TRAVEL_WINDOW_DEG = 33.0;
                 // Sanity band for the UNWRAPPED hood encoder reading (apply the wrap split FIRST):
                 // the anchors above +- ~1.5 deg of travel of slack. Outside this band the feedback
                 // is treated as FAULTED (dead encoder, boot-transient frames, wiring damage) and

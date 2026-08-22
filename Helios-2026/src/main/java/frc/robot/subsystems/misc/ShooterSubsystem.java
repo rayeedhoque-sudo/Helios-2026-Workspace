@@ -127,6 +127,14 @@ public class ShooterSubsystem extends SubsystemBase{
        // Last voltage actually commanded to the hood, for the telemetry block at the bottom of
        // periodic() (which publishes whether or not the subsystem is enabled).
        private double lastHoodVolts;
+       // CONTINUOUS HOOD TRACKING (2026-08-22). The live angle is a datum captured at enable
+       // plus every shortest-path delta since, NOT a fresh interpretation of each reading --
+       // see HOOD_DEG_PER_RAW_UNIT for why the absolute reading alone cannot be trusted.
+       private double hoodBaseAngleDeg;   // absolute angle at the datum
+       private double hoodRelativeDeg;    // signed degrees travelled since the datum
+       private double hoodLastRaw;        // previous raw reading, for the delta
+       private boolean hoodDatumValid;    // false until a datum has been captured
+       private boolean hoodWasEnabled;    // rising-edge detect on DriverStation.isEnabled()
        private double desired_Velocity;
        private double desired_Angle;
        private double target_distance;
@@ -319,8 +327,84 @@ public class ShooterSubsystem extends SubsystemBase{
             return fraction * ShooterSubsystemConstants.HOOD_RAISE_FF_VOLTS;
         }
 
+        // Shortest-path difference between two raw readings, in raw units. A 359 -> 0.5 step
+        // is +1.5, not -358.5. This is what makes the rollover a non-event: the tracker never
+        // sees the discontinuity that the fixed-split interpretation turns into a 56 deg flip.
+        // Package-private + static for HoodTrackingTest.
+        static double shortestRawDelta(double previousRaw, double currentRaw){
+            double delta = (currentRaw - previousRaw) % 360.0;
+            if (delta > 180.0) {
+                delta -= 360.0;
+            } else if (delta < -180.0) {
+                delta += 360.0;
+            }
+            return delta;
+        }
+
+        // Convert one loop's raw delta into degrees of hood travel, rejecting what is not
+        // motion: noise below the deadband (so drift/jitter can never accumulate into phantom
+        // travel -- the team's "slight changes in angle must not affect the hood") and glitches
+        // above the max step (a garbled frame is not a 157 deg/sec hood).
+        // Package-private + static for HoodTrackingTest.
+        static double hoodDeltaDegrees(double rawDelta){
+            double magnitude = Math.abs(rawDelta);
+            if (magnitude < ShooterSubsystemConstants.HOOD_RAW_NOISE_DEADBAND
+                    || magnitude > ShooterSubsystemConstants.HOOD_RAW_MAX_STEP) {
+                return 0;
+            }
+            return rawDelta * ShooterSubsystemConstants.HOOD_DEG_PER_RAW_UNIT;
+        }
+
+        // Clamp a requested angle into what the hood can actually reach: the usual soft limits,
+        // AND no more than HOOD_TRAVEL_WINDOW_DEG from where the hood sat when the robot was
+        // enabled. Wherever it was enabled, a setpoint can never ask for more travel than the
+        // mechanism has. Package-private + static for HoodTrackingTest.
+        static double clampDesiredAngle(double angle, double baseAngleDeg, boolean datumValid){
+            double low = ShooterSubsystemConstants.MIN_ANGLE;
+            double high = ShooterSubsystemConstants.MAX_ANGLE;
+            if (datumValid) {
+                low = Math.max(low, baseAngleDeg - ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG);
+                high = Math.min(high, baseAngleDeg + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG);
+                if (high < low) {
+                    // Degenerate window: the datum sits outside the soft band entirely, so the
+                    // two limits crossed. Collapse to the datum pulled INTO the soft band -- never
+                    // to `low`, which would hand back a setpoint above MAX_ANGLE.
+                    low = MathUtil.clamp(baseAngleDeg,
+                        ShooterSubsystemConstants.MIN_ANGLE, ShooterSubsystemConstants.MAX_ANGLE);
+                    high = low;
+                }
+            }
+            return MathUtil.clamp(angle, low, high);
+        }
+
+        // The datum angle for a fresh capture: the absolute map, CLAMPED into the physical
+        // stops. The clamp is the defence against capturing a flipped reading -- the -4.3 deg
+        // and +52 deg the fixed split produces either side of raw 103.5 both land back on a
+        // real stop instead of seeding the tracker with a fiction.
+        // Package-private + static for HoodTrackingTest.
+        static double hoodDatumAngle(double raw){
+            return MathUtil.clamp(hoodDegreesFromRaw(raw),
+                ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN,
+                ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP);
+        }
+
+        // Live hood angle: the datum plus everything travelled since. Falls back to the raw
+        // absolute map only before a datum exists (first loops after boot, robot never enabled).
         private double getShooterAngleDegrees(){
-            return hoodDegreesFromRaw(shooterAngleEncoder.getPosition());
+            if (hoodDatumValid) {
+                return hoodBaseAngleDeg + hoodRelativeDeg;
+            }
+            return hoodDatumAngle(shooterAngleEncoder.getPosition());
+        }
+
+        // Capture a fresh datum HERE: this position becomes the reference every later reading
+        // is measured against. Called on each disable -> enable transition, so a session's
+        // accumulated encoder drift is discarded rather than carried into the next enable.
+        private void captureHoodDatum(double raw){
+            hoodBaseAngleDeg = hoodDatumAngle(raw);
+            hoodRelativeDeg = 0;
+            hoodLastRaw = raw;
+            hoodDatumValid = true;
         }
 
         // Own alliance for the tag partition. DriverStation may not know yet (no FMS / DS
@@ -364,7 +448,7 @@ public class ShooterSubsystem extends SubsystemBase{
         }
 
         public void setDesired_Angle(double angle){
-            desired_Angle = MathUtil.clamp(angle, ShooterSubsystemConstants.MIN_ANGLE, ShooterSubsystemConstants.MAX_ANGLE);
+            desired_Angle = clampDesiredAngle(angle, hoodBaseAngleDeg, hoodDatumValid);
         }
         public double  getDesiredAngle(){
             return desired_Angle;
@@ -777,6 +861,18 @@ public class ShooterSubsystem extends SubsystemBase{
                 // settle to its firing angle. Raising is never gated. desired_Angle stays
                 // latched, so the stow drop happens on its own the moment the wheels are slow enough.
                 double rawHood = shooterAngleEncoder.getPosition();
+                // CONTINUOUS TRACKING. Datum on the disable -> enable edge (a session's drift is
+                // discarded, never carried across enables), then accumulate shortest-path deltas.
+                // Noise and glitches are filtered out in hoodDeltaDegrees, so a still hood cannot
+                // drift its own angle reading.
+                boolean nowEnabled = DriverStation.isEnabled();
+                if (isHoodFeedbackValid(rawHood) && (!hoodDatumValid || (nowEnabled && !hoodWasEnabled))) {
+                    captureHoodDatum(rawHood);
+                } else if (hoodDatumValid && isHoodFeedbackValid(rawHood)) {
+                    hoodRelativeDeg += hoodDeltaDegrees(shortestRawDelta(hoodLastRaw, rawHood));
+                    hoodLastRaw = rawHood;
+                }
+                hoodWasEnabled = nowEnabled;
                 double currentHoodAngle = getShooterAngleDegrees();
                 double hoodTarget = MathUtil.clamp(desired_Angle, ShooterSubsystemConstants.MIN_ANGLE, ShooterSubsystemConstants.MAX_ANGLE);
                 if (hoodTarget < currentHoodAngle

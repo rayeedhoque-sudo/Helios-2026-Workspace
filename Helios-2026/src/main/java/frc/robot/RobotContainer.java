@@ -159,8 +159,9 @@ public class RobotContainer {
         //   RT (hold)   = flywheels-only shot (2026-08-22): fixed flywheel speed, belts always,
         //                 kicker at-speed-gated, HOOD NOT COMMANDED (set by hand on DPAD L/R).
         //                 Full drive + intake lockout; no vision, no auto-aim.
-        //   RB (hold)   = fixed feed shot (25 deg hood + fixed speed; belts always, kicker
-        //                 at-speed-gated). Full drive + intake lockout (blind feed).
+        //   RB (hold)   = DISABLED 2026-08-22 (was: fixed 25 deg feed shot). The hood is
+        //                 tracked relative to its enable position now, so a fixed angle means
+        //                 nothing until the hood is re-anchored absolutely.
         //   (Kicker at-speed gate added 2026-07-18 by team request.)
         //   B (hold)    = manual hopper belts only (kicker OFF)
         //   VIEW (hold) = hopper unjam: reverse belts + kicker (added 2026-07-18)
@@ -295,16 +296,17 @@ public class RobotContainer {
                         hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed),
                         lockDriveAndIntake())
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));
-            // RB (hold) = fixed feed shot: hood 25 deg (RB_FEED_ANGLE) + fixed tunable feed speed, belts always,
-            // kicker gated on AT-SPEED (team request 2026-07-18). Same drive + intake lockout as
-            // RT. Release: flywheels coast, hood recesses once they slow.
-            joystick2.rightBumper().and(RobotModeTriggers.teleop())
-                .whileTrue(shooterSS.feedAngleShotCommand()
-                    .alongWith(
-                        hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed),
-                        lockDriveAndIntake())
-                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming))
-                .onFalse(shooterSS.stopShooterCommand());
+            // RB DISABLED 2026-08-22 (team request), alongside the hood going relative: RB
+            // commanded a FIXED 25 deg, which only means anything against absolute anchors. The
+            // hood angle is now measured from wherever it sat at enable, so a fixed number is no
+            // longer a real angle. Restore this only after the hood is re-anchored absolutely.
+            // joystick2.rightBumper().and(RobotModeTriggers.teleop())
+            //     .whileTrue(shooterSS.feedAngleShotCommand()
+            //         .alongWith(
+            //             hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed),
+            //             lockDriveAndIntake())
+            //         .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming))
+            //     .onFalse(shooterSS.stopShooterCommand());
     }
 
     /**
