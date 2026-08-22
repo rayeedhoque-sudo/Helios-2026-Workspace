@@ -196,8 +196,10 @@ public class HoodTrackingTest {
     @Test
     void oneClickMovesExactlyOneStep() {
         double base = 20.0;
-        assertEquals(22.0, ShooterSubsystem.clampDesiredAngle(
-            20.0 + ShooterSubsystemConstants.HOOD_NUDGE_DEG, base, true), 1e-9);
+        assertEquals(20.0 + ShooterSubsystemConstants.HOOD_NUDGE_DEG,
+            ShooterSubsystem.clampDesiredAngle(
+                20.0 + ShooterSubsystemConstants.HOOD_NUDGE_DEG, base, true), 1e-9,
+            "one click moves exactly one step, whatever the step is tuned to");
     }
 
     /** A datum far outside the soft band must not invert the window into an empty range. */

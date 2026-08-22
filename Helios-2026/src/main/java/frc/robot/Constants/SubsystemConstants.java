@@ -300,7 +300,7 @@ public class SubsystemConstants {
                 // loop needs to clear breakaway with HOOD_RAISE_FF_VOLTS at 7.0, so one click
                 // buys roughly one clean step of the mechanism instead of a partial one it cannot
                 // act on. Still clamped by clampDesiredAngle (soft limits + travel window).
-                public static double HOOD_NUDGE_DEG = 2.0;
+                public static double HOOD_NUDGE_DEG = 3.0;   // 2.0 -> 3.0, team request 2026-08-22
                 // SETTLE BAND (deg), 2026-08-22: once the hood is within ANGLE_TOLERANCE of its
                 // target it is driven with 0 V and the brake idle mode holds it. Without this the
                 // hood HUNTS after every click: it breaks free at ~7.5 V, carries past the target,
