@@ -539,7 +539,9 @@ function renderChooserStatus(): void {
 // ===================== CONTROLS REFERENCE =====================
 // Static driver reference of the Xbox bindings in RobotContainer.configureBindings().
 // KEEP IN SYNC with RobotContainer.java — bindings are not published over NT, so this
-// mirrors the code by hand (last synced 2026-07-16: full team-spec rebind — shooter
+// mirrors the code by hand (re-synced 2026-08-22: RT = flywheels-only with a manually
+// jogged hood, DPAD ← / → = hood jog in TELEOP too, intake disabled, manual hopper
+// (B) no longer runs the kicker. Earlier sync 2026-07-16: full team-spec rebind — shooter
 // RE-ENABLED, sticks swapped, MENU re-zero / DPAD hood jog / RT test shot removed).
 // MENU desc re-synced 2026-07-21: AprilTag auto-seed now stops at first enable, so
 // MENU is the only in-match re-zero.
@@ -558,29 +560,31 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
       { btn: 'L STICK X', desc: 'Rotate' },
       { btn: 'LB', desc: 'X-lock wheels (toggle)' },
       { btn: 'MENU', desc: 'Re-zero field heading — the ONLY in-match re-zero (AprilTags seed the pose only before first enable / at boot)' },
-      { btn: 'DPAD ← / →', desc: 'Rotate exactly +90° (CCW) / −90° — heading snapshot at press' },
+      { btn: 'DPAD ← / →', desc: 'Hood jog DOWN / UP — see the Shooter group (2026-08-22: replaced the ±90° heading snaps)' },
       { btn: 'A / DPAD ↑', desc: 'Hold: search-align — rotate slowly until OUR scoring tag is seen, then face it (re-aims every loop)' },
     ],
   },
   {
-    group: 'Intake — slider + rollers (hold-to-run; slider stows on release)',
+    group: 'Intake — DISABLED 2026-08-22 (rollers + slider, team request)',
     rows: [
-      { btn: 'LT', desc: 'Hold: intake — slider out to stall, THEN rollers in + belts (kicker stays OFF; feed only while rolling, never while sliding); release = rollers/belts stop, then slider retracts to stall' },
-      { btn: 'Y', desc: 'Hold: outtake — same choreography, rollers out' },
-      { btn: 'X', desc: 'Manual stow: rollers stop immediately, then retract to stall' },
+      { btn: 'LT', desc: 'Intake — DISABLED (unbound in teleop; rollers stay braked, slider never commanded)', off: 'disabled' },
+      { btn: 'Y', desc: 'Outtake — DISABLED', off: 'disabled' },
+      { btn: 'X', desc: 'Manual stow — DISABLED (the slider can still be moved in TEST mode)', off: 'disabled' },
     ],
   },
   {
-    group: 'Shooter — vision shots (release = wheels coast + hood down)',
+    group: 'Shooter — RT is flywheels-only, hood set by hand on the DPAD',
     rows: [
-      { btn: 'RT', desc: 'Hold: precision shot — SCORE tag = ballistic hub shot; FEED tag = calculated lob to our side; no/other tag = NOTHING runs. AUTO-AIMS in place (no strafe), then freezes drive + feeds; belts always, kicker only once flywheels are at speed' },
+      { btn: 'DPAD ←', desc: 'Hold: jog hood DOWN toward MIN, 5°/sec — release freezes the angle there (this is how you set shot range now)' },
+      { btn: 'DPAD →', desc: 'Hold: jog hood UP toward MAX, 5°/sec — release freezes the angle there' },
+      { btn: 'RT', desc: 'Hold: flywheels-only shot (2026-08-22) — fixed flywheel speed, belts always, kicker only once flywheels are at speed. NO vision, NO auto-aim, and the HOOD IS NOT COMMANDED: it stays at the DPAD-set angle, on press AND on release. Drive + intake locked for the hold, so aim BEFORE pressing' },
       { btn: 'RB', desc: 'Hold: fixed feed — 25° hood + fixed tunable speed; belts always, kicker only once flywheels are at speed' },
     ],
   },
   {
     group: 'Hopper',
     rows: [
-      { btn: 'B', desc: 'Hold: MANUAL hopper — belts + kicker, ungated; release = stop' },
+      { btn: 'B', desc: 'Hold: MANUAL hopper — belts ONLY, kicker stays OFF (2026-08-22); release = stop' },
       { btn: 'VIEW', desc: 'Hold: UNJAM — reverse belts + kicker at low duty; release = stop' },
     ],
   },
@@ -619,6 +623,8 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
       { btn: 'MENU', desc: 'Re-zero field heading', off: 'removed' },
       { btn: 'DPAD ↑ / ↓', desc: 'Hood jog', off: 'removed (↑ is now search-align)' },
       { btn: 'RT', desc: 'Test shot', off: 'replaced by precision shot' },
+      { btn: 'RT', desc: 'Precision vision shot (auto-aim + shot model)', off: 'removed 2026-08-22 — RT is now flywheels-only, hood set by hand' },
+      { btn: 'DPAD ← / →', desc: 'Rotate ±90°', off: 'removed 2026-08-22 — DPAD ← / → now jog the hood' },
     ],
   },
 ];
