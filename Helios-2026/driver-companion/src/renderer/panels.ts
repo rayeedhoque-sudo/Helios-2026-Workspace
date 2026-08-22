@@ -577,7 +577,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     rows: [
       { btn: 'DPAD ←', desc: 'Hold: jog hood DOWN toward MIN, 5°/sec — release freezes the angle there (this is how you set shot range now)' },
       { btn: 'DPAD →', desc: 'Hold: jog hood UP toward MAX, 5°/sec — release freezes the angle there' },
-      { btn: 'RT', desc: 'Hold: flywheels-only shot (2026-08-22) — fixed flywheel speed, belts always, kicker only once flywheels are at speed. NO vision, NO auto-aim, and the HOOD IS NOT COMMANDED: it stays at the DPAD-set angle, on press AND on release. Drive + intake locked for the hold, so aim BEFORE pressing' },
+      { btn: 'RT', desc: 'Hold: flywheels-only shot (2026-08-22) — fixed flywheel speed, belts always, kicker opens 2 s after the press (spin-up delay, NOT an at-speed check). NO vision, NO auto-aim, and the HOOD IS NOT COMMANDED: it stays at the DPAD-set angle, on press AND on release. Drive + intake locked for the hold, so aim BEFORE pressing' },
       { btn: 'RB', desc: 'Hold: fixed feed — 25° hood + fixed tunable speed; belts always, kicker only once flywheels are at speed' },
     ],
   },

@@ -11,6 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
 import frc.robot.Constants.TunerConstants;
+import frc.robot.Constants.SubsystemConstants.HopperSubsystemConstants;
 import frc.robot.Constants.SubsystemConstants.ShooterSubsystemConstants;
 import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.commands.CommandSwerveDrivetrain;
@@ -60,6 +62,9 @@ public class RobotContainer {
     // One limiter PER AXIS -- a single shared limiter cross-couples X and Y. Rotation is left
     // unlimited so turning stays crisp. TODO tune rate (per-second) to driver preference on robot.
     private static final double kTranslationSlewRate = 2.5;
+    // Spin-up clock for the RT shot's kicker: restarted on every press, so the kicker stays
+    // shut for KICKER_SPINUP_DELAY_SEC while the flywheels wind up.
+    private final Timer kickerSpinupTimer = new Timer();
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
@@ -159,7 +164,7 @@ public class RobotContainer {
         //   Y (hold)    = outtake (same choreography, rollers out); release = stow
         //   X           = manual stow
         //   RT (hold)   = flywheels-only shot (2026-08-22): fixed flywheel speed, belts always,
-        //                 kicker at-speed-gated, HOOD NOT COMMANDED (set by hand on DPAD L/R).
+        //                 kicker opens 2 s after the press, HOOD NOT COMMANDED (DPAD L/R).
         //                 Full drive + intake lockout; no vision, no auto-aim.
         //   RB (hold)   = DISABLED 2026-08-22 (was: fixed 25 deg feed shot). The hood is
         //                 tracked relative to its enable position now, so a fixed angle means
@@ -284,7 +289,7 @@ public class RobotContainer {
             //
             // RT (hold) = FLYWHEELS-ONLY SHOT (team request 2026-08-22, replaced the vision
             // auto-aim shot): spin the flywheels to RT_FLYWHEEL_SURFACE_SPEED, belts always,
-            // kicker once the wheels reach that speed. The HOOD IS NOT COMMANDED -- it stays
+            // kicker after a 2 s spin-up delay (KICKER_SPINUP_DELAY_SEC). The HOOD IS NOT COMMANDED -- it stays
             // wherever the DPAD jog left it, and it stays there on release too (no
             // stopShooterCommand, which would pull it back to MIN). Aiming is the driver's
             // job: no vision, no auto-rotate. Same drive + intake lockout as RB, so aim BEFORE
@@ -292,8 +297,15 @@ public class RobotContainer {
             joystick2.rightTrigger().and(RobotModeTriggers.teleop())
                 .whileTrue(shooterSS.flywheelOnlyShotCommand()
                     .alongWith(
-                        hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed),
+                        // Belts always; kicker opens KICKER_SPINUP_DELAY_SEC after the trigger
+                        // (team request 2026-08-22) instead of on isFlywheelAtSpeed(), which
+                        // never opened with the velocity loop untuned. The timer restarts with
+                        // the group below, so every press waits the full spin-up.
+                        hopperSS.feedShooterCommand(() -> true,
+                            () -> kickerSpinupTimer.hasElapsed(
+                                HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC)),
                         lockDriveAndIntake())
+                    .beforeStarting(kickerSpinupTimer::restart)
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));
             // RB DISABLED 2026-08-22 (team request), alongside the hood going relative: RB
             // commanded a FIXED 25 deg, which only means anything against absolute anchors. The

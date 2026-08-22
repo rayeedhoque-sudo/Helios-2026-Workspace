@@ -175,6 +175,15 @@ public class SubsystemConstants {
             
             //SPEED CONSTANTS
                 public static final double INDEXER_SPEED = 0.75;
+                // Kicker spin-up delay (s) for the RT shot, team request 2026-08-22: hold the
+                // kicker shut for this long after the trigger so the flywheels can wind up, THEN
+                // feed. Replaces the at-speed gate on that binding -- isFlywheelAtSpeed() needs
+                // the measured surface speed within SPEED_TOLERANCE (0.2 m/s) of target, and the
+                // velocity loop is untuned, so in practice it never opened and the kicker never
+                // ran. NOTE this is a TIMER, not a measurement: it opens at 2 s whether or not
+                // the wheels actually got up to speed. TODO tune on robot -- raise if fuel still
+                // feeds into wheels that are visibly still winding up.
+                public static final double KICKER_SPINUP_DELAY_SEC = 2.0;
                 // Belt duty. Conservative start (old code ran 0.8, never verified on robot);
                 // direction test 2026-07-14 confirmed both motors agree, positive = tested
                 // direction. TODO raise toward 0.8 once feed direction + throughput verified.
