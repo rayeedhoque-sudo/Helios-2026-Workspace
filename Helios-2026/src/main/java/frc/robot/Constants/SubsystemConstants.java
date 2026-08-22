@@ -229,17 +229,36 @@ public class SubsystemConstants {
                 // (offset 63, divisor 187.5*0.0317428): the absolute encoder reads ~113-191, NOT
                 // [0,1) motor rotations, so that formula returned a near-constant ~-10.5 deg and
                 // railed the hood. TODO re-verify the four anchors on robot.
-                public static double HOOD_RAW_AT_FULL_UP   = 113.458;
+                // RE-ANCHORED 2026-08-22 from a labelled 30 s hand sweep (robot disabled, both
+                // hard stops held ~5 s). The old anchors above (113.458 / 191.040) are DEAD: they
+                // span 77.6 raw units over the travel, the measured sweep spans 263.6, and their
+                // polarity is reversed -- the encoder's conversion factor changed at some point.
+                // The measured raw values are UNWRAPPED (see HOOD_RAW_WRAP_SPLIT): the hood's
+                // travel crosses the encoder's 0/360 rollover, so the post-wrap arc is lifted by
+                // 360 before interpolating. UNWRAPPED raw now INCREASES as the hood raises.
+                //   FULL-DOWN hard stop = 151.7 unwrapped raw = 3.224 deg physical
+                //   FULL-UP   hard stop = 415.3 unwrapped raw = 44.5  deg physical  (55.3 + 360)
+                // Scale: 263.6 raw units / 41.276 deg = 6.386 units per hood degree.
+                // The DEGREE values are unchanged -- they describe the physical stops, which did
+                // not move. TODO on-robot: confirm the hood really reaches 3.224 / 44.5 at these
+                // stops; if the physical travel was ever re-shimmed these degrees are stale too.
+                public static double HOOD_RAW_AT_FULL_UP   = 415.3;
                 public static double HOOD_DEG_AT_FULL_UP   = 44.5;
-                public static double HOOD_RAW_AT_FULL_DOWN = 191.040;
+                public static double HOOD_RAW_AT_FULL_DOWN = 151.7;
                 public static double HOOD_DEG_AT_FULL_DOWN = 3.224;
-                // Sanity band for the RAW hood encoder reading: the anchors above +- ~9 deg of
-                // slack. Outside this band the feedback is treated as FAULTED (unplugged encoder
-                // reads 0; boot-transient frames; wiring damage) and periodic() holds the hood at
-                // 0 V instead of closing the loop on garbage. Update alongside the anchors if the
-                // hood is ever re-anchored.
-                public static double HOOD_RAW_SANE_MIN = 96.0;
-                public static double HOOD_RAW_SANE_MAX = 208.0;
+                // Wrap split for the hood absolute encoder, in RAW units. The hood occupies raw
+                // [151.7, 360) + [0, 55.3] and NEVER the 96-unit band between 55.3 and 151.7, so
+                // the split sits at that band's midpoint -- as far from either end of travel as
+                // possible. A raw reading below the split is past the rollover and gets +360.
+                public static double HOOD_RAW_WRAP_SPLIT = 103.5;
+                // Sanity band for the UNWRAPPED hood encoder reading (apply the wrap split FIRST):
+                // the anchors above +- ~1.5 deg of travel of slack. Outside this band the feedback
+                // is treated as FAULTED (dead encoder, boot-transient frames, wiring damage) and
+                // periodic() holds the hood at 0 V instead of closing the loop on garbage.
+                // Widened 2026-08-22 alongside the re-anchor -- the old [96, 208] RAW band both
+                // rejected most of the real travel AND accepted post-wrap garbage.
+                public static double HOOD_RAW_SANE_MIN = 142.0;   // unwrapped
+                public static double HOOD_RAW_SANE_MAX = 425.0;   // unwrapped
             //SHOT MODEL (distance -> velocity; quadratic-drag ballistics for the OFFICIAL FUEL
             // ball -- 5.91 in / 0.203-0.227 kg foam, Cd~0.5, manual sec.5.10.1 -- validated
             // against the no-drag closed form. Angle rule: FIXED at MAX_ANGLE (38 deg since the

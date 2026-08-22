@@ -249,18 +249,54 @@ public class ShooterSubsystem extends SubsystemBase{
                 shooterA.getVelocity().getValueAsDouble() * ShooterSubsystemConstants.FLYWHEEL_ROTATIONS_PER_MOTOR_ROTATION * 2 * Math.PI * ShooterSubsystemConstants.FLYWHEEL_RADIUS_METERS ;
         }
 
-        private double getShooterAngleDegrees(){
-            // Two-point linear map of the hood absolute encoder -> PHYSICAL hood degrees, from the
-            // on-robot HARD-STOP anchors (SubsystemConstants): raw 113.458 (full up) = 44.5 deg,
-            // raw 191.040 (full down) = 3.224 deg. Raw decreases as the hood raises, so the slope is
-            // negative -- carried automatically. Anchored to the PHYSICAL stops, NOT the soft
-            // MIN/MAX_ANGLE limits, so insetting those limits never shifts this scale. Replaces the
-            // old (raw-63)/5.95 motor-rotation math, which froze near -10.5 deg and railed the hood.
-            double raw = shooterAngleEncoder.getPosition();
+        // Lift a raw hood encoder reading into the CONTINUOUS coordinate the anchors are
+        // expressed in. The hood's travel crosses the absolute encoder's 0/360 rollover
+        // (measured 2026-08-22: full DOWN raw 151.7, up through 359 -> 0, full UP raw 55.3),
+        // so a plain raw value is not monotonic across the stroke -- mid-travel the old map
+        // produced -86 deg .. +105 deg and the PID drove the hood into the bottom stop.
+        // Anything below the split lies past the rollover and belongs 360 higher.
+        // Package-private + static for HoodAngleMapTest.
+        static double unwrapHoodRaw(double raw){
+            return raw < ShooterSubsystemConstants.HOOD_RAW_WRAP_SPLIT ? raw + 360.0 : raw;
+        }
+
+        // Two-point linear map of the UNWRAPPED hood encoder reading -> PHYSICAL hood degrees,
+        // from the on-robot HARD-STOP anchors (SubsystemConstants): unwrapped 415.3 (full up) =
+        // 44.5 deg, unwrapped 151.7 (full down) = 3.224 deg. Anchored to the PHYSICAL stops, NOT
+        // the soft MIN/MAX_ANGLE limits, so insetting those limits never shifts this scale.
+        // Package-private + static for HoodAngleMapTest.
+        static double hoodDegreesFromRaw(double raw){
+            double unwrapped = unwrapHoodRaw(raw);
             return ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP
-                + (raw - ShooterSubsystemConstants.HOOD_RAW_AT_FULL_UP)
+                + (unwrapped - ShooterSubsystemConstants.HOOD_RAW_AT_FULL_UP)
                   * (ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN - ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP)
                   / (ShooterSubsystemConstants.HOOD_RAW_AT_FULL_DOWN - ShooterSubsystemConstants.HOOD_RAW_AT_FULL_UP);
+        }
+
+        // Is a raw hood reading trustworthy enough to close the loop on? Package-private +
+        // static for HoodAngleMapTest.
+        //
+        // TWO checks, and the second one only exists because of the unwrap. Before the wrap
+        // fix, a dead encoder's raw 0.0 fell outside the raw band and was caught for free.
+        // Unwrapped, 0.0 lifts to 360 -- a perfectly plausible mid-travel ~35.9 deg -- so the
+        // band alone would now close the loop on a silent encoder and hold the hood at a
+        // fictional angle. A live encoder crossing the rollover reads 0.024, 359.98, and so on;
+        // bit-exact 0.0 is what a controller with no encoder data publishes. Rejecting it costs
+        // at most a loop or two of 0 V if a real reading ever lands exactly on zero, and the
+        // brake idle holds the hood through that.
+        // TODO on-robot: replace the zero test with the SPARK MAX's own sensor fault flag once
+        // someone confirms which REVLib 2026 fault bit reports a missing absolute encoder.
+        static boolean isHoodFeedbackValid(double raw){
+            if (raw == 0.0) {
+                return false; // dead encoder / no data -- NOT a real position
+            }
+            double unwrapped = unwrapHoodRaw(raw);
+            return unwrapped >= ShooterSubsystemConstants.HOOD_RAW_SANE_MIN
+                && unwrapped <= ShooterSubsystemConstants.HOOD_RAW_SANE_MAX;
+        }
+
+        private double getShooterAngleDegrees(){
+            return hoodDegreesFromRaw(shooterAngleEncoder.getPosition());
         }
 
         // Own alliance for the tag partition. DriverStation may not know yet (no FMS / DS
@@ -736,8 +772,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 // 6 V into the bottom hard stop forever (the MIN guard never fires because the
                 // mapped angle reads high, not low) and stall the fragile NEO 550 at its 20 A
                 // limit. Out-of-band or NaN (comparisons fail) -> 0 V; brake idle holds the hood.
-                boolean hoodFeedbackValid = rawHood >= ShooterSubsystemConstants.HOOD_RAW_SANE_MIN
-                        && rawHood <= ShooterSubsystemConstants.HOOD_RAW_SANE_MAX;
+                boolean hoodFeedbackValid = isHoodFeedbackValid(rawHood);
                 double hoodVolts = 0; // kill switch / invalid feedback -> 0 V (brake idle holds)
                 if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid) {
                     double anglePID = shooterAnglePID.calculate(currentHoodAngle, hoodTarget);
