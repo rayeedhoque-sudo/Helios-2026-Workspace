@@ -626,6 +626,24 @@ public class ShooterSubsystem extends SubsystemBase{
                 .beforeStarting(() -> heldClass = TargetClass.NONE);
         }
 
+        // RT (hold) = FLYWHEELS ONLY (team request 2026-08-22): spin to a fixed surface speed
+        // and NEVER touch the hood -- the angle is whatever the DPAD jog left it at, which is
+        // the whole point (manual range control). No vision, no model, no aim. The RT binding
+        // runs belts always and gates the kicker on isFlywheelAtSpeed(). Release: velocity 0
+        // (CoastOut), hood deliberately left where it is -- stopShooterCommand would yank it
+        // back to MIN and undo the driver's setting.
+        public Command flywheelOnlyShotCommand(){
+            return runEnd(
+                () -> {
+                    enableSubsystem();
+                    setDesiredFlywheelVelocity(ShooterSubsystemConstants.RT_FLYWHEEL_SURFACE_SPEED);
+                },
+                () -> {
+                    hasShotTarget = false;
+                    setDesiredFlywheelVelocity(0);
+                });
+        }
+
         // RB (hold) = fixed blind feed: fixed hood angle + fixed tunable feed surface speed.
         // The RB binding runs belts always and gates the kicker on isFlywheelAtSpeed() (team
         // request 2026-07-18) -- fuel feeds only once the wheels actually reach the commanded

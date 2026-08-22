@@ -151,19 +151,18 @@ public class RobotContainer {
         // binding list — no other keybinds may exist):
         //   L stick     = translate (field-centric)      R stick X = rotate  (reverted 2026-07-17)
         //   LB          = toggle X-lock brake
-        //   LT (hold)   = intake (slider out -> rollers + belts; kicker stays OFF); release = stow
-        //   Y (hold)    = outtake (same choreography, rollers out); release = stow
-        //   X           = manual stow
-        //   RT (hold)   = precision vision shot: AUTO-AIM in place, THEN freeze drive + feed
-        //                 (belts always, kicker at-speed-gated). Intake disabled all hold;
-        //                 drive disabled once aimed.
+        //   LT / Y / X  = intake in / out / stow -- ALL DISABLED 2026-08-22 (team request)
+        //   RT (hold)   = flywheels-only shot (2026-08-22): fixed flywheel speed, belts always,
+        //                 kicker at-speed-gated, HOOD NOT COMMANDED (set by hand on DPAD L/R).
+        //                 Full drive + intake lockout; no vision, no auto-aim.
         //   RB (hold)   = fixed feed shot (25 deg hood + fixed speed; belts always, kicker
         //                 at-speed-gated). Full drive + intake lockout (blind feed).
         //   (Kicker at-speed gate added 2026-07-18 by team request.)
         //   B (hold)    = manual hopper belts only (kicker OFF)
         //   VIEW (hold) = hopper unjam: reverse belts + kicker (added 2026-07-18)
         //   A / DPAD-UP (hold) = search-align to our alliance's scoring tag
-        //   DPAD-LEFT/RIGHT    = rotate exactly +90 / -90 deg
+        //   DPAD-LEFT/RIGHT    = jog the hood DOWN / UP, 5 deg/sec (2026-08-22; replaced the
+        //                        +-90 deg heading snaps)
         //   MENU        = manual heading re-zero -- the ONLY in-match re-center (2026-07-21:
         //                 AprilTag auto-seed now stops at the first enable after boot)
         // REMOVED 2026-07-16: DPAD hood jog, RT test shot. (MENU re-zero re-added 2026-07-17.)
@@ -279,43 +278,19 @@ public class RobotContainer {
             // can no longer ABORT a shot by pressing another control -- RELEASING the trigger is
             // the only way out (whileTrue cancels on release).
             //
-            // RT (hold) = precision vision shot, AUTO-AIM then FREEZE (team request 2026-07-17):
-            //   phase 1 -- rotate IN PLACE to the vision firing bearing (aimUntilAligned); intake
-            //             locked, flywheels already spinning up, NOTHING feeds yet.
-            //   phase 2 -- once aimed on a REAL target: FREEZE the drivetrain (Idle -> brake) and
-            //             feed (belts always, kicker once flywheels reach speed). Drive is disabled
-            //             only AFTER the aim is made, so the shot can never fire mid-rotation.
-            //   No tag in view -> aim never latches -> holds heading, never freezes/feeds (release
-            //   to exit; use A / DPAD to acquire a tag first). Release: flywheels coast, hood
-            //   recesses once they slow (hood interlock), drive + intake unlock. Strafe is OFF
-            //   during aim -- pre-position for distance first.
+            // RT (hold) = FLYWHEELS-ONLY SHOT (team request 2026-08-22, replaced the vision
+            // auto-aim shot): spin the flywheels to RT_FLYWHEEL_SURFACE_SPEED, belts always,
+            // kicker once the wheels reach that speed. The HOOD IS NOT COMMANDED -- it stays
+            // wherever the DPAD jog left it, and it stays there on release too (no
+            // stopShooterCommand, which would pull it back to MIN). Aiming is the driver's
+            // job: no vision, no auto-rotate. Same drive + intake lockout as RB, so aim BEFORE
+            // pressing. Release: flywheels coast, hood unchanged.
             joystick2.rightTrigger().and(RobotModeTriggers.teleop())
-                .whileTrue(shooterSS.visionShotCommand()
+                .whileTrue(shooterSS.flywheelOnlyShotCommand()
                     .alongWith(
-                        // Intake stays disabled the WHOLE hold (never intake mid-shot).
-                        intakeSS.run(intakeSS::stopRollers),
-                        // Drivetrain: AUTO-AIM in place, THEN (once aimed on a real target) freeze
-                        // + feed. Ending the aim on the shooter's own gate (present + isAimed)
-                        // means no target -> never ends -> never fires a blind shot.
-                        drivetrain.aimUntilAligned(
-                                () -> shooterSS.getAimHeadingDegrees()
-                                    .orElse(drivetrain.getState().Pose.getRotation().getDegrees()),
-                                () -> shooterSS.getAimHeadingDegrees().isPresent()
-                                    && shooterSS.isAimedAtTarget())
-                            .andThen(Commands.parallel(
-                                drivetrain.applyRequest(() -> shotFreeze),
-                                // BELTS UNGATED (team request 2026-07-18: "make sure the hopper
-                                // runs whenever the shooter runs"): belts always feed staged fuel
-                                // during the hold. KICKER gated on AT-SPEED (team request
-                                // 2026-07-18: "kicker only starts after the flywheels are up to
-                                // speed") -- see isFlywheelAtSpeed(); a refused shot commands
-                                // velocity 0 and can never read at-speed, so this also keeps the
-                                // CIM out of the stationary wheel nip (Victor SPX has no current
-                                // sensing; CIM stall ~131 A). Tighten to shooterSS::isReadyToShoot
-                                // once the hood encoder is repaired and tolerances are trusted.
-                                hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed))))
-                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming))
-                .onFalse(shooterSS.stopShooterCommand());
+                        hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed),
+                        lockDriveAndIntake())
+                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));
             // RB (hold) = fixed feed shot: hood 25 deg (RB_FEED_ANGLE) + fixed tunable feed speed, belts always,
             // kicker gated on AT-SPEED (team request 2026-07-18). Same drive + intake lockout as
             // RT. Release: flywheels coast, hood recesses once they slow.

@@ -303,6 +303,13 @@ public class SubsystemConstants {
                 // not lift the hood against gravity). MUST stay < MAX_ANGLE. TODO retune
                 // RB_FEED_SURFACE_SPEED for this flatter 25 deg lob on robot.
                 public static double RB_FEED_ANGLE = 25.0;           // deg (must be < MAX_ANGLE)
+                // RT flywheel-only shot surface speed (m/s) -- team request 2026-08-22: RT now
+                // just spins the wheels to this speed and the hood angle is set by hand on the
+                // DPAD. Seeded from RB_FEED_SURFACE_SPEED because that is the one speed actually
+                // run on the robot; it is NOT tuned for a scoring shot at an arbitrary hood
+                // angle. TODO tune on robot (and note the whole point of this mode is that range
+                // now comes from the manual hood angle, not from the model).
+                public static double RT_FLYWHEEL_SURFACE_SPEED = 19.8;  // m/s surface
                 // Time-of-flight linear fits (s) for moving-shot compensation, refit AT 38 DEG
                 // (refit_38.py 2026-07-21, residual <= 0.011 s): score 0.188 + 0.115*d,
                 // feed 0.583 + 0.081*d. (The stale 44.5-deg fits over-read ToF ~14% at range,
