@@ -419,7 +419,15 @@ public class SubsystemConstants {
                 // clears breakaway from the stow (5.5+5 = 10.5 -> capped 10) and sustains the creep in
                 // near the target. TODO tune on robot: raise toward 7 if the hood won't start from
                 // small errors; LOWER it if shots reach MAX_ANGLE too hard.
-                public static double HOOD_RAISE_FF_VOLTS = 5.0;
+                // RAISED 5.0 -> 7.0 on 2026-08-22 (team request: smaller, more frequent steps),
+                // using the breakaway measured that day -- the hood does NOT move at 7.0 V and
+                // does at 7.5 V. At 5.0 the loop peaked near 5.7 V (FF + 0.275 V/deg of P), under
+                // breakaway, so error had to reach ~9 deg before anything moved: big, rare lurches.
+                // At 7.0 the FF plus a few tenths of P crosses breakaway at ~2 deg instead, so the
+                // hood steps roughly 4x as often and 4x as small. Deliberately kept just BELOW the
+                // 7.5 V standalone breakaway so the FF alone can never move the hood -- P still has
+                // to ask for it. TODO tune on robot: lower if shots overshoot toward MAX_ANGLE.
+                public static double HOOD_RAISE_FF_VOLTS = 7.0;
                 // FF FADE BAND (deg), 2026-08-22: the lift feedforward used to STEP from 0 to the
                 // full 5 V the instant error crossed ANGLE_TOLERANCE, which made the DPAD jog move
                 // in lurches -- nothing (PID alone is ~0.14 V at small error, far under breakaway),
@@ -428,7 +436,10 @@ public class SubsystemConstants {
                 // so there is no discontinuity anywhere. Endpoints are unchanged: still 0 V at the
                 // target, still 5 V at a large error. Bigger = smoother but slower to break away;
                 // smaller = back toward the old lurch. TODO tune on robot.
-                public static double HOOD_FF_FADE_DEG = 2.0;
+                // Narrowed 2.0 -> 1.0 on 2026-08-22 alongside the FF raise: the FF reaches full a
+                // degree sooner, so breakaway comes sooner and the steps shorten further. The fade
+                // is what keeps this from being the step function that caused the original lurch.
+                public static double HOOD_FF_FADE_DEG = 1.0;
                 // Surface-speed gate for the kicker, m/s. TIGHTENED 0.3 -> 0.2 (spec 6): at the
                 // 3.0 m minimum, 0.3 m/s maps to 0.30 m of along-track error -- more than the
                 // 0.226 m half-window through the opening; 0.2 closes the budget exactly.
