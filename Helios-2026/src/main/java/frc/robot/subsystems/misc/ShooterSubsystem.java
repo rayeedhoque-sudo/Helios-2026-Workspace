@@ -59,15 +59,14 @@ public class ShooterSubsystem extends SubsystemBase{
     // position) -- the safe state if the angle feedback ever misbehaves again. Re-enabled 2026-07-18
     // after getShooterAngleDegrees() was recalibrated to the absolute encoder's real two-point map
     // (HOOD_*_AT_FULL_UP / HOOD_*_AT_FULL_DOWN); the old motor-rotation math railed the hood.
-    // DISABLED 2026-08-22: the hood's travel crosses the absolute encoder's 0/360 wrap
-    // (measured sweep: raw 153 -> 359 -> 0 -> 69), which getShooterAngleDegrees()'s
-    // two-point linear map cannot represent -- it reported -86 deg .. +105 deg mid-travel.
-    // The PID then drove the hood DOWN into the bottom stop (SPARK MAX blinking red =
-    // reverse output) and the MIN_ANGLE travel guard never fired, because the bogus mapping
-    // reads HIGH, not low. Re-enable only after the wrap is handled and both hard-stop
-    // anchors (HOOD_RAW_AT_FULL_UP/DOWN) are re-measured -- the recorded 77.6 deg span
-    // does not match the ~276 deg span actually observed.
-    private static final boolean HOOD_CLOSED_LOOP_ENABLED = false;
+    // RE-ENABLED 2026-08-22 after the wrap fix was verified on the robot: a disabled hand
+    // sweep traced 3.2 deg (down stop) -> 44.7 deg (up stop) continuously, max 2.03 deg
+    // between samples straight through the rollover -- where the old map jumped 191 deg in
+    // one sample and drove the hood into the bottom stop. See unwrapHoodRaw() and
+    // HoodAngleMapTest. NOTE: the hood PID gains and HOOD_RAISE_FF_VOLTS were tuned against
+    // the OLD broken mapping, so they are effectively untuned -- expect overshoot or
+    // sluggishness and retune on robot.
+    private static final boolean HOOD_CLOSED_LOOP_ENABLED = true;
 
      //Shooter Speed - PID & FF
         private final VelocityVoltage m_velocity = new VelocityVoltage(0);
