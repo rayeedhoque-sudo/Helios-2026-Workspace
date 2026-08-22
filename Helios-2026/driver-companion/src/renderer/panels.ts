@@ -561,7 +561,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
       { btn: 'LB', desc: 'X-lock wheels (toggle)' },
       { btn: 'MENU', desc: 'Re-zero field heading — the ONLY in-match re-zero (AprilTags seed the pose only before first enable / at boot)' },
       { btn: 'DPAD ← / →', desc: 'Hood jog DOWN / UP — see the Shooter group (2026-08-22: replaced the ±90° heading snaps)' },
-      { btn: 'A / DPAD ↑', desc: 'Hold: search-align — rotate slowly until OUR scoring tag is seen, then face it (re-aims every loop)' },
+      { btn: 'A', desc: 'Hold: search-align — rotate slowly until OUR scoring tag is seen, then face it (re-aims every loop)' },
     ],
   },
   {
@@ -575,6 +575,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
   {
     group: 'Shooter — RT is flywheels-only, hood set by hand on the DPAD',
     rows: [
+      { btn: 'DPAD ↑ / ↓', desc: 'Press: RT flywheel target +/- 200 motor RPM (~1.6 m/s surface each). Clamped to the motor ceiling; resets to the constant on redeploy' },
       { btn: 'DPAD ←', desc: 'Hold: jog hood DOWN toward MIN, 5°/sec — release freezes the angle there (this is how you set shot range now)' },
       { btn: 'DPAD →', desc: 'Hold: jog hood UP toward MAX, 5°/sec — release freezes the angle there' },
       { btn: 'RT', desc: 'Hold: flywheels-only shot (2026-08-22) — fixed flywheel speed, belts always, kicker opens 2 s after the press (spin-up delay, NOT an at-speed check). NO vision, NO auto-aim, and the HOOD IS NOT COMMANDED: it stays at the DPAD-set angle, on press AND on release. Drive + intake locked for the hold, so aim BEFORE pressing' },

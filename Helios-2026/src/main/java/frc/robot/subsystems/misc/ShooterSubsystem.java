@@ -125,6 +125,10 @@ public class ShooterSubsystem extends SubsystemBase{
             // hood has travelled since. Without these the tracked angle is unfalsifiable.
             private final GenericEntry hoodBaseAngleEntry;
             private final GenericEntry hoodRelativeEntry;
+            // Live RT flywheel target, both units -- the DPAD trims in RPM, the model works in
+            // surface speed, and the driver needs to see what the next press is adjusting.
+            private final GenericEntry rtSpeedEntry;
+            private final GenericEntry rtSpeedRpmEntry;
 
     //Tracker Variables
        private boolean enableSubsystem;
@@ -134,6 +138,9 @@ public class ShooterSubsystem extends SubsystemBase{
        // CONTINUOUS HOOD TRACKING (2026-08-22). The live angle is a datum captured at enable
        // plus every shortest-path delta since, NOT a fresh interpretation of each reading --
        // see HOOD_DEG_PER_RAW_UNIT for why the absolute reading alone cannot be trusted.
+       // Live RT flywheel target (m/s surface), trimmed by the DPAD UP/DOWN bindings. Seeded
+       // from the constant and NOT persisted -- a reboot or redeploy returns it to the constant.
+       private double rtSurfaceSpeed = ShooterSubsystemConstants.RT_FLYWHEEL_SURFACE_SPEED;
        private double hoodBaseAngleDeg;   // absolute angle at the datum
        private double hoodRelativeDeg;    // signed degrees travelled since the datum
        private double hoodLastRaw;        // previous raw reading, for the delta
@@ -265,6 +272,8 @@ public class ShooterSubsystem extends SubsystemBase{
                 hoodCurrentEntry = ShooterSubsystemTab.add("Hood Current (A)", 0.0).getEntry();
                 hoodBaseAngleEntry = ShooterSubsystemTab.add("Hood Base Angle (deg)", 0.0).getEntry();
                 hoodRelativeEntry = ShooterSubsystemTab.add("Hood Travel Since Datum (deg)", 0.0).getEntry();
+                rtSpeedEntry = ShooterSubsystemTab.add("RT Target (m/s)", 0.0).getEntry();
+                rtSpeedRpmEntry = ShooterSubsystemTab.add("RT Target (motor RPM)", 0.0).getEntry();
        }
 
     //Utility Methods
@@ -335,6 +344,38 @@ public class ShooterSubsystem extends SubsystemBase{
             double aboveTolerance = errorDeg - ShooterSubsystemConstants.ANGLE_TOLERANCE;
             double fraction = MathUtil.clamp(aboveTolerance / ShooterSubsystemConstants.HOOD_FF_FADE_DEG, 0, 1);
             return fraction * ShooterSubsystemConstants.HOOD_RAISE_FF_VOLTS;
+        }
+
+        // Surface speed (m/s) equivalent to a motor speed in RPM. Same geometry the velocity
+        // command uses in reverse: rev/s at the motor -> rev/s at the wheel -> rim speed.
+        // Package-private + static for ShooterSpeedTrimTest.
+        static double surfaceSpeedForMotorRpm(double rpm){
+            return rpm / 60.0 * 2 * Math.PI * ShooterSubsystemConstants.FLYWHEEL_RADIUS_METERS
+                * ShooterSubsystemConstants.FLYWHEEL_ROTATIONS_PER_MOTOR_ROTATION;
+        }
+
+        // Apply an RPM trim to an RT target, clamped to [0, the motor ceiling]. Zero is a legal
+        // floor: it means "refuse", which the at-speed gate can never satisfy, so the kicker
+        // stays shut. The ceiling is SHOT_MAX_MOTOR_RPS, the same limit the shot model refuses
+        // above -- the DPAD must not be able to ask for a speed the motors cannot hold.
+        // Package-private + static for ShooterSpeedTrimTest.
+        static double trimSurfaceSpeed(double currentSurfaceSpeed, double rpmDelta){
+            double ceiling = ShooterSubsystemConstants.SHOT_MAX_MOTOR_RPS * 2 * Math.PI
+                * ShooterSubsystemConstants.FLYWHEEL_RADIUS_METERS
+                * ShooterSubsystemConstants.FLYWHEEL_ROTATIONS_PER_MOTOR_ROTATION;
+            return MathUtil.clamp(currentSurfaceSpeed + surfaceSpeedForMotorRpm(rpmDelta), 0, ceiling);
+        }
+
+        // Current RT flywheel target, m/s surface (dashboard + telemetry).
+        public double getRtSurfaceSpeed(){
+            return rtSurfaceSpeed;
+        }
+
+        // DPAD UP/DOWN (press) = trim the RT flywheel target by rpmDelta motor RPM (team request
+        // 2026-08-22). Takes effect on the NEXT loop of a live shot too, since
+        // flywheelOnlyShotCommand re-reads the field every loop. runOnce, so a press is one step.
+        public Command trimRtSpeedCommand(double rpmDelta){
+            return Commands.runOnce(() -> rtSurfaceSpeed = trimSurfaceSpeed(rtSurfaceSpeed, rpmDelta));
         }
 
         // Shortest-path difference between two raw readings, in raw units. A 359 -> 0.5 step
@@ -816,7 +857,8 @@ public class ShooterSubsystem extends SubsystemBase{
             return runEnd(
                 () -> {
                     enableSubsystem();
-                    setDesiredFlywheelVelocity(ShooterSubsystemConstants.RT_FLYWHEEL_SURFACE_SPEED);
+                    // Every loop, so a DPAD trim mid-hold takes effect immediately.
+                    setDesiredFlywheelVelocity(rtSurfaceSpeed);
                 },
                 () -> {
                     hasShotTarget = false;
@@ -1037,6 +1079,8 @@ public class ShooterSubsystem extends SubsystemBase{
             hoodCurrentEntry.setDouble(shooterAngle.getOutputCurrent());
             hoodBaseAngleEntry.setDouble(hoodBaseAngleDeg);
             hoodRelativeEntry.setDouble(hoodRelativeDeg);
+            rtSpeedEntry.setDouble(rtSurfaceSpeed);
+            rtSpeedRpmEntry.setDouble(rtSurfaceSpeed / surfaceSpeedForMotorRpm(1.0));
             // Desired Velocity/Angle double as INPUTS in live-data mode (enableComp reads
             // them back above) -- only echo the real setpoints when NOT in that mode, so a
             // dashboard edit is never stomped mid-tune.

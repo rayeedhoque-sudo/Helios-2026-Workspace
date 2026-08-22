@@ -65,6 +65,8 @@ public class RobotContainer {
     // Spin-up clock for the RT shot's kicker: restarted on every press, so the kicker stays
     // shut for KICKER_SPINUP_DELAY_SEC while the flywheels wind up.
     private final Timer kickerSpinupTimer = new Timer();
+    // DPAD UP/DOWN step for the RT flywheel target, in motor RPM (team request 2026-08-22).
+    private static final double kRtSpeedTrimRpm = 200.0;
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
@@ -172,7 +174,8 @@ public class RobotContainer {
         //   (Kicker at-speed gate added 2026-07-18 by team request.)
         //   B (hold)    = manual hopper belts only (kicker OFF)
         //   VIEW (hold) = hopper unjam: reverse belts + kicker (added 2026-07-18)
-        //   A / DPAD-UP (hold) = search-align to our alliance's scoring tag
+        //   A (hold)    = search-align to our alliance's scoring tag
+        //   DPAD-UP/DOWN       = RT flywheel target +/- 200 motor RPM per press (2026-08-22)
         //   DPAD-LEFT/RIGHT    = jog the hood DOWN / UP, 5 deg/sec (2026-08-22; replaced the
         //                        +-90 deg heading snaps)
         //   MENU        = manual heading re-zero -- the ONLY in-match re-center (2026-07-21:
@@ -228,17 +231,22 @@ public class RobotContainer {
             // a match (collision skew, gyro drift, camera down -- all of it lands here).
                 joystick2.start().and(RobotModeTriggers.teleop()).onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-            // A / DPAD-UP (hold) = search-align: rotate slowly until a SCORING tag of OUR
-            // alliance is seen, then face it (bearing re-sampled every loop). Two separate
-            // command instances -- one instance on two triggers cross-cancels on release.
+            // A (hold) = search-align: rotate slowly until a SCORING tag of OUR alliance is
+            // seen, then face it (bearing re-sampled every loop).
                 joystick2.a().and(RobotModeTriggers.teleop()).whileTrue(drivetrain.searchAndAlignCommand(
                     shooterSS::seesScoringTag,
                     () -> drivetrain.getState().Pose.getRotation().getDegrees()
                           + shooterSS.getDegreesToAlignToTarget()));
-                joystick2.povUp().and(RobotModeTriggers.teleop()).whileTrue(drivetrain.searchAndAlignCommand(
-                    shooterSS::seesScoringTag,
-                    () -> drivetrain.getState().Pose.getRotation().getDegrees()
-                          + shooterSS.getDegreesToAlignToTarget()));
+            // DPAD-UP / DOWN (press) = trim the RT flywheel target by +/- 200 motor RPM (team
+            // request 2026-08-22). ~1.6 m/s of surface speed per press. Takes effect mid-hold:
+            // flywheelOnlyShotCommand re-reads the target every loop. Clamped to
+            // [0, SHOT_MAX_MOTOR_RPS] in the subsystem, and NOT persisted -- a redeploy returns
+            // it to RT_FLYWHEEL_SURFACE_SPEED. (DPAD-UP was a duplicate of A's search-align,
+            // which A still does.)
+                joystick2.povUp().and(RobotModeTriggers.teleop())
+                    .onTrue(shooterSS.trimRtSpeedCommand(kRtSpeedTrimRpm));
+                joystick2.povDown().and(RobotModeTriggers.teleop())
+                    .onTrue(shooterSS.trimRtSpeedCommand(-kRtSpeedTrimRpm));
 
             // DPAD-LEFT/RIGHT (hold) = jog the hood DOWN / UP (team request 2026-08-22,
             // replaced the +-90 deg rotateBy snaps). Identical closed-loop jog to the
