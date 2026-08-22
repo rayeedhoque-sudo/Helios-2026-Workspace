@@ -67,7 +67,9 @@ public class RobotContainer {
     // CLOSED-LOOP hood setpoint toward MIN_ANGLE/MAX_ANGLE, 5 deg/sec. Shared by both
     // directions -- reset to the current setpoint at the start of each hold (see
     // configureTestBindings) so it always continues smoothly from wherever it left off.
-    private static final double kHoodJogRateDegPerSec = 5.0;
+    // Doubled 5.0 -> 10.0 (team request 2026-08-22). The setpoint ramp only; the hood's
+    // own voltage caps and travel guards are unchanged.
+    private static final double kHoodJogRateDegPerSec = 10.0;
     private final SlewRateLimiter hoodJogLimiter = new SlewRateLimiter(kHoodJogRateDegPerSec);
 
     // Intake-live slowdown: halve translation while the intake rollers spin (LT/Y hold,

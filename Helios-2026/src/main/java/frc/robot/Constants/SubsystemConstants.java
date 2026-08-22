@@ -328,7 +328,8 @@ public class SubsystemConstants {
                 // run on the robot; it is NOT tuned for a scoring shot at an arbitrary hood
                 // angle. TODO tune on robot (and note the whole point of this mode is that range
                 // now comes from the manual hood angle, not from the model).
-                public static double RT_FLYWHEEL_SURFACE_SPEED = 19.8;  // m/s surface
+                // Cut 20% (19.8 -> 15.84) 2026-08-22 by team request.
+                public static double RT_FLYWHEEL_SURFACE_SPEED = 15.84;  // m/s surface
                 // Time-of-flight linear fits (s) for moving-shot compensation, refit AT 38 DEG
                 // (refit_38.py 2026-07-21, residual <= 0.011 s): score 0.188 + 0.115*d,
                 // feed 0.583 + 0.081*d. (The stale 44.5-deg fits over-read ToF ~14% at range,
