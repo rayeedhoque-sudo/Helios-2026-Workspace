@@ -476,6 +476,16 @@ public class SubsystemConstants {
                 // degree sooner, so breakaway comes sooner and the steps shorten further. The fade
                 // is what keeps this from being the step function that caused the original lurch.
                 public static double HOOD_FF_FADE_DEG = 1.0;
+                // LOWERING feedforward (V), 2026-08-22. The hood had NO feedforward on the way
+                // down -- only P, and P alone is nowhere near enough: measured on the robot,
+                // -4.90 V (= kP x a 17.8 deg error) moved the hood not at all and drew 0 A, so
+                // down-breakaway is above 4.9 V. With the 2 deg click the error is only ever
+                // ~2 deg, which is 0.55 V from P -- the hood would never descend at all.
+                // Lower than the RAISE value because gravity helps this stroke, and it still
+                // clips at HOOD_MAX_DOWN_VOLTAGE (6.0), so the descent cannot exceed the cap
+                // that is already tuned. TODO on robot: raise toward 6 if the hood still will
+                // not come down; if that is still not enough the down CAP has to move too.
+                public static double HOOD_LOWER_FF_VOLTS = 5.5;
                 // Surface-speed gate for the kicker, m/s. TIGHTENED 0.3 -> 0.2 (spec 6): at the
                 // 3.0 m minimum, 0.3 m/s maps to 0.30 m of along-track error -- more than the
                 // 0.226 m half-window through the opening; 0.2 closes the budget exactly.

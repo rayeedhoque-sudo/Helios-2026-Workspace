@@ -364,6 +364,17 @@ public class ShooterSubsystem extends SubsystemBase{
         // Never negative -- lowering is gravity-assisted and stays FF-free.
         // Package-private + static for HoodFeedforwardTest.
         static double hoodLiftFeedforward(double errorDeg){
+            // LOWERING (error negative): the hood used to get P only on this stroke, and P is
+            // far too small -- -4.90 V measured on the robot moved it not at all. Mirror the
+            // ramp downward, at HOOD_LOWER_FF_VOLTS (less than the raise value, since gravity
+            // helps here). Without this the 2 deg click could never descend: 2 deg of error is
+            // 0.55 V from P alone.
+            if (errorDeg < 0) {
+                double belowTolerance = -errorDeg - ShooterSubsystemConstants.ANGLE_TOLERANCE;
+                double fraction = MathUtil.clamp(
+                    belowTolerance / ShooterSubsystemConstants.HOOD_FF_FADE_DEG, 0, 1);
+                return -fraction * ShooterSubsystemConstants.HOOD_LOWER_FF_VOLTS;
+            }
             double aboveTolerance = errorDeg - ShooterSubsystemConstants.ANGLE_TOLERANCE;
             double fraction = MathUtil.clamp(aboveTolerance / ShooterSubsystemConstants.HOOD_FF_FADE_DEG, 0, 1);
             return fraction * ShooterSubsystemConstants.HOOD_RAISE_FF_VOLTS;
