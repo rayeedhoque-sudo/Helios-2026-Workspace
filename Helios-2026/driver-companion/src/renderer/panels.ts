@@ -576,8 +576,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     group: 'Shooter — RT is flywheels-only, hood set by hand on the DPAD',
     rows: [
       { btn: 'DPAD ↑ / ↓', desc: 'Press: RT flywheel target +/- 200 motor RPM (~1.6 m/s surface each). Clamped to the motor ceiling; resets to the constant on redeploy' },
-      { btn: 'DPAD ←', desc: 'Hold: jog hood DOWN toward MIN, 5°/sec — release freezes the angle there (this is how you set shot range now)' },
-      { btn: 'DPAD →', desc: 'Hold: jog hood UP toward MAX, 5°/sec — release freezes the angle there' },
+      { btn: 'DPAD ← / →', desc: 'Press: hood setpoint −2° / +2° per click (clicks accumulate; clamped to the soft limits and the 33° window from where the hood sat at enable). This is how you set shot range now' },
       { btn: 'RT', desc: 'Hold: flywheels-only shot (2026-08-22) — fixed flywheel speed, belts always, kicker opens 2 s after the press (spin-up delay, NOT an at-speed check). NO vision, NO auto-aim, and the HOOD IS NOT COMMANDED: it stays at the DPAD-set angle, on press AND on release. Drive + intake locked for the hold, so aim BEFORE pressing' },
       { btn: 'RB', desc: 'Hold: fixed feed — 25° hood + fixed tunable speed; belts always, kicker only once flywheels are at speed' },
     ],
@@ -614,8 +613,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     testOnly: true,
     rows: [
       { btn: 'Y', desc: 'Hold: manual test-fire — fixed hood + speed (same as match RB), belts + kicker at-speed-gated — actually launches a ball' },
-      { btn: 'DPAD ←', desc: 'Hold: jog hood DOWN toward MIN, 5°/sec, flywheels off — release freezes position' },
-      { btn: 'DPAD →', desc: 'Hold: jog hood UP toward MAX, 5°/sec, flywheels off — release freezes position' },
+      { btn: 'DPAD ← / →', desc: 'Press: hood setpoint −2° / +2° per click, flywheels off — same mechanism as the match bindings' },
     ],
   },
   {

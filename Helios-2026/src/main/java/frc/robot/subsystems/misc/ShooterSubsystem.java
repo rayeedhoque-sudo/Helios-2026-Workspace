@@ -371,6 +371,15 @@ public class ShooterSubsystem extends SubsystemBase{
             return rtSurfaceSpeed;
         }
 
+        // DPAD LEFT/RIGHT (press) = step the hood setpoint by deltaDeg (team request
+        // 2026-08-22: 2 deg a click, left down / right up), replacing the held rate-ramp jog.
+        // Steps from the CURRENT SETPOINT so repeated clicks accumulate, and every step goes
+        // through setDesired_Angle, so the soft limits and the enable-time travel window still
+        // bound it. The PID + feedforward still do the driving -- this only moves the target.
+        public Command nudgeHoodCommand(double deltaDeg){
+            return Commands.runOnce(() -> setDesired_Angle(desired_Angle + deltaDeg));
+        }
+
         // DPAD UP/DOWN (press) = trim the RT flywheel target by rpmDelta motor RPM (team request
         // 2026-08-22). Takes effect on the NEXT loop of a live shot too, since
         // flywheelOnlyShotCommand re-reads the field every loop. runOnce, so a press is one step.

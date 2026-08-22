@@ -165,6 +165,41 @@ public class HoodTrackingTest {
             "bit-exact 0.0 is a silent controller, not a position");
     }
 
+    // ---- DPAD nudge: repeated clicks accumulate but stay bounded ----
+
+    /**
+     * The nudge steps from the CURRENT SETPOINT, so leaning on the button walks the setpoint
+     * up -- and must stop at the window edge rather than running away from the hood.
+     */
+    @Test
+    void repeatedNudgesSaturateAtTheWindowEdge() {
+        double base = 10.0;
+        double setpoint = base;
+        for (int click = 0; click < 100; click++) {
+            setpoint = ShooterSubsystem.clampDesiredAngle(
+                setpoint + ShooterSubsystemConstants.HOOD_NUDGE_DEG, base, true);
+        }
+        assertEquals(Math.min(ShooterSubsystemConstants.MAX_ANGLE,
+                base + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG),
+            setpoint, 1e-9, "100 clicks up must stop at the window edge");
+
+        for (int click = 0; click < 100; click++) {
+            setpoint = ShooterSubsystem.clampDesiredAngle(
+                setpoint - ShooterSubsystemConstants.HOOD_NUDGE_DEG, base, true);
+        }
+        assertEquals(Math.max(ShooterSubsystemConstants.MIN_ANGLE,
+                base - ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG),
+            setpoint, 1e-9, "100 clicks down must stop at the other edge");
+    }
+
+    /** One click must move the setpoint by exactly the step, mid-range. */
+    @Test
+    void oneClickMovesExactlyOneStep() {
+        double base = 20.0;
+        assertEquals(22.0, ShooterSubsystem.clampDesiredAngle(
+            20.0 + ShooterSubsystemConstants.HOOD_NUDGE_DEG, base, true), 1e-9);
+    }
+
     /** A datum far outside the soft band must not invert the window into an empty range. */
     @Test
     void degenerateWindowHoldsInsteadOfInverting() {

@@ -70,16 +70,9 @@ public class RobotContainer {
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
-    // Test-mode hood jog (DPAD LEFT/RIGHT, team request 2026-07-21): rate-limits the
-    // CLOSED-LOOP hood setpoint toward MIN_ANGLE/MAX_ANGLE, 5 deg/sec. Shared by both
-    // directions -- reset to the current setpoint at the start of each hold (see
-    // configureTestBindings) so it always continues smoothly from wherever it left off.
-    // Doubled twice on 2026-08-22 by team request: 5.0 -> 10.0 -> 20.0. The setpoint ramp
-    // only; the hood's own voltage caps and travel guards are unchanged. NOTE at 20 deg/sec
-    // the ramp can outrun the hood itself -- the setpoint is frozen wherever it got to on
-    // release, so if it has run ahead the hood keeps travelling after the button is let go.
-    private static final double kHoodJogRateDegPerSec = 20.0;
-    private final SlewRateLimiter hoodJogLimiter = new SlewRateLimiter(kHoodJogRateDegPerSec);
+    // Hood: DPAD LEFT/RIGHT step the setpoint by HOOD_NUDGE_DEG per click
+    // (ShooterSubsystem.nudgeHoodCommand). The held rate-ramp jog this replaced needed a
+    // SlewRateLimiter; a per-click step does not.
 
     // Intake-live slowdown: halve translation while the intake rollers spin (LT/Y hold,
     // intake or outtake) so the extended intake can't be rammed at full speed. Applied
@@ -248,13 +241,14 @@ public class RobotContainer {
                 joystick2.povDown().and(RobotModeTriggers.teleop())
                     .onTrue(shooterSS.trimRtSpeedCommand(-kRtSpeedTrimRpm));
 
-            // DPAD-LEFT/RIGHT (hold) = jog the hood DOWN / UP (team request 2026-08-22,
-            // replaced the +-90 deg rotateBy snaps). Identical closed-loop jog to the
-            // test-mode binding below -- see hoodJogCommand().
+            // DPAD-LEFT/RIGHT (press) = step the hood setpoint -2 / +2 deg (HOOD_NUDGE_DEG,
+            // team request 2026-08-22), replacing the held rate-ramp jog. One click is about
+            // the error the loop needs to break the hood free, so a click buys a step. Clicks
+            // accumulate; the soft limits and the travel window still bound the result.
                 joystick2.povLeft().and(RobotModeTriggers.teleop())
-                    .whileTrue(hoodJogCommand(ShooterSubsystemConstants.MIN_ANGLE));
+                    .onTrue(shooterSS.nudgeHoodCommand(-ShooterSubsystemConstants.HOOD_NUDGE_DEG));
                 joystick2.povRight().and(RobotModeTriggers.teleop())
-                    .whileTrue(hoodJogCommand(ShooterSubsystemConstants.MAX_ANGLE));
+                    .onTrue(shooterSS.nudgeHoodCommand(ShooterSubsystemConstants.HOOD_NUDGE_DEG));
 
             drivetrain.registerTelemetry(logger::telemeterize);
 
@@ -375,31 +369,18 @@ public class RobotContainer {
                 .whileTrue(shooterSS.feedAngleShotCommand()
                     .alongWith(hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed)))
                 .onFalse(shooterSS.stopShooterCommand());
-            // DPAD LEFT / RIGHT (hold) = jog the hood setpoint DOWN toward MIN / UP toward
-            // MAX at 5 deg/sec (team request 2026-07-21; was a snap-to-target press, changed
-            // to a jog). Flywheels stay off (setDesired_Angle doesn't touch velocity). Still
-            // fully closed-loop and interlocked -- hoodJogLimiter rate-limits the SETPOINT,
-            // not raw voltage; setDesired_Angle clamps to [MIN_ANGLE, MAX_ANGLE] and
-            // periodic() drives it through the same PID/hard-travel-guard/feedback-sanity-gate
-            // as every other shooter command. This is NOT the raw open-loop hood jog removed
-            // 2026-07-16 -- that bypassed closed-loop feedback entirely, which is why it was
-            // unsafe; this one cannot be driven past a limit no matter how long it's held.
-            // Release freezes the setpoint wherever it got to (deliberate -- lets the hood be
-            // parked at a precise angle to read the encoder anchors, handoff on-robot verify
-            // item 2), so there is no .onFalse() reset.
+            // DPAD LEFT / RIGHT (press) = step the hood setpoint -2 / +2 deg, the same
+            // mechanism as the match bindings (ShooterSubsystem.nudgeHoodCommand). Flywheels
+            // stay off (setDesired_Angle doesn't touch velocity), the step is clamped by the
+            // soft limits and the enable-time travel window, and periodic() drives it through
+            // the same PID / travel guard / feedback gate as every other shooter command.
+            // Clicks accumulate and the setpoint holds where it lands, which is what lets the
+            // hood be parked at a precise angle to read the encoder anchors (handoff on-robot
+            // verify item 2).
             joystick2.povLeft().and(RobotModeTriggers.test())
-                .whileTrue(hoodJogCommand(ShooterSubsystemConstants.MIN_ANGLE));
+                .onTrue(shooterSS.nudgeHoodCommand(-ShooterSubsystemConstants.HOOD_NUDGE_DEG));
             joystick2.povRight().and(RobotModeTriggers.test())
-                .whileTrue(hoodJogCommand(ShooterSubsystemConstants.MAX_ANGLE));
-    }
-
-    /**
-     * Hood jog toward targetAngle at kHoodJogRateDegPerSec. A fresh command instance per
-     * call -- one instance shared by two triggers would cross-cancel on release.
-     */
-    private Command hoodJogCommand(double targetAngle){
-        return shooterSS.run(() -> shooterSS.setDesired_Angle(hoodJogLimiter.calculate(targetAngle)))
-            .beforeStarting(() -> hoodJogLimiter.reset(shooterSS.getDesiredAngle()));
+                .onTrue(shooterSS.nudgeHoodCommand(ShooterSubsystemConstants.HOOD_NUDGE_DEG));
     }
 
     /**

@@ -286,6 +286,12 @@ public class SubsystemConstants {
                 // choice 2026-08-22). Matches the usable MIN_ANGLE..MAX_ANGLE band, so a setpoint
                 // can never ask for more travel than the mechanism has, wherever it was enabled.
                 public static double HOOD_TRAVEL_WINDOW_DEG = 33.0;
+                // DPAD hood step (deg per click), team request 2026-08-22: LEFT -2, RIGHT +2,
+                // replacing the held rate-ramp jog. Deliberately close to the ~2 deg of error the
+                // loop needs to clear breakaway with HOOD_RAISE_FF_VOLTS at 7.0, so one click
+                // buys roughly one clean step of the mechanism instead of a partial one it cannot
+                // act on. Still clamped by clampDesiredAngle (soft limits + travel window).
+                public static double HOOD_NUDGE_DEG = 2.0;
                 // Sanity band for the UNWRAPPED hood encoder reading (apply the wrap split FIRST):
                 // the anchors above +- ~1.5 deg of travel of slack. Outside this band the feedback
                 // is treated as FAULTED (dead encoder, boot-transient frames, wiring damage) and
