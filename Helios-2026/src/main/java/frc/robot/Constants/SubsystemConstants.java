@@ -156,11 +156,11 @@ public class SubsystemConstants {
             //SPEED CONSTANTS
                 // Roller duty cycles (driver-tuned 2026-07-10: 35% intake was too fast;
                 // outtake halved 2026-07-14 per team request). Worst-case steady supply draw
-                // = duty x stator limit (40 A, set in IntakeSubsystem): intake 0.25 x 40 =
-                // 10 A, outtake 0.3 x 40 = 12 A, both well under the 25 A supply limit.
+                // = duty x stator limit (40 A, set in IntakeSubsystem): intake 0.2875 x 40 =
+                // 11.5 A, outtake 0.345 x 40 = 13.8 A, both well under the 25 A supply limit.
                 // Inrush softened by the duty-cycle ramp.
-                public static final double INTAKE_SPEED = 0.25;
-                public static final double OUTTAKE_SPEED = 0.3;
+                public static final double INTAKE_SPEED = 0.2875;   // +15% team request 2026-08-24
+                public static final double OUTTAKE_SPEED = 0.345;   // +15% team request 2026-08-24
 
         }
 
@@ -178,7 +178,7 @@ public class SubsystemConstants {
                 //                                                                                                                                                                          Belt duty. Conservative start (old code ran 0.8, never verified on robot);
                 // direction test 2026-07-14 confirmed both motors agree, positive = tested
                 // direction. TODO raise toward 0.8 once feed direction + throughput verified.
-                public static final double HOPPER_SPEED = 0.5;
+                public static final double HOPPER_SPEED = 0.6;   // +20% team request 2026-08-24
                 // Reverse duty for the unjam button (belts + kicker together, held).
                 public static final double UNJAM_SPEED = 0.3;
                 // Slow duty for the (unbound) kicker-only test (bypasses the at-speed gate).
