@@ -321,7 +321,7 @@ public class RobotContainer {
             // joystick2.rightBumper().and(RobotModeTriggers.teleop())
             //     .whileTrue(shooterSS.feedAngleShotCommand()
             //         .alongWith(
-            //             hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed),
+            //             hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed, () -> false),
             //             lockDriveAndIntake())
             //         .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming))
             //     .onFalse(shooterSS.stopShooterCommand());

@@ -195,9 +195,12 @@ public class HopperSubsystem extends SubsystemBase{
      * kicker runs BACKWARD, to hold fuel off the winding-up flywheels. Deliberately at
      * UNJAM_SPEED, not INDEXER_SPEED -- the belts are still feeding FORWARD underneath it,
      * so this duty is fighting them, and the Victor SPX has no current sensing (CIM stall
-     * ~131 A) so duty is the only software limit there is. TODO on robot: watch for fuel
-     * being crushed between belts and kicker during the 2 s window; if it binds, either
-     * drop this duty or gate the belts off for the window too.
+     * ~131 A) so duty is the only software limit there is. The belts cannot win that fight
+     * at the 5 A smart limit, so the crush risk is self-limiting; the unverified part is
+     * the DIRECTION FLIP at the end of the window -- the kicker goes -0.3 -> +0.75 while
+     * still spinning backward under load, a plugging reversal on a CIM with no current
+     * sensing and an unknown breaker. configOpenloopRamp(0.25) slews it over ~0.26 s,
+     * which is why this is not gated. TODO on robot: watch the breaker at the t=2 s flip.
      */
     public Command feedShooterCommand(BooleanSupplier beltsOn, BooleanSupplier kickerOn, BooleanSupplier reverseKicker){
         return runEnd(
