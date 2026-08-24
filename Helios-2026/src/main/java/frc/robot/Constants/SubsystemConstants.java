@@ -173,27 +173,9 @@ public class SubsystemConstants {
             // flywheels are at speed (ShooterSubsystem.isReadyToShoot), and the shooter was disabled.
             public static final int KICKER_MOTOR_ID = 17;
             
-            // Belt smart current limit (A) on the two NEO 2.0s. Normal = 20 A
-            // (conservative start, Hardware-Data-Sheet sec.7). During a shot feed the belts
-            // push a full hopper against the kicker, so the limit is raised 20% for the
-            // duration of feedShooterCommand only (team request 2026-08-22) and dropped back
-            // on release. TODO verify on robot: watch "Hopper A/B Current" during RT -- if the
-            // belts sit pinned at 24 A they are jammed, not under-powered.
-                public static final int HOPPER_CURRENT_LIMIT_A = 20;
-                public static final int HOPPER_SHOT_CURRENT_LIMIT_A = 24;
-
             //SPEED CONSTANTS
                 public static final double INDEXER_SPEED = 0.75;
-                // Kicker spin-up delay (s) for the RT shot, team request 2026-08-22: hold the
-                // kicker shut for this long after the trigger so the flywheels can wind up, THEN
-                // feed. Replaces the at-speed gate on that binding -- isFlywheelAtSpeed() needs
-                // the measured surface speed within SPEED_TOLERANCE (0.2 m/s) of target, and the
-                // velocity loop is untuned, so in practice it never opened and the kicker never
-                // ran. NOTE this is a TIMER, not a measurement: it opens at 2 s whether or not
-                // the wheels actually got up to speed. TODO tune on robot -- raise if fuel still
-                // feeds into wheels that are visibly still winding up.
-                public static final double KICKER_SPINUP_DELAY_SEC = 2.0;
-                // Belt duty. Conservative start (old code ran 0.8, never verified on robot);
+                //                                                                                                                                                                          Belt duty. Conservative start (old code ran 0.8, never verified on robot);
                 // direction test 2026-07-14 confirmed both motors agree, positive = tested
                 // direction. TODO raise toward 0.8 once feed direction + throughput verified.
                 public static final double HOPPER_SPEED = 0.5;
@@ -209,6 +191,11 @@ public class SubsystemConstants {
                 // The stall analysis it carried still applies to ANY kicker use against stopped
                 // flywheels: CIM stall at 12 V is ~131 A and the Victor SPX has no current
                 // sensing, so duty is the only software knob -- see manualRunCommand.)
+                
+                // Some variable that AI made, change value to make it work.
+                public static final double KICKER_SPINUP_DELAY_SEC = 0.2;
+                public static final int HOPPER_CURRENT_LIMIT_A = 5;
+                public static final int HOPPER_SHOT_CURRENT_LIMIT_A = (int)(HOPPER_CURRENT_LIMIT_A * 1.2);
         }
 
         public static class ShooterSubsystemConstants{
@@ -220,7 +207,7 @@ public class SubsystemConstants {
             public static final int SHOOTER_ID_C = 15;
             public static final int SHOOTER_ID_D = 16;
             //PID - Angle
-                public static double SHOOTER_ANGLE_kP = 0.275;
+                public static double SHOOTER_ANGLE_kP = 0.35;
                 public static double SHOOTER_ANGLE_kI = 0.0;
                 public static double SHOOTER_ANGLE_kD = 0.0;
             //PID - Speed
@@ -295,26 +282,6 @@ public class SubsystemConstants {
                 // choice 2026-08-22). Matches the usable MIN_ANGLE..MAX_ANGLE band, so a setpoint
                 // can never ask for more travel than the mechanism has, wherever it was enabled.
                 public static double HOOD_TRAVEL_WINDOW_DEG = 33.0;
-                // DPAD hood step (deg per click), team request 2026-08-22: LEFT -2, RIGHT +2,
-                // replacing the held rate-ramp jog. Deliberately close to the ~2 deg of error the
-                // loop needs to clear breakaway with HOOD_RAISE_FF_VOLTS at 7.0, so one click
-                // buys roughly one clean step of the mechanism instead of a partial one it cannot
-                // act on. Still clamped by clampDesiredAngle (soft limits + travel window).
-                public static double HOOD_NUDGE_DEG = 3.0;   // 2.0 -> 3.0, team request 2026-08-22
-                // SETTLE BAND (deg), 2026-08-22: once the hood is within ANGLE_TOLERANCE of its
-                // target it is driven with 0 V and the brake idle mode holds it. Without this the
-                // hood HUNTS after every click: it breaks free at ~7.5 V, carries past the target,
-                // error flips negative, and the loop drives it back DOWN with up to 6 V plus
-                // gravity -- a limit cycle around the setpoint. Team requirement: a click moves
-                // the hood 2 deg and it STAYS there.
-                //
-                // Re-engage is deliberately WIDER than settle (hysteresis). With one threshold the
-                // loop would chatter on and off at the boundary; the hood must drift a full
-                // HOOD_REENGAGE_DEG before the loop pushes again. That also means a click smaller
-                // than the re-engage band would do nothing, which is why HOOD_NUDGE_DEG (2.0)
-                // sits above it. TODO on robot: if the hood visibly sags and re-lifts while
-                // parked, raise this -- the sag is crossing the re-engage threshold.
-                public static double HOOD_REENGAGE_DEG = 1.5;
                 // Sanity band for the UNWRAPPED hood encoder reading (apply the wrap split FIRST):
                 // the anchors above +- ~1.5 deg of travel of slack. Outside this band the feedback
                 // is treated as FAULTED (dead encoder, boot-transient frames, wiring damage) and
@@ -485,16 +452,6 @@ public class SubsystemConstants {
                 // degree sooner, so breakaway comes sooner and the steps shorten further. The fade
                 // is what keeps this from being the step function that caused the original lurch.
                 public static double HOOD_FF_FADE_DEG = 1.0;
-                // LOWERING feedforward (V), 2026-08-22. The hood had NO feedforward on the way
-                // down -- only P, and P alone is nowhere near enough: measured on the robot,
-                // -4.90 V (= kP x a 17.8 deg error) moved the hood not at all and drew 0 A, so
-                // down-breakaway is above 4.9 V. With the 2 deg click the error is only ever
-                // ~2 deg, which is 0.55 V from P -- the hood would never descend at all.
-                // Lower than the RAISE value because gravity helps this stroke, and it still
-                // clips at HOOD_MAX_DOWN_VOLTAGE (6.0), so the descent cannot exceed the cap
-                // that is already tuned. TODO on robot: raise toward 6 if the hood still will
-                // not come down; if that is still not enough the down CAP has to move too.
-                public static double HOOD_LOWER_FF_VOLTS = 5.5;
                 // Surface-speed gate for the kicker, m/s. TIGHTENED 0.3 -> 0.2 (spec 6): at the
                 // 3.0 m minimum, 0.3 m/s maps to 0.30 m of along-track error -- more than the
                 // 0.226 m half-window through the opening; 0.2 closes the budget exactly.
@@ -513,5 +470,13 @@ public class SubsystemConstants {
                 public static double HOOD_STOW_INTERLOCK_FLOOR_DEG = 30.0;
                 // Hood gate, deg: worst contribution 0.078 m at 3 m, shrinking with distance.
                 public static double ANGLE_TOLERANCE = 0.5;
+                
+                // Random variables that AI added that are not defined
+                // HOOD_NUDGE_DEG is the degree that the hood changes per button press
+                public static double HOOD_NUDGE_DEG = 2;
+                // HOOD_REENGAGE_DEG is the degree at which the hood needs to readjust hold
+                public static double HOOD_REENGAGE_DEG = 0.75;
+                // HOOD_LOWER_FF_VOLTS is self explanatory, based off raise volts
+                public static double HOOD_LOWER_FF_VOLTS = 6.0;
         }
 }

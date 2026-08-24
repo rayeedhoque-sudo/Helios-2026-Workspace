@@ -62,7 +62,10 @@ public class HoodSettleTest {
         holding = ShooterSubsystem.hoodShouldHold(-0.3, holding);
         assertTrue(holding, "arrived (with overshoot): stop driving");
         // Now it must STAY held through ordinary jitter and small sag -- this is the anti-hunt.
-        double[] jitter = { -0.4, 0.2, -0.1, 0.6, -0.9, 1.2, -1.4 };
+        // Scaled off REENGAGE so retuning the band on the robot doesn't fail this test:
+        // every sample is inside it, which is what "parked" means.
+        double[] jitter = { -0.3, 0.15, -0.05, 0.5, -0.7, 0.85, -0.95 };
+        for (int i = 0; i < jitter.length; i++) { jitter[i] *= REENGAGE; }
         for (double error : jitter) {
             holding = ShooterSubsystem.hoodShouldHold(error, holding);
             assertTrue(holding, "must stay parked at error " + error + " -- this is the hunting case");
