@@ -193,7 +193,10 @@ public class SubsystemConstants {
                 // sensing, so duty is the only software knob -- see manualRunCommand.)
                 
                 // Some variable that AI made, change value to make it work.
-                public static final double KICKER_SPINUP_DELAY_SEC = 0.2;
+                // Back to 2.0 s (team request 2026-08-24): this is now BOTH the delay before the
+                // kicker feeds forward AND the window it spends running in REVERSE while the
+                // flywheels wind up.
+                public static final double KICKER_SPINUP_DELAY_SEC = 2.0;
                 public static final int HOPPER_CURRENT_LIMIT_A = 5;
                 public static final int HOPPER_SHOT_CURRENT_LIMIT_A = (int)(HOPPER_CURRENT_LIMIT_A * 1.2);
         }

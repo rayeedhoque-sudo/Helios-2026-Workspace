@@ -303,8 +303,13 @@ public class RobotContainer {
                         // (team request 2026-08-22) instead of on isFlywheelAtSpeed(), which
                         // never opened with the velocity loop untuned. The timer restarts with
                         // the group below, so every press waits the full spin-up.
+                        // Kicker runs REVERSE for the whole spin-up window, then forward
+                        // (team request 2026-08-24) -- it holds fuel off the flywheels
+                        // while they wind up instead of just sitting stopped.
                         hopperSS.feedShooterCommand(() -> true,
                             () -> kickerSpinupTimer.hasElapsed(
+                                HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC),
+                            () -> !kickerSpinupTimer.hasElapsed(
                                 HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC)),
                         lockDriveAndIntake())
                     .beforeStarting(kickerSpinupTimer::restart)
@@ -367,7 +372,8 @@ public class RobotContainer {
             // ball (not just a flywheel spin), so it verifies the whole feed path end to end.
             joystick2.y().and(RobotModeTriggers.test())
                 .whileTrue(shooterSS.feedAngleShotCommand()
-                    .alongWith(hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed)))
+                    .alongWith(hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed,
+                        () -> false)))
                 .onFalse(shooterSS.stopShooterCommand());
             // DPAD LEFT / RIGHT (press) = step the hood setpoint -2 / +2 deg, the same
             // mechanism as the match bindings (ShooterSubsystem.nudgeHoodCommand). Flywheels

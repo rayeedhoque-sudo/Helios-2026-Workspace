@@ -190,12 +190,22 @@ public class HopperSubsystem extends SubsystemBase{
      * INDEXER_SPEED only while kickerOn (flywheels at speed AND hood at angle, via
      * ShooterSubsystem.isReadyToShoot()). A gate going false stops that motor the same
      * loop, so fuel is never kicked into flywheels that aren't ready. End = stop both.
+     *
+     * reverseKicker (team request 2026-08-24) wins over kickerOn: while it is true the
+     * kicker runs BACKWARD, to hold fuel off the winding-up flywheels. Deliberately at
+     * UNJAM_SPEED, not INDEXER_SPEED -- the belts are still feeding FORWARD underneath it,
+     * so this duty is fighting them, and the Victor SPX has no current sensing (CIM stall
+     * ~131 A) so duty is the only software limit there is. TODO on robot: watch for fuel
+     * being crushed between belts and kicker during the 2 s window; if it binds, either
+     * drop this duty or gate the belts off for the window too.
      */
-    public Command feedShooterCommand(BooleanSupplier beltsOn, BooleanSupplier kickerOn){
+    public Command feedShooterCommand(BooleanSupplier beltsOn, BooleanSupplier kickerOn, BooleanSupplier reverseKicker){
         return runEnd(
             () -> {
                 if (beltsOn.getAsBoolean()) { indexFuel(); } else { stopIndex(); }
-                if (kickerOn.getAsBoolean()) { kickFuel(); } else { stopKickFuel(); }
+                if (reverseKicker.getAsBoolean()) { reverseKickFuel(); }
+                else if (kickerOn.getAsBoolean()) { kickFuel(); }
+                else { stopKickFuel(); }
             },
             () -> {
                 stopIndex();
@@ -244,6 +254,11 @@ public class HopperSubsystem extends SubsystemBase{
         kickerMotor.set(ControlMode.PercentOutput, HopperSubsystemConstants.INDEXER_SPEED);
     }
     
+    /** Kicker backward at the proven unjam duty -- holds fuel back during flywheel spin-up. */
+    public void reverseKickFuel(){
+        kickerMotor.set(ControlMode.PercentOutput, -HopperSubsystemConstants.UNJAM_SPEED);
+    }
+
     public void stopIndex(){
         hopperMotorA.set(0);
         hopperMotorB.set(0);
