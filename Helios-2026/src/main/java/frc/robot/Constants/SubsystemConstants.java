@@ -198,6 +198,16 @@ public class SubsystemConstants {
                 // flywheels wind up.
                 public static final double KICKER_SPINUP_DELAY_SEC = 2.0;
                 public static final int HOPPER_CURRENT_LIMIT_A = 5;
+
+                // BELT INVERSION (2026-08-24): the two motors were fighting through the shared
+                // gearbox, so they now get OPPOSITE signs instead of the same sign. Both live
+                // here so all four combinations can be tried without touching HopperSubsystem.
+                // Relative sign = whether they fight. Both flipped together = which way the
+                // belts feed. If they STILL fight with these opposite, the cause is not
+                // inversion -- see the fighting-vs-starved note in HopperSubsystem.
+                // TODO verify on robot with the test-mode LB/RB single-belt runs.
+                public static final boolean HOPPER_A_INVERTED = false;
+                public static final boolean HOPPER_B_INVERTED = true;
                 public static final int HOPPER_SHOT_CURRENT_LIMIT_A = (int)(HOPPER_CURRENT_LIMIT_A * 1.2);
         }
 
