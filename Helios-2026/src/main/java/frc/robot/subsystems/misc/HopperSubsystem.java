@@ -85,30 +85,16 @@ public class HopperSubsystem extends SubsystemBase{
             // (power-limiting-review nit). Nothing gates on belt spin-up time.
             hopperConfig.openLoopRampRate(0.25);
             hopperConfig.disableFollowerMode();
-            // INVERSION: now OPPOSITE signs (team report 2026-08-24: the two motors fight each
-            // other). Both values live in HOPPER_A_INVERTED / HOPPER_B_INVERTED so every
-            // combination can be tried from Constants. RELATIVE sign decides whether they fight;
-            // flipping BOTH together decides which way the belts feed.
-            //
-            // HISTORY, and it CONTRADICTS this change -- read before re-flipping. The
-            // Hardware-Data-Sheet says the two gearbox positions differ in direction (opposite
-            // inversion, what is set here now). But the on-robot test 2026-07-18 recorded the
-            // opposite: with A=false/B=true the pair hard-stalled at the then-20 A limit while
-            // motor B ALONE spun the belts freely at 0.1 A, which is why both were same-sign
-            // until now. Both cannot be right, so ONE of the two observations is measuring
-            // something else.
-            //
-            // FIGHTING vs CURRENT-STARVED -- the likeliest confound now. HOPPER_CURRENT_LIMIT_A
-            // is 5 A. Two NEO 2.0s at 5 A through ~12:1 have very little torque, so belts that
-            // will not move while BOTH motors sit pinned at the limit looks exactly like
-            // fighting and is not. The discriminator is the test-mode single-belt runs (LB / RB,
-            // 5% duty): if ONE motor alone turns the belts freely but the pair stalls, they are
-            // genuinely fighting and this change is right. If ONE alone also stalls, it is the
-            // 5 A limit or a mechanical jam and the inversion is a red herring -- put these back
-            // to matching signs.
-            hopperConfig.inverted(HopperSubsystemConstants.HOPPER_A_INVERTED);
+            // INVERSION: SAME sign for BOTH motors -- measured on-robot 2026-07-18. With A=false/
+            // B=true (the "opposite inversion" the Hardware-Data-Sheet note suggested) the pair
+            // hard-stalled at the 20 A limit whenever driven together, while motor B ALONE spun
+            // the belts freely at 0.1 A: the gearbox geometry already handles the direction
+            // difference between the two mounting positions, so opposite CODE inversion makes the
+            // motors fight. This matches the original 2026-07-14 direction test ("positive output
+            // moves BOTH belts the same way"). If the belts feed BACKWARD (away from the shooter),
+            // flip BOTH booleans together -- never just one.
+            hopperConfig.inverted(false);
             REVLibError hopperACfg = hopperMotorA.configure(hopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-            hopperConfig.inverted(HopperSubsystemConstants.HOPPER_B_INVERTED);
             REVLibError hopperBCfg = hopperMotorB.configure(hopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
             // Surface configure failures LOUDLY (2026-07-18): if configure() fails (CAN timeout =
             // controller unpowered or off the bus), NONE of the above -- reset, follower-disable,
