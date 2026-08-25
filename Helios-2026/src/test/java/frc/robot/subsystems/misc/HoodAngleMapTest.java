@@ -17,34 +17,45 @@ import frc.robot.Constants.SubsystemConstants.ShooterSubsystemConstants;
  * guard stayed blind (the bad mapping read HIGH, not low). This test fails at the desk if
  * the wrap handling is ever dropped or the anchors are edited without re-measuring.
  *
- * Sweep data (robot disabled, both hard stops held ~5 s):
- *   full DOWN stop = raw 151.7          -> 3.224 deg
- *   full UP   stop = raw  55.3 (+360)   -> 44.5  deg
- *   never occupies raw 55.3 .. 151.7 (the 96-unit dead band the split sits in)
+ * Sweep data (2026-08-24, robot disabled, two 50 Hz NT-logged hand sweeps):
+ *   full DOWN stop = raw 360.0 unwrapped (raw ~359.6 / ~0.3) -> 3.224 deg
+ *   full UP   stop = raw 290.4 (+360 = 650.4)                -> 44.5  deg
+ *   never occupies raw 290.4 .. 359.6 (the ~69-unit dead arc the split sits in)
  */
 public class HoodAngleMapTest {
 
     private static final double TOL_DEG = 0.05;
+    // How far outside the stop ANGLES a reading may legally map. The down stop straddles the
+    // encoder's 0/360 rollover and its rest position varied ~0.7 raw units (0.1 deg) between
+    // the two measured sweeps, so the anchor is the midpoint and real readings sit slightly
+    // either side of it. This is the measured slop, not a fudge factor.
+    private static final double STOP_BAND_DEG = 0.15;
 
     @Test
     void anchorsMapToTheirPhysicalStops() {
+        // The down stop sits ON the rollover: raw 0.0 unwraps to 360.0, the anchor.
         assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN,
-            ShooterSubsystem.hoodDegreesFromRaw(151.7), TOL_DEG,
+            ShooterSubsystem.hoodDegreesFromRaw(0.0), TOL_DEG,
             "full-DOWN raw must map to the down stop angle");
-        // Full up is measured PAST the wrap: raw 55.3 unwraps to 415.3.
+        // Full up is measured PAST the wrap: raw 290.4 unwraps to 650.4.
         assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP,
-            ShooterSubsystem.hoodDegreesFromRaw(55.3), TOL_DEG,
+            ShooterSubsystem.hoodDegreesFromRaw(290.4), TOL_DEG,
             "full-UP raw (past the rollover) must map to the up stop angle");
     }
 
     @Test
     void wrapSplitLiftsOnlyThePostRolloverArc() {
         // Below the split = past the rollover -> +360.
-        assertEquals(415.3, ShooterSubsystem.unwrapHoodRaw(55.3), 1e-9);
+        assertEquals(650.4, ShooterSubsystem.unwrapHoodRaw(290.4), 1e-9);
         assertEquals(360.0, ShooterSubsystem.unwrapHoodRaw(0.0), 1e-9);
         // At or above the split = already continuous -> unchanged.
-        assertEquals(151.7, ShooterSubsystem.unwrapHoodRaw(151.7), 1e-9);
-        assertEquals(359.0, ShooterSubsystem.unwrapHoodRaw(359.0), 1e-9);
+        assertEquals(359.6, ShooterSubsystem.unwrapHoodRaw(359.6), 1e-9);
+        assertEquals(340.0, ShooterSubsystem.unwrapHoodRaw(340.0), 1e-9);
+        // The reason the split is 325 and not 0: the DOWN stop sits on the rollover, so
+        // resting jitter crosses raw 0 constantly. Either side must stay continuous --
+        // a 0.2-unit step of raw must not become a 41 deg step of angle.
+        assertEquals(0.2, ShooterSubsystem.unwrapHoodRaw(0.1)
+            - ShooterSubsystem.unwrapHoodRaw(359.9), 1e-9);
     }
 
     /**
@@ -54,7 +65,7 @@ public class HoodAngleMapTest {
     @Test
     void angleIsMonotonicAcrossTheRollover() {
         // Ascending unwrapped positions spanning the wrap, as the hood actually travels.
-        double[] rawUpSweep = { 151.7, 200, 260, 320, 359, 0.5, 20, 40, 55.3 };
+        double[] rawUpSweep = { 359.6, 359.9, 0.1, 20, 60, 120, 200, 260, 290.4 };
         double previous = Double.NEGATIVE_INFINITY;
         for (double raw : rawUpSweep) {
             double deg = ShooterSubsystem.hoodDegreesFromRaw(raw);
@@ -65,8 +76,8 @@ public class HoodAngleMapTest {
         // And it stays inside the physical stops the whole way.
         for (double raw : rawUpSweep) {
             double deg = ShooterSubsystem.hoodDegreesFromRaw(raw);
-            assertTrue(deg >= ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN - TOL_DEG
-                    && deg <= ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP + TOL_DEG,
+            assertTrue(deg >= ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN - STOP_BAND_DEG
+                    && deg <= ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP + STOP_BAND_DEG,
                 "raw " + raw + " mapped outside the physical stops: " + deg);
         }
     }
@@ -89,9 +100,9 @@ public class HoodAngleMapTest {
      */
     @Test
     void sanityBandAcceptsTheWholeMeasuredTravel() {
-        assertTrue(ShooterSubsystem.isHoodFeedbackValid(151.7), "full-down anchor must be valid");
-        assertTrue(ShooterSubsystem.isHoodFeedbackValid(55.3), "full-up anchor must be valid");
-        assertTrue(ShooterSubsystem.isHoodFeedbackValid(359.0), "just below the rollover must be valid");
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(359.6), "full-down anchor must be valid");
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(290.4), "full-up anchor must be valid");
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(359.9), "just below the rollover must be valid");
         assertTrue(ShooterSubsystem.isHoodFeedbackValid(0.5), "just past the rollover must be valid");
     }
 
@@ -102,7 +113,7 @@ public class HoodAngleMapTest {
      */
     @Test
     void deadEncoderZeroIsRejected() {
-        assertEquals(35.85, ShooterSubsystem.hoodDegreesFromRaw(0.0), 0.05,
+        assertEquals(3.224, ShooterSubsystem.hoodDegreesFromRaw(0.0), 0.05,
             "raw 0 maps into legal travel -- which is exactly why it needs its own check");
         assertTrue(!ShooterSubsystem.isHoodFeedbackValid(0.0),
             "bit-exact 0.0 is a dead encoder, not a position");
@@ -117,9 +128,9 @@ public class HoodAngleMapTest {
      */
     @Test
     void anyDialPositionIsAcceptedNow() {
-        assertTrue(ShooterSubsystem.isHoodFeedbackValid(103.6),
-            "the old dead-band reading must be usable -- rejecting it killed hood control");
-        assertTrue(ShooterSubsystem.isHoodFeedbackValid(140.0));
-        assertTrue(ShooterSubsystem.isHoodFeedbackValid(70.0));
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(325.1),
+            "a reading in the unused arc must be usable -- rejecting it killed hood control");
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(300.0));
+        assertTrue(ShooterSubsystem.isHoodFeedbackValid(340.0));
     }
 }

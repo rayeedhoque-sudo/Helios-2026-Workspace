@@ -237,28 +237,46 @@ public class SubsystemConstants {
                 // (offset 63, divisor 187.5*0.0317428): the absolute encoder reads ~113-191, NOT
                 // [0,1) motor rotations, so that formula returned a near-constant ~-10.5 deg and
                 // railed the hood. TODO re-verify the four anchors on robot.
-                // RE-ANCHORED 2026-08-22 from a labelled 30 s hand sweep (robot disabled, both
-                // hard stops held ~5 s). The old anchors above (113.458 / 191.040) are DEAD: they
-                // span 77.6 raw units over the travel, the measured sweep spans 263.6, and their
-                // polarity is reversed -- the encoder's conversion factor changed at some point.
-                // The measured raw values are UNWRAPPED (see HOOD_RAW_WRAP_SPLIT): the hood's
-                // travel crosses the encoder's 0/360 rollover, so the post-wrap arc is lifted by
-                // 360 before interpolating. UNWRAPPED raw now INCREASES as the hood raises.
-                //   FULL-DOWN hard stop = 151.7 unwrapped raw = 3.224 deg physical
-                //   FULL-UP   hard stop = 415.3 unwrapped raw = 44.5  deg physical  (55.3 + 360)
-                // Scale: 263.6 raw units / 41.276 deg = 6.386 units per hood degree.
+                // RE-ANCHORED 2026-08-24 from two NT-logged hand sweeps at 50 Hz (robot disabled;
+                // see the 2026-08-24 hood-calibration note). The 08-22 anchors (415.3 / 151.7)
+                // are DEAD, and they were the bug: they put HOOD_RAW_WRAP_SPLIT at 103.5, which
+                // sits INSIDE live travel. Mid-stroke the map then jumped ~41 deg across one
+                // count, so the tracked angle saturated at HOOD_DEG_AT_FULL_UP barely half-way
+                // up; the travel guard (currentHoodAngle >= MAX_ANGLE) then killed ALL upward
+                // voltage, and the hood moved once on a DPAD click and never again.
+                //
+                // MEASURED (raw values here are UNWRAPPED -- see HOOD_RAW_WRAP_SPLIT):
+                //   FULL-DOWN hard stop = 360.0 unwrapped raw = 3.224 deg physical
+                //     (sweep 1: 360.34 over 1615 samples, spread 0.15; sweep 2: 359.70 over 767.
+                //      The bottom rest straddles the encoder's 0/360 rollover and varies ~0.7
+                //      units between settles; 360.0 splits the two, 0.05 deg from either.)
+                //   FULL-UP   hard stop = 650.4 unwrapped raw = 44.5  deg physical
+                //     (two independent PUSHES agree: 650.82 peak, then 650.08 held 1.2 s. On
+                //      release the hood falls back to ~639.5 -- that is backlash off the stop,
+                //      not the stop. Anchors are the PUSHED stops, matching the degree values.)
+                // Scale: 290.4 raw units / 41.276 deg = 7.036 units per hood degree.
                 // The DEGREE values are unchanged -- they describe the physical stops, which did
                 // not move. TODO on-robot: confirm the hood really reaches 3.224 / 44.5 at these
                 // stops; if the physical travel was ever re-shimmed these degrees are stale too.
-                public static double HOOD_RAW_AT_FULL_UP   = 415.3;
+                //
+                // TODO (root cause of the repeat re-anchoring): three measurements have now given
+                // three different spans for the SAME travel -- 77.6, then 263.6, then 290.4 raw
+                // units. The absolute encoder's positionConversionFactor is never set in code and
+                // ShooterSubsystem configures the hood with kNoResetSafeParameters specifically to
+                // keep whatever was flashed, so anyone opening the REV Hardware Client silently
+                // re-scales the hood and these anchors go stale again. Pin it in code to stop this.
+                public static double HOOD_RAW_AT_FULL_UP   = 650.4;
                 public static double HOOD_DEG_AT_FULL_UP   = 44.5;
-                public static double HOOD_RAW_AT_FULL_DOWN = 151.7;
+                public static double HOOD_RAW_AT_FULL_DOWN = 360.0;
                 public static double HOOD_DEG_AT_FULL_DOWN = 3.224;
-                // Wrap split for the hood absolute encoder, in RAW units. The hood occupies raw
-                // [151.7, 360) + [0, 55.3] and NEVER the 96-unit band between 55.3 and 151.7, so
-                // the split sits at that band's midpoint -- as far from either end of travel as
-                // possible. A raw reading below the split is past the rollover and gets +360.
-                public static double HOOD_RAW_WRAP_SPLIT = 103.5;
+                // Wrap split for the hood absolute encoder, in RAW units. Travel runs raw ~359.6
+                // (down stop) THROUGH the 0/360 rollover up to ~290.4 (up stop), so the hood
+                // occupies [359.6, 360) + [0, 290.4] and NEVER the ~69-unit arc between 290.4 and
+                // 359.6. The split sits at that arc's midpoint -- as far from either end of travel
+                // as possible. A raw reading below the split is past the rollover and gets +360,
+                // which keeps the map continuous across zero (raw 359.9 -> 3.210 deg, raw 0.1 ->
+                // 3.238 deg). At the old 103.5 the split cut straight through live travel.
+                public static double HOOD_RAW_WRAP_SPLIT = 325.0;
                 // CONTINUOUS TRACKING (2026-08-22). The absolute reading cannot be trusted on its
                 // own: the encoder drifts against the hood over a session (the hood physically
                 // cannot pass its up stop at raw ~55-71, yet readings wander toward the split),
@@ -271,15 +289,20 @@ public class SubsystemConstants {
                 // then accumulate shortest-path deltas. A 359 -> 0 step is a small delta, never a
                 // flip, and slow drift cannot move the hood because only CHANGES are counted.
                 //
-                // Degrees per raw unit, from the measured anchors: 41.276 deg / 263.6 units.
-                public static double HOOD_DEG_PER_RAW_UNIT = 0.15658;
+                // Degrees per raw unit. DERIVED from the anchors above rather than typed: it was
+                // a hand-copied literal before, which is how it drifted out of sync with them and
+                // left the incremental tracker on a different scale than the absolute map.
+                public static double HOOD_DEG_PER_RAW_UNIT =
+                    (HOOD_DEG_AT_FULL_UP - HOOD_DEG_AT_FULL_DOWN)
+                        / (HOOD_RAW_AT_FULL_UP - HOOD_RAW_AT_FULL_DOWN);   // ~0.1421 deg/unit
                 // Ignore deltas smaller than this (raw units): measured encoder noise is +-0.08,
                 // and noise must never accumulate into phantom travel. 0.2 clears it with margin
                 // and costs 0.03 deg of resolution -- far below the 0.5 deg angle tolerance.
                 public static double HOOD_RAW_NOISE_DEADBAND = 0.2;
                 // Reject deltas bigger than this (raw units) as glitches, NOT motion: 20 units is
-                // 3.1 deg in one 20 ms loop = 157 deg/sec, far faster than the hood can physically
-                // travel. A dropped/garbled frame lands here instead of jumping the tracker.
+                // 2.84 deg in one 20 ms loop = 142 deg/sec, far faster than the hood can physically
+                // travel (the logged hand sweeps peaked at ~1.6 units per loop). A dropped/garbled
+                // frame lands here instead of jumping the tracker.
                 public static double HOOD_RAW_MAX_STEP = 20.0;
                 // How far the hood may be commanded from its enable-time position (deg, team
                 // choice 2026-08-22). Matches the usable MIN_ANGLE..MAX_ANGLE band, so a setpoint

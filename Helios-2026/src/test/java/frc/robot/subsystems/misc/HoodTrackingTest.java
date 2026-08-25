@@ -91,11 +91,14 @@ public class HoodTrackingTest {
 
     @Test
     void datumClampsAFlippedReadingBackOntoARealStop() {
-        // Either side of the old split, both readings are fictions; both must land on a stop.
+        // Either side of the split the map still has a cliff -- that is unavoidable with a
+        // fixed split. What matters is WHERE it sits: re-anchored 2026-08-24 the split is 325,
+        // inside the ~69-unit arc the hood never occupies, instead of 103.5 which cut through
+        // live travel. Both readings here are fictions; both must land on a stop.
         assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP,
-            ShooterSubsystem.hoodDatumAngle(103.4), 1e-9, "+52 deg fiction clamps to the up stop");
+            ShooterSubsystem.hoodDatumAngle(324.9), 1e-9, "+49 deg fiction clamps to the up stop");
         assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN,
-            ShooterSubsystem.hoodDatumAngle(103.6), 1e-9, "-4.3 deg fiction clamps to the down stop");
+            ShooterSubsystem.hoodDatumAngle(325.1), 1e-9, "-1.7 deg fiction clamps to the down stop");
     }
 
     @Test
