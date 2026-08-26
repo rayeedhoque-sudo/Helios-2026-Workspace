@@ -41,9 +41,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.SubsystemConstants.DriveConstants;
 import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.Constants.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.utility.LimelightHelpers;
+import frc.robot.util.Tunable;
 import frc.robot.subsystems.utility.LimelightHelpers.PoseEstimate;
 
 /**
@@ -234,6 +236,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                         + e.getMessage(), e.getStackTrace());
             }
         if(config != null){
+            // Named so the PID panel can show them read-only. NOT live-tunable: PPHolonomicDriveController
+            // bakes these in at configure time, so changing one needs a redeploy.
+            PIDConstants ppTranslation = new PIDConstants(5.0, 0.0, 0.0); // m/s per m of error; old 0.0001 was effectively open-loop. TODO tune on robot
+            PIDConstants ppRotation = new PIDConstants(5.0, 0.0, 0.0);
+            Tunable.publishReadOnly("Auto/Translation/kP", ppTranslation.kP);
+            Tunable.publishReadOnly("Auto/Rotation/kP", ppRotation.kP);
                   //Configure Auto Builder
             AutoBuilder.configure(
             () -> this.getState().Pose, // Robot pose supplier
@@ -241,8 +249,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             () -> this.getState().Speeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds, feedforwards) -> this.setControl(m_applyRobotSpeeds.withSpeeds(speeds).withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesX()).withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesY())), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID (m/s per m of error; old 0.0001 was effectively open-loop). TODO tune on robot
-                    new PIDConstants(5, 0.0, 0.0) // Rotation PID constants
+                    ppTranslation,
+                    ppRotation
             ),
             config, // The robot configuration
             () -> {
@@ -339,6 +347,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // badge: 0 = odometry only. Lives in the same NT table as Pose/robotPose (Telemetry).
     private final DoublePublisher visionTagCountPub = NetworkTableInstance.getDefault()
         .getTable("Pose").getDoubleTopic("visionTagCount").publish();
+
+    // Heading-servo gains, live-tunable from the driver-companion PID panel. setPID is called
+    // fresh every time one of the aim/align requests is built, so reading these needs no
+    // re-apply gating. Constant values when TUNING_MODE is off.
+    private final Tunable headingKp = new Tunable("Drive/Heading/kP", DriveConstants.HEADING_kP);
+    private final Tunable headingKi = new Tunable("Drive/Heading/kI", DriveConstants.HEADING_kI);
+    private final Tunable headingKd = new Tunable("Drive/Heading/kD", DriveConstants.HEADING_kD);
 
     /**
      * AprilTag pose correction, two layers (both BLUE-origin -- PathPlanner and this
@@ -476,7 +491,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         var request = new SwerveRequest.FieldCentricFacingAngle();
         // The HeadingController gains default to 0 -- without this the request outputs zero
         // rotation and the command would hold the drivetrain forever. Radians in, rad/s out.
-        request.HeadingController.setPID(5.0, 0.0, 0.0); // TODO tune on robot
+        request.HeadingController.setPID(
+            headingKp.get(), headingKi.get(), headingKd.get()); // live-tunable, see Tunable
         request.HeadingController.enableContinuousInput(-Math.PI, Math.PI); // take the short way around
         // Cap the commanded spin (P-only at 5 rad/s per rad could otherwise demand ~15 rad/s).
         request.MaxAbsRotationalRate = 1.5 * Math.PI; // rad/s. TODO tune on robot
@@ -516,7 +532,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // Same heading-servo setup as rotateToAngle: the HeadingController gains default to 0
         // (zero rotation output without this), continuous input takes the short way around,
         // and the rate cap tames P-only spikes. Radians in, rad/s out.
-        faceRequest.HeadingController.setPID(5.0, 0.0, 0.0); // TODO tune on robot
+        faceRequest.HeadingController.setPID(
+            headingKp.get(), headingKi.get(), headingKd.get()); // live-tunable, see Tunable
         faceRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
         faceRequest.MaxAbsRotationalRate = 1.5 * Math.PI; // rad/s. TODO tune on robot
         // Blue-origin targets (pose heading + camera bearing) -- see rotateToAngle: the
@@ -548,7 +565,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command aimUntilAligned(DoubleSupplier targetHeadingDeg, BooleanSupplier aimed) {
         var request = new SwerveRequest.FieldCentricFacingAngle();
         // Same heading servo as rotateToAngle / driveWithAimLock. Radians in, rad/s out.
-        request.HeadingController.setPID(5.0, 0.0, 0.0); // TODO tune on robot
+        request.HeadingController.setPID(
+            headingKp.get(), headingKi.get(), headingKd.get()); // live-tunable, see Tunable
         request.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
         request.MaxAbsRotationalRate = 1.5 * Math.PI; // rad/s
         // Blue-origin bearing (from pose) -- OperatorPerspective default would re-rotate it 180 on red.

@@ -38,6 +38,7 @@ import java.util.OptionalDouble;
 
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SubsystemConstants.ShooterSubsystemConstants;
+import frc.robot.util.Tunable;
 import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.commands.CommandSwerveDrivetrain;
 import frc.robot.subsystems.utility.LimelightHelpers;
@@ -74,11 +75,17 @@ public class ShooterSubsystem extends SubsystemBase{
         // reverse-brake 4 spinning Krakens (regen current dump + gearbox stress) -- the Coast
         // neutral mode only applies when no closed-loop request is latched.
         private final CoastOut m_flywheelCoast = new CoastOut();
-        private final Slot0Configs shooterVelConfigs = 
+        // All six gains are applied, not just kP/kD/kV: kI/kS/kA existed as constants but were
+        // never reaching the controller, so the PID panel would have shown three knobs that did
+        // nothing. Their defaults are 0, so wiring them up changes no behavior.
+        private final Slot0Configs shooterVelConfigs =
             new Slot0Configs().
-            withKP(ShooterSubsystemConstants.SHOOTER_SPEED_kP). 
+            withKP(ShooterSubsystemConstants.SHOOTER_SPEED_kP).
+            withKI(ShooterSubsystemConstants.SHOOTER_SPEED_kI).
             withKD(ShooterSubsystemConstants.SHOOTER_SPEED_kD).
-            withKV(ShooterSubsystemConstants.SHOOTER_SPEED_kV);
+            withKS(ShooterSubsystemConstants.SHOOTER_SPEED_kS).
+            withKV(ShooterSubsystemConstants.SHOOTER_SPEED_kV).
+            withKA(ShooterSubsystemConstants.SHOOTER_SPEED_kA);
     //Shooter Angle - PID 
         private final PIDController shooterAnglePID = new PIDController(
             ShooterSubsystemConstants.SHOOTER_ANGLE_kP, 
@@ -107,12 +114,20 @@ public class ShooterSubsystem extends SubsystemBase{
             private final GenericEntry movingCompEntry;
             private final GenericEntry subsystemStateEntry;
             private final GenericEntry degreedToAlignToTargEntry;
-            private final GenericEntry shooterSpeed_kP;
-            private final GenericEntry shooterSpeed_kD;
-            private final GenericEntry shooterSpeed_kV;
-            private final GenericEntry shooterAngle_kP;
-            private final GenericEntry shooterAngle_kI;
-            private final GenericEntry shooterAngle_kD;
+            // Gains moved off Shuffleboard onto the driver-companion PID panel (NT /Tuning/*).
+            // The old GenericEntry boxes had the robot and the dashboard both writing the same
+            // entry every loop, so a typed value survived only if it landed in the gap between
+            // the echo and the read -- tuning appeared to work, then silently reverted. Tunable
+            // is read-only on the robot side, which removes that race. See frc.robot.util.Tunable.
+            private final Tunable tuneSpeedKp = new Tunable("Shooter/Flywheel/kP", ShooterSubsystemConstants.SHOOTER_SPEED_kP);
+            private final Tunable tuneSpeedKi = new Tunable("Shooter/Flywheel/kI", ShooterSubsystemConstants.SHOOTER_SPEED_kI);
+            private final Tunable tuneSpeedKd = new Tunable("Shooter/Flywheel/kD", ShooterSubsystemConstants.SHOOTER_SPEED_kD);
+            private final Tunable tuneSpeedKs = new Tunable("Shooter/Flywheel/kS", ShooterSubsystemConstants.SHOOTER_SPEED_kS);
+            private final Tunable tuneSpeedKv = new Tunable("Shooter/Flywheel/kV", ShooterSubsystemConstants.SHOOTER_SPEED_kV);
+            private final Tunable tuneSpeedKa = new Tunable("Shooter/Flywheel/kA", ShooterSubsystemConstants.SHOOTER_SPEED_kA);
+            private final Tunable tuneAngleKp = new Tunable("Shooter/Hood/kP", ShooterSubsystemConstants.SHOOTER_ANGLE_kP);
+            private final Tunable tuneAngleKi = new Tunable("Shooter/Hood/kI", ShooterSubsystemConstants.SHOOTER_ANGLE_kI);
+            private final Tunable tuneAngleKd = new Tunable("Shooter/Hood/kD", ShooterSubsystemConstants.SHOOTER_ANGLE_kD);
             private final GenericEntry desiredVelReachedEntry;
             private final GenericEntry desiredAngleReachedEntry;
             private final GenericEntry debugEntry;
@@ -264,12 +279,6 @@ public class ShooterSubsystem extends SubsystemBase{
                 movingCompEntry = ShooterSubsystemTab.add("Moving Comp Delta", 0.0).getEntry();
                 subsystemStateEntry = ShooterSubsystemTab.add("Subsystem State", true).getEntry();
                 degreedToAlignToTargEntry = ShooterSubsystemTab.add("Degrees to Align to Target", 0.0).getEntry();
-                shooterSpeed_kP = ShooterSubsystemTab.add("SHOOTER KP", shooterVelConfigs.kP).getEntry();
-                shooterSpeed_kD = ShooterSubsystemTab.add("SHOOTER KD", shooterVelConfigs.kD).getEntry();
-                shooterSpeed_kV = ShooterSubsystemTab.add("SHOOTER KV", shooterVelConfigs.kV).getEntry();
-                shooterAngle_kP = ShooterSubsystemTab.add("SHOOTER ANGLE KP", shooterAnglePID.getP()).getEntry();
-                shooterAngle_kI = ShooterSubsystemTab.add("SHOOTER ANGLE KI", shooterAnglePID.getI()).getEntry();
-                shooterAngle_kD = ShooterSubsystemTab.add("SHOOTER ANGLE KD", shooterAnglePID.getD()).getEntry();
                 // Initialized false: with the subsystem disabled at boot these entries were
                 // never written again, so a `true` here showed "At Speed: YES" on dashboards
                 // while the flywheels coasted.
@@ -1078,28 +1087,35 @@ public class ShooterSubsystem extends SubsystemBase{
                     desired_Angle = desiredAngleEntry.getDouble(0);
                 }
 
-            //PID + FF Tuning
+            //PID + FF Tuning -- gains come from the driver-companion PID panel over NT (frc.robot.util.Tunable).
+            // No-ops entirely when SubsystemConstants.TUNING_MODE is false.
                 //Speed
-                    if(shooterVelConfigs.kP != shooterSpeed_kP.getDouble(shooterVelConfigs.kP) ||
-                       shooterVelConfigs.kD != shooterSpeed_kD.getDouble(shooterVelConfigs.kD) ||
-                       shooterVelConfigs.kV != shooterSpeed_kV.getDouble(shooterVelConfigs.kV)){
-                        shooterVelConfigs.kP = shooterSpeed_kP.getDouble(shooterVelConfigs.kP);
-                        shooterVelConfigs.kD = shooterSpeed_kD.getDouble(shooterVelConfigs.kD);
-                        shooterVelConfigs.kV = shooterSpeed_kV.getDouble(shooterVelConfigs.kV);
+                    // Every hasChanged() is evaluated into a local FIRST: || short-circuits, so
+                    // OR-ing the calls inline would leave later gains unpolled and their change
+                    // consumed-but-unapplied on the next pass.
+                    boolean kPChanged = tuneSpeedKp.hasChanged();
+                    boolean kIChanged = tuneSpeedKi.hasChanged();
+                    boolean kDChanged = tuneSpeedKd.hasChanged();
+                    boolean kSChanged = tuneSpeedKs.hasChanged();
+                    boolean kVChanged = tuneSpeedKv.hasChanged();
+                    boolean kAChanged = tuneSpeedKa.hasChanged();
+                    if(kPChanged || kIChanged || kDChanged || kSChanged || kVChanged || kAChanged){
+                        shooterVelConfigs.kP = tuneSpeedKp.get();
+                        shooterVelConfigs.kI = tuneSpeedKi.get();
+                        shooterVelConfigs.kD = tuneSpeedKd.get();
+                        shooterVelConfigs.kS = tuneSpeedKs.get();
+                        shooterVelConfigs.kV = tuneSpeedKv.get();
+                        shooterVelConfigs.kA = tuneSpeedKa.get();
+                        // Slot0Configs ONLY -- applying a whole TalonFXConfiguration here would
+                        // reset the stator/supply limits and Coast neutral mode set in the ctor.
                         shooterA.getConfigurator().apply(shooterVelConfigs);
                     }
                 //Angle
-                    // Compare the live PID against the SHUFFLEBOARD entries (like the speed block
-                    // above) -- the old guard compared against the static constants the PID was
-                    // built from, which never change, so slider edits silently never applied.
-                    if(shooterAnglePID.getP() != shooterAngle_kP.getDouble(shooterAnglePID.getP()) ||
-                       shooterAnglePID.getI() != shooterAngle_kI.getDouble(shooterAnglePID.getI()) ||
-                       shooterAnglePID.getD() != shooterAngle_kD.getDouble(shooterAnglePID.getD())){
-                        shooterAnglePID.setPID(
-                            shooterAngle_kP.getDouble(shooterAnglePID.getP()),
-                            shooterAngle_kI.getDouble(shooterAnglePID.getI()),
-                            shooterAngle_kD.getDouble(shooterAnglePID.getD())
-                        );
+                    boolean angleKPChanged = tuneAngleKp.hasChanged();
+                    boolean angleKIChanged = tuneAngleKi.hasChanged();
+                    boolean angleKDChanged = tuneAngleKd.hasChanged();
+                    if(angleKPChanged || angleKIChanged || angleKDChanged){
+                        shooterAnglePID.setPID(tuneAngleKp.get(), tuneAngleKi.get(), tuneAngleKd.get());
                     }
             } else {
                 // Subsystem disabled while the robot is still enabled: VelocityVoltage LATCHES on

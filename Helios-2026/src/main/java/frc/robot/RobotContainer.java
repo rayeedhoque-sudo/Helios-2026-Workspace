@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 
 import frc.robot.Constants.TunerConstants;
+import frc.robot.util.Tunable;
 import frc.robot.Constants.SubsystemConstants.HopperSubsystemConstants;
 import frc.robot.Constants.SubsystemConstants.ShooterSubsystemConstants;
 import frc.robot.Constants.SubsystemConstants.Vision;
@@ -144,6 +145,18 @@ public class RobotContainer {
 
         // Read-only current/temp/voltage publisher for the driver companion app (app optional).
         new PowerTelemetry(drivetrain, shooterSS, intakeSS, hopperSS);
+
+        // Live PID tuning for the driver-companion "PID Tuning" panel. All of this no-ops when
+        // SubsystemConstants.TUNING_MODE is false (the competition default).
+        // Swerve gains are published READ-ONLY: Tuner X owns TunerConstants.java, and a
+        // fat-fingered steer kP is a violent mechanism. Read off the public module constants so
+        // regenerating that file stays safe. Changing them still needs a redeploy.
+        Tunable.publishReadOnly("Swerve/Steer/kP", TunerConstants.FrontLeft.SteerMotorGains.kP);
+        Tunable.publishReadOnly("Swerve/Steer/kD", TunerConstants.FrontLeft.SteerMotorGains.kD);
+        Tunable.publishReadOnly("Swerve/Drive/kP", TunerConstants.FrontLeft.DriveMotorGains.kP);
+        Tunable.publishReadOnly("Swerve/Drive/kV", TunerConstants.FrontLeft.DriveMotorGains.kV);
+        // Must run AFTER every subsystem is constructed -- this is what the panel enumerates.
+        Tunable.publishKeys();
     }
 
     private void configureBindings() {

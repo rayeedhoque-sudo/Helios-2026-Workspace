@@ -4,6 +4,26 @@ import edu.wpi.first.math.util.Units;
 
 public class SubsystemConstants {
 
+        /**
+         * Master gate for live PID tuning from the driver-companion app.
+         *
+         * <p>MUST BE FALSE FOR COMPETITION. When false, frc.robot.util.Tunable publishes nothing,
+         * subscribes to nothing, and every gain is the compiled constant below -- there is no path
+         * for a dashboard value to reach a motor controller. Flip to true and redeploy once at the
+         * start of a tuning session, then flip it back.
+         */
+        public static final boolean TUNING_MODE = false;
+
+        public static class DriveConstants{
+            // Heading servo (SwerveRequest.FieldCentricFacingAngle) gains, shared by every
+            // aim/align command -- rotateToAngle, searchAndAlignCommand, aimUntilAligned. These
+            // were three duplicated 5.0 literals in CommandSwerveDrivetrain; one copy so there is
+            // a single thing to tune. Radians in, rad/s out. TODO tune on robot.
+            public static double HEADING_kP = 5.0;
+            public static double HEADING_kI = 0.0;
+            public static double HEADING_kD = 0.0;
+        }
+
         public static class LightSensor{
             // Indexer beam-breaks -- DECLARED, NOT YET WIRED IN CODE (data sheet sec.11):
             // physical wiring + active-high/low polarity unconfirmed. Construct
