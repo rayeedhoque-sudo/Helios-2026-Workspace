@@ -142,7 +142,13 @@ public class Tunable {
         return NetworkTableInstance.getDefault().getTable(TABLE_NAME);
     }
 
-    /** Test-only: the real gate is the compile-time SubsystemConstants.TUNING_MODE. */
+    /**
+     * Test-only: the real gate is the compile-time SubsystemConstants.TUNING_MODE.
+     *
+     * <p>NEVER call this from robot code. The gate's safety claim -- that with TUNING_MODE false
+     * there is no path from a dashboard value to a motor controller -- holds because nothing in
+     * frc.robot flips this. Package-private so it can only be reached from frc.robot.util.
+     */
     static void setEnabledForTest(boolean e) {
         enabled = e;
     }
