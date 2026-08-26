@@ -8,11 +8,16 @@
 //
 // The UI is driven entirely off /Tuning/keys, so adding a gain on the robot needs no change here.
 //
-// Values are VOLATILE by design: a robot reboot re-seeds every gain from Constants. "Copy as
-// Java" hands you the block to paste back into SubsystemConstants when a session's numbers are
-// good. Writes go through ntPublishVolatile (NOT ntPublish) so the app never replays last
-// session's gain onto a freshly booted robot — see the comment on that function.
+// NT values are VOLATILE by design: a robot reboot re-seeds every gain from Constants. Making a
+// number permanent is a DELIBERATE second step — "Save to Constants" patches the source file via
+// main/tuning.ts (it does not deploy, and it does not commit), and "Copy as Java" is the manual
+// alternative. Keeping the write explicit preserves reboot-as-undo for exploratory values, and
+// keeps the app from rewriting a file you may have open in an editor while you tune.
+//
+// Writes go through ntPublishVolatile (NOT ntPublish) so the app never replays last session's
+// gain onto a freshly booted robot — see the comment on that function.
 import { onValue, onConnection, ntPublishVolatile, TOPICS } from './nt';
+import { currentDeployTarget, currentDeployPath } from './deploy';
 
 const TUNE = '/Tuning';
 
@@ -31,6 +36,8 @@ let rootEl: HTMLElement | null = null;
 let bannerEl: HTMLElement | null = null;
 let bodyEl: HTMLElement | null = null;
 let copyEl: HTMLButtonElement | null = null;
+let saveEl: HTMLButtonElement | null = null;
+let resultEl: HTMLElement | null = null;
 // name -> input, so a live robot value can refresh a field the user is not editing
 const inputs = new Map<string, HTMLInputElement>();
 
@@ -77,6 +84,9 @@ function injectStyles(): void {
     '  border:1px solid var(--accent,#b57bff); border-radius:6px; padding:8px 16px; cursor:pointer; width:fit-content; }',
     '.pid-btn:hover:not(:disabled) { background:#c99cff; }',
     '.pid-btn:disabled { opacity:0.45; cursor:not-allowed; }',
+    '.pid-buttons { display:flex; gap:8px; align-items:center; }',
+    '.pid-btn-quiet { color:var(--text-dim,#a99cbe); background:var(--surface,#17111f); border-color:var(--line,#38294c); }',
+    '.pid-btn-quiet:hover:not(:disabled) { background:var(--surface,#17111f); color:var(--text,#f2eef8); border-color:var(--accent,#b57bff); }',
     '.pid-hint { font-family:var(--font-mono,"Cascadia Mono",monospace); font-size:11px;',
     '  color:var(--text-faint,#6c6182); line-height:1.5; }',
   ].join('\n');
@@ -100,19 +110,38 @@ function build(container: HTMLElement): void {
   container.appendChild(body);
   bodyEl = body;
 
+  const buttons = document.createElement('div');
+  buttons.className = 'pid-buttons';
+
+  const save = document.createElement('button');
+  save.className = 'pid-btn';
+  save.textContent = 'Save to Constants';
+  save.title = 'Write the current gains into SubsystemConstants.java (does not deploy)';
+  save.addEventListener('click', onSaveClick);
+  buttons.appendChild(save);
+  saveEl = save;
+
   const copy = document.createElement('button');
-  copy.className = 'pid-btn';
+  copy.className = 'pid-btn pid-btn-quiet';
   copy.textContent = 'Copy as Java';
-  copy.title = 'Copy the current gains as constant assignments to paste into SubsystemConstants.java';
+  copy.title = 'Copy the current gains as constant assignments, to paste by hand instead';
   copy.addEventListener('click', onCopyClick);
-  container.appendChild(copy);
+  buttons.appendChild(copy);
   copyEl = copy;
+
+  container.appendChild(buttons);
+
+  const result = document.createElement('div');
+  result.className = 'pid-hint';
+  container.appendChild(result);
+  resultEl = result;
 
   const hint = document.createElement('div');
   hint.className = 'pid-hint';
   hint.textContent =
-    'Gains apply within one robot loop. They are NOT saved — a robot reboot restores the '
-    + 'compiled constants. Use "Copy as Java" to keep a good set.';
+    'Gains apply within one robot loop, but live only in NetworkTables — a robot reboot '
+    + 'restores the compiled constants. "Save to Constants" writes them into the source file; '
+    + 'they become the robot default after your next deploy.';
   container.appendChild(hint);
 }
 
@@ -187,7 +216,13 @@ function renderBanner(): void {
     bannerEl.textContent = 'Live — ' + keys.length + ' gains';
     bannerEl.dataset.level = 'ok';
   }
-  if (copyEl) copyEl.disabled = keys.length === 0;
+  const noGains = keys.length === 0;
+  if (copyEl) copyEl.disabled = noGains;
+  if (saveEl) {
+    saveEl.disabled = noGains;
+    saveEl.title = 'Write the current gains into ' + currentDeployPath()
+      + '\\src\\main\\java\\frc\\robot\\Constants\\SubsystemConstants.java (does not deploy)';
+  }
 }
 
 // "Shooter/Flywheel/kP" -> group "Shooter/Flywheel", leaf "kP".
@@ -330,6 +365,60 @@ export function javaBlock(names: string[], values: Map<string, number>): string 
       return 'public static double ' + constant + ' = ' + fmtNum(v ?? NaN) + ';';
     })
     .join('\n');
+}
+
+/** {constantName: value} for every live gain that maps to a constant, for the source patcher. */
+export function gainsByConstant(names: string[], values: Map<string, number>): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const n of names) {
+    const constant = CONSTANT_NAMES[n];
+    const v = values.get(n);
+    if (constant && v !== undefined && Number.isFinite(v)) out[constant] = v;
+  }
+  return out;
+}
+
+async function onSaveClick(): Promise<void> {
+  if (!saveEl || !resultEl) return;
+  const gains = gainsByConstant(keys, liveValues);
+  if (Object.keys(gains).length === 0) {
+    showResult('Nothing to save — no gain values read from the robot yet.', 'bad');
+    return;
+  }
+  saveEl.disabled = true;
+  try {
+    const r = await window.companion.tuning.save(currentDeployTarget(), gains);
+    if (!r.ok) {
+      showResult('Save failed: ' + (r.error ?? 'unknown error'), 'bad');
+      return;
+    }
+    // Report per-constant so a silently-skipped gain can never look like a successful save.
+    const parts: string[] = [];
+    if (r.changed.length > 0) {
+      parts.push(
+        'Wrote ' + r.changed.length + ' to SubsystemConstants.java: '
+        + r.changed.map((c) => c.name + ' ' + c.from + ' → ' + c.to).join(', '),
+      );
+    } else {
+      parts.push('No change — the file already matches these gains.');
+    }
+    const notable = r.skipped.filter((s) => s.reason !== 'already at this value');
+    if (notable.length > 0) {
+      parts.push('SKIPPED: ' + notable.map((s) => s.name + ' (' + s.reason + ')').join(', '));
+    }
+    parts.push('Deploy to make it the robot default. Review the diff before committing.');
+    showResult(parts.join('  |  '), notable.length > 0 ? 'bad' : 'ok');
+  } catch (err) {
+    showResult('Save failed: ' + String(err), 'bad');
+  } finally {
+    saveEl.disabled = keys.length === 0;
+  }
+}
+
+function showResult(msg: string, level: 'ok' | 'bad'): void {
+  if (!resultEl) return;
+  resultEl.textContent = msg;
+  resultEl.style.color = level === 'ok' ? 'var(--good,#35d07f)' : 'var(--bad,#ff4d5e)';
 }
 
 function onCopyClick(): void {

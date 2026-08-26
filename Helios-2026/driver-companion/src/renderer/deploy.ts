@@ -22,6 +22,15 @@ function targetPath(key: DeployTarget): string {
   return TARGETS.find((t) => t.key === key)?.path ?? TARGETS[0].path;
 }
 
+// The project the PID panel bakes tuned gains into — always the one this dropdown would
+// deploy, so "Save to Constants" can never write V1's file while you are running V2.
+export function currentDeployTarget(): DeployTarget {
+  return selectedTarget;
+}
+export function currentDeployPath(): string {
+  return targetPath(selectedTarget);
+}
+
 // ---- module-scope state (persists across mount/unmount) --------------------
 const logBuffer: string[] = [];
 let partialLine = ''; // trailing, not-yet-newline-terminated tail between output events

@@ -26,7 +26,7 @@ const PROJECT_DIRS: Record<DeployTarget, string> = {
 export const DEFAULT_TARGET: DeployTarget = 'v1';
 // Resolve a key to its hardcoded path, falling back to the default for any
 // unknown/absent key (so a bad IPC payload can never reach spawn as a path).
-function projectDirFor(target: DeployTarget | undefined): string {
+export function projectDirFor(target: DeployTarget | undefined): string {
   return (target && PROJECT_DIRS[target]) || PROJECT_DIRS[DEFAULT_TARGET];
 }
 
