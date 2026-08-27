@@ -86,8 +86,21 @@ public class HoodTrackingTest {
 
     @Test
     void glitchesAboveTheMaxStepAreRejected() {
-        assertEquals(0, ShooterSubsystem.hoodDeltaDegrees(90.0), 1e-9,
-            "90 units in one loop is a garbled frame, not a 14 deg hood movement");
+        assertEquals(0, ShooterSubsystem.hoodDeltaDegrees(150.0), 1e-9,
+            "150 units in one loop is a garbled frame; above 180 the wrap logic could not even"
+                + " tell which way it went");
+    }
+
+    /**
+     * THE REGRESSION THAT GROUND THE BELT (2026-08-27). A powered move steps the encoder 25-55
+     * raw units per 20 ms loop; the old 20-unit ceiling rejected all of it, so the tracked angle
+     * froze mid-move, the MAX_ANGLE travel guard never fired, and the hood drove into its stop.
+     * Powered-speed deltas must COUNT.
+     */
+    @Test
+    void poweredSpeedDeltasAreMotionNotGlitches() {
+        assertEquals(55.0 * DEG_PER_UNIT, ShooterSubsystem.hoodDeltaDegrees(55.0), 1e-9,
+            "the fastest measured powered step must be tracked, not filtered away");
     }
 
     @Test

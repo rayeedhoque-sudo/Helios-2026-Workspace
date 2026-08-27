@@ -336,11 +336,28 @@ public class SubsystemConstants {
                 // and noise must never accumulate into phantom travel. 0.2 clears it with margin
                 // and costs 0.03 deg of resolution -- far below the 0.5 deg angle tolerance.
                 public static double HOOD_RAW_NOISE_DEADBAND = 0.2;
-                // Reject deltas bigger than this (raw units) as glitches, NOT motion: 20 units is
-                // 2.84 deg in one 20 ms loop = 142 deg/sec, far faster than the hood can physically
-                // travel (the logged hand sweeps peaked at ~1.6 units per loop). A dropped/garbled
-                // frame lands here instead of jumping the tracker.
-                public static double HOOD_RAW_MAX_STEP = 20.0;
+                // Reject deltas bigger than this (raw units) as glitches, NOT motion.
+                //
+                // RAISED 20 -> 120 (2026-08-27) after it caused a belt grind. Under POWER the
+                // encoder moves 25-55 raw units per 20 ms loop (measured), so a 20-unit ceiling
+                // discarded EVERY delta of a real move: the tracked angle froze at 11.84 deg while
+                // the hood kept climbing, the MAX_ANGLE travel guard compared against that frozen
+                // value and never fired, and the hood drove into the top stop until the driver
+                // disabled. The old 20 was sized off HAND sweeps (~1.6 units/loop) -- hand motion
+                // is an order of magnitude slower than powered motion, so it was never a valid
+                // ceiling for the thing it had to pass.
+                //
+                // 120 is the largest sane value, not a tuned one: above 180 a delta is
+                // indistinguishable from the same motion the other way round the circle, so the
+                // wrap logic (shortestRawDelta) stops being able to tell direction. 120 keeps
+                // that margin while clearing the measured 55.
+                //
+                // TODO: re-derive from the real scale once step 3 of the hood bring-up measures
+                // units-per-hood-degree against an angle finder. A filter this wide also means a
+                // SLIPPING drive accumulates tracked angle fast -- which trips the travel guard
+                // and cuts drive, the fail-safe direction, but it is not a substitute for the
+                // motor-vs-hood skip detector (step 4).
+                public static double HOOD_RAW_MAX_STEP = 120.0;
                 // How far the hood may be commanded from its enable-time position (deg). This is
                 // the hood's FULL physical travel now: with the datum fixed at the bottom rest
                 // (see ShooterSubsystem.captureHoodDatum) the window no longer needs to bound

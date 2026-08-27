@@ -71,6 +71,11 @@ public class RobotContainer {
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
+    // KILL SWITCH for the teleop DPAD hood moves (2026-08-27). false = the bindings are not
+    // registered at all, so nothing can drive the hood from the driver station; the hood still
+    // holds on its brake and commanded shot angles are unaffected. See the bindings below.
+    private static final boolean HOOD_DPAD_MOVES_ENABLED = false;
+
     // Hood: DPAD LEFT/RIGHT are PRESSED to send the hood to the floor / HOOD_UP_PRESET_DEG in
     // teleop, and
     // HELD to jog it open loop at HOOD_JOG_UP/DOWN_VOLTS in test mode
@@ -263,11 +268,22 @@ public class RobotContainer {
             // loop at HOOD_JOG_*_VOLTS -- only the STOP is by angle, off the measured encoder --
             // so the stick-slip that killed the old setpoint step cannot come back. See
             // ShooterSubsystem.moveHoodToCommand; the travel guards still bound the result.
-                joystick2.povLeft().and(RobotModeTriggers.teleop())
-                    .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
-                joystick2.povRight().and(RobotModeTriggers.teleop())
-                    .onTrue(shooterSS.moveHoodToCommand(
-                        () -> ShooterSubsystemConstants.HOOD_UP_PRESET_DEG));
+                // GATED 2026-08-27 after the hood ground its belt on a DPAD-right press. The
+                // moves stop on the MEASURED hood angle, and the measurement is not currently
+                // trustworthy: HOOD_RAW_UNITS_PER_FULL_TRAVEL is unverified (five hand sweeps gave
+                // five answers, and hand sweeps cannot back-drive a 187.5:1 train), so the travel
+                // guard's MAX_ANGLE threshold does not correspond to a known physical angle.
+                // Re-enable at step 4 of the hood bring-up, once the scale is measured against an
+                // angle finder and the motor-vs-hood skip detector is in. The TEST-mode held jog
+                // below is deliberately left live -- it is supervised, stops on release, and is
+                // what the calibration pass needs.
+                if (HOOD_DPAD_MOVES_ENABLED) {
+                    joystick2.povLeft().and(RobotModeTriggers.teleop())
+                        .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
+                    joystick2.povRight().and(RobotModeTriggers.teleop())
+                        .onTrue(shooterSS.moveHoodToCommand(
+                            () -> ShooterSubsystemConstants.HOOD_UP_PRESET_DEG));
+                }
 
             drivetrain.registerTelemetry(logger::telemeterize);
 
