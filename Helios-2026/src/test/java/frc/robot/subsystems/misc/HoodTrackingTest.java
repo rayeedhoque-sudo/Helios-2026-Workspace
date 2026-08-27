@@ -21,6 +21,14 @@ import frc.robot.Constants.SubsystemConstants.ShooterSubsystemConstants;
  */
 public class HoodTrackingTest {
 
+    /**
+     * An arbitrary commanded step, in degrees. These tests exercise clampDesiredAngle, which
+     * does not care HOW a setpoint was asked for -- the DPAD now jogs at a rate
+     * (HOOD_JOG_DEG_PER_SEC) rather than stepping per click, so a local constant keeps the
+     * clamp tests independent of that tuning.
+     */
+    private static final double STEP = 2.0;
+
     private static final double DEG_PER_UNIT = ShooterSubsystemConstants.HOOD_DEG_PER_RAW_UNIT;
 
     // ---- shortest-path delta: the rollover must be a non-event ----
@@ -180,29 +188,29 @@ public class HoodTrackingTest {
         double setpoint = base;
         for (int click = 0; click < 100; click++) {
             setpoint = ShooterSubsystem.clampDesiredAngle(
-                setpoint + ShooterSubsystemConstants.HOOD_NUDGE_DEG, base, true);
+                setpoint + STEP, base, true);
         }
         assertEquals(Math.min(ShooterSubsystemConstants.MAX_ANGLE,
                 base + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG),
-            setpoint, 1e-9, "100 clicks up must stop at the window edge");
+            setpoint, 1e-9, "100 steps up must stop at the window edge");
 
         for (int click = 0; click < 100; click++) {
             setpoint = ShooterSubsystem.clampDesiredAngle(
-                setpoint - ShooterSubsystemConstants.HOOD_NUDGE_DEG, base, true);
+                setpoint - STEP, base, true);
         }
         assertEquals(Math.max(ShooterSubsystemConstants.MIN_ANGLE,
                 base - ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG),
-            setpoint, 1e-9, "100 clicks down must stop at the other edge");
+            setpoint, 1e-9, "100 steps down must stop at the other edge");
     }
 
     /** One click must move the setpoint by exactly the step, mid-range. */
     @Test
     void oneClickMovesExactlyOneStep() {
         double base = 20.0;
-        assertEquals(20.0 + ShooterSubsystemConstants.HOOD_NUDGE_DEG,
+        assertEquals(20.0 + STEP,
             ShooterSubsystem.clampDesiredAngle(
-                20.0 + ShooterSubsystemConstants.HOOD_NUDGE_DEG, base, true), 1e-9,
-            "one click moves exactly one step, whatever the step is tuned to");
+                20.0 + STEP, base, true), 1e-9,
+            "one step moves exactly one step, whatever the step is");
     }
 
     /** A datum far outside the soft band must still produce a usable, non-inverted range. */
@@ -236,7 +244,7 @@ public class HoodTrackingTest {
     void nudgingDownBelowTheFloorHoldsInsteadOfRising() {
         double rest = ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN;
         double commanded = ShooterSubsystem.clampDesiredAngle(
-            rest - ShooterSubsystemConstants.HOOD_NUDGE_DEG, rest, true);
+            rest - STEP, rest, true);
         assertEquals(rest, commanded, 1e-9, "must hold at the enable position, not rise to MIN_ANGLE");
     }
 
@@ -244,8 +252,8 @@ public class HoodTrackingTest {
     @Test
     void nudgingUpFromBelowTheFloorStillWorks() {
         double rest = ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN;
-        assertEquals(rest + ShooterSubsystemConstants.HOOD_NUDGE_DEG,
-            ShooterSubsystem.clampDesiredAngle(rest + ShooterSubsystemConstants.HOOD_NUDGE_DEG, rest, true),
+        assertEquals(rest + STEP,
+            ShooterSubsystem.clampDesiredAngle(rest + STEP, rest, true),
             1e-9, "the band opens toward the hood, it does not trap it");
     }
 
@@ -257,8 +265,8 @@ public class HoodTrackingTest {
             "must hold where it was enabled");
         assertEquals(high, ShooterSubsystem.clampDesiredAngle(high + 5, high, true), 1e-9,
             "must never be commanded further up");
-        assertEquals(high - ShooterSubsystemConstants.HOOD_NUDGE_DEG,
-            ShooterSubsystem.clampDesiredAngle(high - ShooterSubsystemConstants.HOOD_NUDGE_DEG, high, true),
+        assertEquals(high - STEP,
+            ShooterSubsystem.clampDesiredAngle(high - STEP, high, true),
             1e-9, "but must still come down");
     }
 

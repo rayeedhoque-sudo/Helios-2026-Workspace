@@ -510,9 +510,11 @@ public class SubsystemConstants {
                 // Hood gate, deg: worst contribution 0.078 m at 3 m, shrinking with distance.
                 public static double ANGLE_TOLERANCE = 0.5;
                 
-                // Random variables that AI added that are not defined
-                // HOOD_NUDGE_DEG is the degree that the hood changes per button press
-                public static double HOOD_NUDGE_DEG = 2;
+                // DPAD hood jog RATE, deg/sec (team request 2026-08-26): HOLD DPAD right to
+                // raise, left to lower, release to stop. Replaced HOOD_NUDGE_DEG (2 deg per
+                // press) -- a per-click step was unusable because a 2 deg error already puts the
+                // lift feedforward at full scale, so one click drove the hood far past the step.
+                public static double HOOD_JOG_DEG_PER_SEC = 2.0;
                 // HOOD_REENGAGE_DEG is the degree at which the hood needs to readjust hold
                 public static double HOOD_REENGAGE_DEG = 0.75;
                 // HOOD_LOWER_FF_VOLTS is self explanatory, based off raise volts

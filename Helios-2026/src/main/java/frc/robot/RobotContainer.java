@@ -71,9 +71,9 @@ public class RobotContainer {
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
-    // Hood: DPAD LEFT/RIGHT step the setpoint by HOOD_NUDGE_DEG per click
-    // (ShooterSubsystem.nudgeHoodCommand). The held rate-ramp jog this replaced needed a
-    // SlewRateLimiter; a per-click step does not.
+    // Hood: DPAD LEFT/RIGHT are HELD to jog the setpoint at HOOD_JOG_DEG_PER_SEC
+    // (ShooterSubsystem.jogHoodCommand). The rate limiting is the ramp itself -- the command
+    // integrates deg/sec into the setpoint -- so no SlewRateLimiter is involved.
 
     // Intake-live slowdown: halve translation while the intake rollers spin (LT/Y hold,
     // intake or outtake) so the extended intake can't be rammed at full speed. Applied
@@ -254,14 +254,15 @@ public class RobotContainer {
                 joystick2.povDown().and(RobotModeTriggers.teleop())
                     .onTrue(shooterSS.trimRtSpeedCommand(-kRtSpeedTrimRpm));
 
-            // DPAD-LEFT/RIGHT (press) = step the hood setpoint -2 / +2 deg (HOOD_NUDGE_DEG,
-            // team request 2026-08-22), replacing the held rate-ramp jog. One click is about
-            // the error the loop needs to break the hood free, so a click buys a step. Clicks
-            // accumulate; the soft limits and the travel window still bound the result.
+            // DPAD-LEFT/RIGHT (HOLD) = jog the hood setpoint down / up at HOOD_JOG_DEG_PER_SEC
+            // (team request 2026-08-26, replacing the 2 deg per-click step). Hold to move,
+            // release to stop where it is. The per-click step was unusable: a 2 deg error is
+            // already full-scale lift feedforward, so one click drove the hood far past the
+            // step. The soft limits and the travel window still bound the result.
                 joystick2.povLeft().and(RobotModeTriggers.teleop())
-                    .onTrue(shooterSS.nudgeHoodCommand(-ShooterSubsystemConstants.HOOD_NUDGE_DEG));
+                    .whileTrue(shooterSS.jogHoodCommand(-ShooterSubsystemConstants.HOOD_JOG_DEG_PER_SEC));
                 joystick2.povRight().and(RobotModeTriggers.teleop())
-                    .onTrue(shooterSS.nudgeHoodCommand(ShooterSubsystemConstants.HOOD_NUDGE_DEG));
+                    .whileTrue(shooterSS.jogHoodCommand(ShooterSubsystemConstants.HOOD_JOG_DEG_PER_SEC));
 
             drivetrain.registerTelemetry(logger::telemeterize);
 
@@ -388,18 +389,17 @@ public class RobotContainer {
                     .alongWith(hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed,
                         () -> false)))
                 .onFalse(shooterSS.stopShooterCommand());
-            // DPAD LEFT / RIGHT (press) = step the hood setpoint -2 / +2 deg, the same
-            // mechanism as the match bindings (ShooterSubsystem.nudgeHoodCommand). Flywheels
-            // stay off (setDesired_Angle doesn't touch velocity), the step is clamped by the
-            // soft limits and the enable-time travel window, and periodic() drives it through
-            // the same PID / travel guard / feedback gate as every other shooter command.
-            // Clicks accumulate and the setpoint holds where it lands, which is what lets the
-            // hood be parked at a precise angle to read the encoder anchors (handoff on-robot
-            // verify item 2).
+            // DPAD LEFT / RIGHT (HOLD) = jog the hood setpoint down / up, the same mechanism as
+            // the match bindings (ShooterSubsystem.jogHoodCommand). Flywheels stay off
+            // (setDesired_Angle doesn't touch velocity), the ramp is clamped by the soft limits
+            // and the enable-time travel window, and periodic() drives it through the same PID /
+            // travel guard / feedback gate as every other shooter command. Releasing leaves the
+            // setpoint where it lands, which is what lets the hood be parked at a precise angle
+            // to read the encoder anchors (handoff on-robot verify item 2).
             joystick2.povLeft().and(RobotModeTriggers.test())
-                .onTrue(shooterSS.nudgeHoodCommand(-ShooterSubsystemConstants.HOOD_NUDGE_DEG));
+                .whileTrue(shooterSS.jogHoodCommand(-ShooterSubsystemConstants.HOOD_JOG_DEG_PER_SEC));
             joystick2.povRight().and(RobotModeTriggers.test())
-                .onTrue(shooterSS.nudgeHoodCommand(ShooterSubsystemConstants.HOOD_NUDGE_DEG));
+                .whileTrue(shooterSS.jogHoodCommand(ShooterSubsystemConstants.HOOD_JOG_DEG_PER_SEC));
     }
 
     /**

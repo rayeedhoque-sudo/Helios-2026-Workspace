@@ -414,13 +414,31 @@ public class ShooterSubsystem extends SubsystemBase{
             return rtSurfaceSpeed;
         }
 
-        // DPAD LEFT/RIGHT (press) = step the hood setpoint by deltaDeg (team request
-        // 2026-08-22: 2 deg a click, left down / right up), replacing the held rate-ramp jog.
-        // Steps from the CURRENT SETPOINT so repeated clicks accumulate, and every step goes
-        // through setDesired_Angle, so the soft limits and the enable-time travel window still
-        // bound it. The PID + feedforward still do the driving -- this only moves the target.
-        public Command nudgeHoodCommand(double deltaDeg){
-            return Commands.runOnce(() -> setDesired_Angle(desired_Angle + deltaDeg));
+        // DPAD LEFT/RIGHT (HOLD) = jog the hood setpoint at a constant rate, left down / right
+        // up (team request 2026-08-26, replacing the per-click 2 deg step). Hold to move, release
+        // to stop -- the setpoint stays wherever the release left it.
+        //
+        // This ramps the SETPOINT only, so every existing guard still applies unchanged: the
+        // soft band, the enable-time travel window, the feedback sanity gate and the hard travel
+        // guard. The PID + feedforward still do the driving.
+        //
+        // Requires NO subsystem, deliberately. The RT shot group runs kCancelIncoming, so a
+        // requiring command would be BLOCKED for the whole hold -- which would kill the mid-hold
+        // hood trim that flywheelOnlyShotCommand explicitly depends on.
+        public Command jogHoodCommand(double degreesPerSecond){
+            Timer clock = new Timer();
+            return Commands.run(() -> {
+                        double dt = clock.get();
+                        clock.restart();
+                        // The first loop after the press has a meaningless dt, and a stalled loop
+                        // would hand back a huge one -- either way a single step could jump the
+                        // setpoint far more than the rate allows. Fall back to one nominal period.
+                        if (dt <= 0 || dt > 0.2) {
+                            dt = 0.020;
+                        }
+                        setDesired_Angle(desired_Angle + degreesPerSecond * dt);
+                    })
+                    .beforeStarting(clock::restart);
         }
 
         // DPAD UP/DOWN (press) = trim the RT flywheel target by rpmDelta motor RPM (team request

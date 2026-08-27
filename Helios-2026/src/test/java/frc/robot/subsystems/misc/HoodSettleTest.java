@@ -76,13 +76,17 @@ public class HoodSettleTest {
     }
 
     /**
-     * A click must be big enough to actually escape the hysteresis band, or pressing the
-     * DPAD would do nothing at all.
+     * A HELD jog must escape the hysteresis band promptly. The setpoint ramps at
+     * HOOD_JOG_DEG_PER_SEC from zero error, and the loop stays held (0 V) until the error
+     * passes HOOD_REENGAGE_DEG -- so there is an unavoidable dead time of REENGAGE / rate at
+     * the start of every press. Too long and holding the DPAD reads as a broken control.
      */
     @Test
-    void oneClickIsLargerThanTheReengageBand() {
-        assertTrue(ShooterSubsystemConstants.HOOD_NUDGE_DEG > REENGAGE,
-            "HOOD_NUDGE_DEG must exceed HOOD_REENGAGE_DEG or a click cannot start the drive");
+    void aHeldJogEscapesTheReengageBandPromptly() {
+        double secondsToEscape = REENGAGE / ShooterSubsystemConstants.HOOD_JOG_DEG_PER_SEC;
+        assertTrue(secondsToEscape <= 0.5,
+            "a held DPAD must start the hood inside 0.5 s; takes " + secondsToEscape + " s at "
+                + ShooterSubsystemConstants.HOOD_JOG_DEG_PER_SEC + " deg/s");
     }
 
     @Test
