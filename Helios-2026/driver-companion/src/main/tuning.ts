@@ -6,7 +6,7 @@
 // does NOT change the running robot (that already happened over NT) — it only edits the file.
 //
 // Safety model, in the same spirit as deploy.ts: the renderer never supplies a path. It sends
-// a project KEY ('v1'|'v2') validated against deploy.ts's hardcoded PROJECT_DIRS, plus a map of
+// a project KEY ('v1') validated against deploy.ts's hardcoded PROJECT_DIRS, plus a map of
 // {constantName: number}. Both halves are validated here:
 //   - the name must be a plain Java identifier AND must already exist in the file as a
 //     `public static double NAME = ...;` declaration. We only ever REPLACE the number in an
