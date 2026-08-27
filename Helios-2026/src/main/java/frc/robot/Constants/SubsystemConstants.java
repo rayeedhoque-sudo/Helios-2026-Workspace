@@ -230,11 +230,11 @@ public class SubsystemConstants {
             public static final int SHOOTER_ID_C = 15;
             public static final int SHOOTER_ID_D = 16;
             //PID - Angle
-                public static double SHOOTER_ANGLE_kP = 0.35;
+                public static double SHOOTER_ANGLE_kP = 0.4;
                 public static double SHOOTER_ANGLE_kI = 0.0;
                 public static double SHOOTER_ANGLE_kD = 0.0;
             //PID - Speed
-                public static double SHOOTER_SPEED_kP = 0.4;
+                public static double SHOOTER_SPEED_kP = 0.2;
                 public static double SHOOTER_SPEED_kI = 0.0;
                 public static double SHOOTER_SPEED_kD = 0.01;
             //FEEDFORWARD - Speed
@@ -510,11 +510,19 @@ public class SubsystemConstants {
                 // Hood gate, deg: worst contribution 0.078 m at 3 m, shrinking with distance.
                 public static double ANGLE_TOLERANCE = 0.5;
                 
-                // DPAD hood jog RATE, deg/sec (team request 2026-08-26): HOLD DPAD right to
-                // raise, left to lower, release to stop. Replaced HOOD_NUDGE_DEG (2 deg per
-                // press) -- a per-click step was unusable because a 2 deg error already puts the
-                // lift feedforward at full scale, so one click drove the hood far past the step.
-                public static double HOOD_JOG_DEG_PER_SEC = 2.0;
+                // DPAD hood jog DRIVE VOLTAGE (2026-08-26): HOLD DPAD right to raise, left to
+                // lower, release to stop and hold. Open loop ON PURPOSE. Ramping a SETPOINT at
+                // a few deg/sec (the previous HOOD_JOG_DEG_PER_SEC) could never move the hood
+                // smoothly: the hood needs ~7 V to break away, so the position loop sat held at
+                // 0 V until the ramped error grew past HOOD_REENGAGE_DEG *and* the feedforward
+                // faded in, then slammed ~7.5 V, jumped ~1.5 deg, overshot into the settle band
+                // and stopped -- a ~0.75 s stick-slip cycle the driver sees as oscillation.
+                // A held jog is a VELOCITY request, so it is driven as one; these two volts are
+                // the jog speed knob and are independent of the shot loop's tuned gains.
+                // TODO tune on robot: raise for a faster jog, lower for a slower one. UP must
+                // stay above the ~7 V breakaway or the hood will not move at all.
+                public static double HOOD_JOG_UP_VOLTS = 7.0;    // [assumed] = measured breakaway
+                public static double HOOD_JOG_DOWN_VOLTS = 3.0;  // [assumed] gravity assists here
                 // HOOD_REENGAGE_DEG is the degree at which the hood needs to readjust hold
                 public static double HOOD_REENGAGE_DEG = 0.75;
                 // HOOD_LOWER_FF_VOLTS is self explanatory, based off raise volts

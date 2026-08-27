@@ -169,6 +169,9 @@ public class ShooterSubsystem extends SubsystemBase{
        private double hoodLastRaw;        // previous raw reading, for the delta
        private boolean hoodDatumValid;    // false until a datum has been captured
        private boolean hoodWasEnabled;    // rising-edge detect on DriverStation.isEnabled()
+       // Open-loop hood jog request, volts; 0 = not jogging. Set by jogHoodCommand while the
+       // DPAD is held, applied (and guarded) in periodic(). See jogHoodCommand.
+       private double hoodJogVolts;
        private double desired_Velocity;
        private double desired_Angle;
        private double target_distance;
@@ -414,31 +417,28 @@ public class ShooterSubsystem extends SubsystemBase{
             return rtSurfaceSpeed;
         }
 
-        // DPAD LEFT/RIGHT (HOLD) = jog the hood setpoint at a constant rate, left down / right
-        // up (team request 2026-08-26, replacing the per-click 2 deg step). Hold to move, release
-        // to stop -- the setpoint stays wherever the release left it.
+        // DPAD LEFT/RIGHT (HOLD) = jog the hood at a constant VOLTAGE, left down / right up.
+        // Hold to move, release to stop where it is.
         //
-        // This ramps the SETPOINT only, so every existing guard still applies unchanged: the
-        // soft band, the enable-time travel window, the feedback sanity gate and the hard travel
-        // guard. The PID + feedforward still do the driving.
+        // OPEN LOOP on purpose (2026-08-26). This used to ramp the SETPOINT at
+        // HOOD_JOG_DEG_PER_SEC and let the position loop chase it, which oscillated: the hood
+        // needs ~7 V to break away, so the loop sat HELD at 0 V until the ramped error passed
+        // HOOD_REENGAGE_DEG and the feedforward faded in, then slammed ~7.5 V, jumped past the
+        // target into the settle band and stopped dead -- stick-slip, roughly 0.75 s per cycle.
+        // No gain retune fixes that; a position loop fed a slow setpoint through that much
+        // stiction must stick-slip. A held jog is a velocity request, so it is driven as one.
+        //
+        // The voltage is applied in periodic() (see hoodJogVolts), NOT here, so the jog still
+        // passes through the feedback sanity gate and the MIN/MAX_ANGLE hard travel guards --
+        // the dead-encoder and belt-skip protections are unchanged. periodic() also keeps the
+        // setpoint pinned to the live angle while jogging, so releasing hands back to the
+        // position loop at zero error and the brake holds it there.
         //
         // Requires NO subsystem, deliberately. The RT shot group runs kCancelIncoming, so a
         // requiring command would be BLOCKED for the whole hold -- which would kill the mid-hold
         // hood trim that flywheelOnlyShotCommand explicitly depends on.
-        public Command jogHoodCommand(double degreesPerSecond){
-            Timer clock = new Timer();
-            return Commands.run(() -> {
-                        double dt = clock.get();
-                        clock.restart();
-                        // The first loop after the press has a meaningless dt, and a stalled loop
-                        // would hand back a huge one -- either way a single step could jump the
-                        // setpoint far more than the rate allows. Fall back to one nominal period.
-                        if (dt <= 0 || dt > 0.2) {
-                            dt = 0.020;
-                        }
-                        setDesired_Angle(desired_Angle + degreesPerSecond * dt);
-                    })
-                    .beforeStarting(clock::restart);
+        public Command jogHoodCommand(double volts){
+            return Commands.runEnd(() -> hoodJogVolts = volts, () -> hoodJogVolts = 0);
         }
 
         // DPAD UP/DOWN (press) = trim the RT flywheel target by rpmDelta motor RPM (team request
@@ -1055,7 +1055,17 @@ public class ShooterSubsystem extends SubsystemBase{
                 // limit. Out-of-band or NaN (comparisons fail) -> 0 V; brake idle holds the hood.
                 boolean hoodFeedbackValid = isHoodFeedbackValid(rawHood);
                 double hoodVolts = 0; // kill switch / invalid feedback -> 0 V (brake idle holds)
-                if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid) {
+                if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid && hoodJogVolts != 0) {
+                    // HELD DPAD JOG: drive open loop at the requested voltage and keep the
+                    // setpoint pinned to where the hood actually is, so releasing resumes the
+                    // position loop at zero error (it latches into hold and the brake parks it)
+                    // instead of snapping back to a stale setpoint. The MIN/MAX guards after
+                    // the branches still apply to this voltage.
+                    hoodVolts = hoodJogVolts;
+                    setDesired_Angle(currentHoodAngle);
+                    hoodHolding = true;
+                    shooterAnglePID.reset();
+                } else if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid) {
                     // SETTLE BAND (2026-08-22, team requirement: a DPAD click moves the hood
                     // 2 deg and it STAYS there). Once inside ANGLE_TOLERANCE the hood is driven
                     // with 0 V and the brake idle mode holds it; without this it HUNTS -- it
@@ -1081,17 +1091,19 @@ public class ShooterSubsystem extends SubsystemBase{
                     // (it sat fully down during the feed shot). Positive output raises the hood, so it
                     // is capped at +UP; negative lowers, capped at -DOWN.
                     hoodVolts = MathUtil.clamp(anglePID + liftFF, -ShooterSubsystemConstants.HOOD_MAX_DOWN_VOLTAGE, ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE);
-                    // HARD travel guard (team request 2026-07-18: "by no means exceed the max angle"
-                    // -- the hood was over-extending and skipping the belt). Positive volts raise the
-                    // hood: once at/above MAX_ANGLE never drive UP, once at/below MIN_ANGLE never drive
-                    // DOWN, whatever the PID asks. MAX_ANGLE sits ~6.5 deg below the physical 44.5
-                    // stop, so even a little coast after the cut never reaches the stop / skips the belt.
-                    if (currentHoodAngle >= ShooterSubsystemConstants.MAX_ANGLE && hoodVolts > 0) {
-                        hoodVolts = 0;
-                    }
-                    if (currentHoodAngle <= ShooterSubsystemConstants.MIN_ANGLE && hoodVolts < 0) {
-                        hoodVolts = 0;
-                    }
+                }
+                // HARD travel guard (team request 2026-07-18: "by no means exceed the max angle"
+                // -- the hood was over-extending and skipping the belt). Positive volts raise the
+                // hood: once at/above MAX_ANGLE never drive UP, once at/below MIN_ANGLE never drive
+                // DOWN, whatever the PID or the DPAD jog asks. MAX_ANGLE sits ~6.5 deg below the
+                // physical 44.5 stop, so a little coast after the cut never reaches the stop /
+                // skips the belt. Outside the branches above so it bounds BOTH the closed loop
+                // and the open-loop jog.
+                if (currentHoodAngle >= ShooterSubsystemConstants.MAX_ANGLE && hoodVolts > 0) {
+                    hoodVolts = 0;
+                }
+                if (currentHoodAngle <= ShooterSubsystemConstants.MIN_ANGLE && hoodVolts < 0) {
+                    hoodVolts = 0;
                 }
                 shooterAngle.setVoltage(hoodVolts);
                 lastHoodVolts = hoodVolts;

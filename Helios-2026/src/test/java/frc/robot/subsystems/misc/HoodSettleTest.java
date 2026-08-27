@@ -76,17 +76,20 @@ public class HoodSettleTest {
     }
 
     /**
-     * A HELD jog must escape the hysteresis band promptly. The setpoint ramps at
-     * HOOD_JOG_DEG_PER_SEC from zero error, and the loop stays held (0 V) until the error
-     * passes HOOD_REENGAGE_DEG -- so there is an unavoidable dead time of REENGAGE / rate at
-     * the start of every press. Too long and holding the DPAD reads as a broken control.
+     * The open-loop DPAD jog (2026-08-26) must stay inside the drive caps the closed loop is
+     * held to -- a jog voltage is still a voltage into a 20 A NEO 550, and UP must clear the
+     * ~7 V breakaway or holding the DPAD does nothing at all.
      */
     @Test
-    void aHeldJogEscapesTheReengageBandPromptly() {
-        double secondsToEscape = REENGAGE / ShooterSubsystemConstants.HOOD_JOG_DEG_PER_SEC;
-        assertTrue(secondsToEscape <= 0.5,
-            "a held DPAD must start the hood inside 0.5 s; takes " + secondsToEscape + " s at "
-                + ShooterSubsystemConstants.HOOD_JOG_DEG_PER_SEC + " deg/s");
+    void jogVoltsStayInsideTheDriveCaps() {
+        assertTrue(ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS > 0
+                && ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS
+                    <= ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE,
+            "up jog must be positive and within HOOD_MAX_UP_VOLTAGE");
+        assertTrue(ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS > 0
+                && ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS
+                    <= ShooterSubsystemConstants.HOOD_MAX_DOWN_VOLTAGE,
+            "down jog must be positive (the sign is applied at the binding) and within cap");
     }
 
     @Test
