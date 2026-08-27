@@ -196,7 +196,7 @@ public class SubsystemConstants {
             // Belt inversion. The two NEOs sit in different positions of ONE ~12:1 gearbox;
             // B is always the OPPOSITE of this value (set that way in HopperSubsystem). Flip
             // this single boolean to reverse the pair's feed direction -- never make them equal.
-            public static final boolean HOPPER_A_INVERTED = false;
+            public static final boolean HOPPER_A_INVERTED = true;
             
             //SPEED CONSTANTS
                 public static final double INDEXER_SPEED = 0.75;
@@ -584,18 +584,22 @@ public class SubsystemConstants {
                 // stay above the ~7 V breakaway or the hood will not move at all.
                 public static double HOOD_JOG_UP_VOLTS = 7.0;    // [assumed] = measured breakaway
                 public static double HOOD_JOG_DOWN_VOLTS = 3.0;  // [assumed] gravity assists here
-                // DPAD UP STEP (2026-08-27, team request: "dpad right makes the hood go up
-                // 5 degrees ... it adds 5 degrees to the base angle"). One press of DPAD RIGHT
-                // sends the hood to base + this and no further -- pressing right again does
-                // nothing, because that is an absolute target it has already reached. DPAD LEFT
-                // returns it to the base (the enable-time datum), after which right raises it again.
-                // The base is re-read from the raw encoder on every enable (captureHoodDatum).
+                // DPAD UP STEP (2026-08-27, team direction: "in teleop the hood should go up
+                // 5 degrees every press"). EVERY press of DPAD RIGHT raises the hood by this
+                // much, measured from where the hood IS at the moment of the press. DPAD LEFT
+                // returns it to the base (the enable-time datum, re-read from the raw encoder on
+                // every enable -- see captureHoodDatum).
                 //
-                // RAW UNITS, deliberately NOT converted: the team asked for 5 on the same scale as
-                // the raw encoder readout, so this is 5 raw units = 0.67 PHYSICAL degrees of hood.
+                // RAW UNITS, deliberately NOT converted: the team asked for 5 on the same scale
+                // as the raw encoder readout, so this is 5 raw units = 0.67 PHYSICAL degrees.
                 // Multiply by HOOD_UNITS_PER_DEG (-> 37.5) if 5 physical degrees was meant.
-                // The hood STOPS on the measured angle, so expect some overshoot plus mechanical
-                // coast; TODO on robot, trim if it lands high.
+                //
+                // WHAT ACTUALLY HAPPENS ON THE ROBOT, accepted knowingly by the team: a press
+                // moves 25-55 raw units (3-7 physical deg), NOT 5. The drive is open loop at the
+                // ~7.5 V breakaway and the stop is checked once per 20 ms loop, so one loop of
+                // powered travel is already bigger than this step -- the stop cannot resolve a
+                // move this short, and no lower voltage moves the hood at all. Raising this
+                // above ~60 would make the step and the stop agree; lowering it changes nothing.
                 public static double HOOD_UP_STEP_UNITS = 5.0;
                 // Hard stop on how long ONE DPAD move may drive. It normally ends on the
                 // encoder; this ends it when the hood does not move at all (the 2026-08-26 trace

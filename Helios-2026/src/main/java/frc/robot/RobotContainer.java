@@ -74,21 +74,19 @@ public class RobotContainer {
     // KILL SWITCH for the teleop DPAD hood moves (2026-08-27). false = the bindings are not
     // registered at all, so nothing can drive the hood from the driver station; the hood still
     // holds on its brake and commanded shot angles are unaffected. See the bindings below.
-    // STILL GATED OFF (team decision 2026-08-27, after the raw-unit rework). The unverified
-    // SCALE that first closed this gate is gone -- the hood angle is the raw encoder reading
-    // now -- but the other half of the reason stands: these moves stop on the MEASURED angle,
-    // and the measurement cannot resolve a move this short. A powered hood steps 25-55 raw
-    // units per 20 ms loop, so the first loop of a base + 5 press overshoots the target by
-    // 20-50 units (3-7 physical deg) before the stop can fire, every press, toward the top
-    // stop -- the belt grind of 2026-08-26. Driving softer is not a fix either: the hood does
-    // not break away below ~7.5 V, so ~25 units is the smallest move the mechanism can make.
-    // To re-enable, the step has to be BIGGER than one loop of powered travel (~60 units,
-    // ~8 physical deg) -- team's call, not a code decision. The TEST-mode held jog below stays
-    // live: it is supervised and stops on release.
-    private static final boolean HOOD_DPAD_MOVES_ENABLED = false;
+    // ON (team direction 2026-08-27: "in teleop the hood should go up 5 degrees every
+    // press"), with the overshoot accepted knowingly. THE RISK, restated so it is not
+    // rediscovered on the belt: the move stops on the MEASURED angle, and a powered hood steps
+    // 25-55 raw units per 20 ms loop, so ONE press actually moves 25-55 units (3-7 physical
+    // deg), not 5 -- the stop cannot resolve a move shorter than its own sample. Driving
+    // softer is not available either: the hood does not break away below ~7.5 V. So each press
+    // is roughly one physical "notch" of ~3-7 deg, and about 6-12 of them reach the ceiling
+    // guard at base + one full travel, which is what protects the top stop.
+    // Set false to kill the teleop bindings outright; the TEST-mode held jog is separate.
+    private static final boolean HOOD_DPAD_MOVES_ENABLED = true;
 
-    // Hood: DPAD LEFT/RIGHT are PRESSED to send the hood to the base / base + HOOD_UP_STEP_UNITS
-    // in teleop, and
+    // Hood: DPAD LEFT/RIGHT are PRESSED to send the hood to the base / one HOOD_UP_STEP_UNITS
+    // step above where it currently sits, in teleop, and
     // HELD to jog it open loop at HOOD_JOG_UP/DOWN_VOLTS in test mode
     // (ShooterSubsystem.jogHoodCommand). Jog speed is the voltage itself, so no SlewRateLimiter
     // and no setpoint ramp is involved.
@@ -272,21 +270,23 @@ public class RobotContainer {
                 joystick2.povDown().and(RobotModeTriggers.teleop())
                     .onTrue(shooterSS.trimRtSpeedCommand(-kRtSpeedTrimRpm));
 
-            // DPAD-LEFT/RIGHT (PRESS) = two hood positions (team request 2026-08-27). RIGHT
-            // raises to BASE + HOOD_UP_STEP_UNITS and stops there -- pressing it again does
-            // nothing, the target is absolute and already reached. The base is this enable's
-            // datum, re-read from the raw encoder every enable, so "up 5" is always 5 above
-            // where the hood was when the robot was enabled. LEFT returns the hood to that base,
-            // and RIGHT can raise it again after that. Still driven open loop at
-            // HOOD_JOG_*_VOLTS -- only the STOP is by angle, off the measured encoder -- so the
-            // stick-slip that killed the old setpoint step cannot come back. See
-            // ShooterSubsystem.moveHoodToCommand; the travel guards still bound the result.
+            // DPAD-RIGHT (PRESS) = raise the hood by HOOD_UP_STEP_UNITS, EVERY PRESS (team
+            // direction 2026-08-27). The target is read off the hood itself at the moment of
+            // the press -- current + step -- not off a stored setpoint, so presses keep working
+            // after the inevitable overshoot instead of going dead (see
+            // ShooterSubsystem.getHoodAngle). DPAD-LEFT still returns the hood all the way to
+            // this enable's base in one press.
+            //
+            // Driven open loop at HOOD_JOG_*_VOLTS; only the STOP is by angle, off the measured
+            // encoder. See ShooterSubsystem.moveHoodToCommand -- the ceiling and floor guards
+            // in periodic() still bound the result, and HOOD_MOVE_TIMEOUT_SEC ends a press that
+            // produces no motion at all.
                 if (HOOD_DPAD_MOVES_ENABLED) {
                     joystick2.povLeft().and(RobotModeTriggers.teleop())
                         .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
                     joystick2.povRight().and(RobotModeTriggers.teleop())
                         .onTrue(shooterSS.moveHoodToCommand(
-                            () -> shooterSS.getHoodFloorAngle()
+                            () -> shooterSS.getHoodAngle()
                                 + ShooterSubsystemConstants.HOOD_UP_STEP_UNITS));
                 }
 

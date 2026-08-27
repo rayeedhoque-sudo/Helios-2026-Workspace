@@ -9,9 +9,8 @@ import org.junit.jupiter.api.Test;
 import frc.robot.Constants.SubsystemConstants.ShooterSubsystemConstants;
 
 /**
- * The two DPAD hood positions (2026-08-27): RIGHT raises to BASE + HOOD_UP_STEP_UNITS and no
- * further, LEFT returns to the base, RIGHT works again after that. What makes "no further" true
- * is that the target is an ABSOLUTE angle, so a second press is already satisfied -- pinned here.
+ * The DPAD hood moves (2026-08-27): RIGHT raises the hood by HOOD_UP_STEP_UNITS on EVERY press,
+ * measured from where the hood currently is; LEFT returns it to this enable's base in one press.
  *
  * FLOOR is a RAW ENCODER reading now (the hood angle is the raw encoder angle), so the test uses
  * the live resting value rather than a physical degree.
@@ -34,13 +33,35 @@ public class HoodMoveTest {
         assertTrue(ShooterSubsystem.hoodMoveReached(FLOOR - 1, FLOOR, false), "undershot is there");
     }
 
-    /** Press RIGHT again at the preset: already reached, so the move ends without driving. */
+    /**
+     * EVERY press steps again, and it steps from the HOOD, not from the last target. This is
+     * what keeps presses alive through the open-loop overshoot: a press that lands 40 units
+     * past its 5-unit target must leave the next press asking for 5 above THAT, not for a
+     * target the hood has already sailed past (which would be already-satisfied and do nothing).
+     */
     @Test
-    void aSecondUpPressIsAlreadySatisfied() {
-        assertTrue(ShooterSubsystem.hoodMoveReached(TARGET, TARGET, true),
-            "the hood may never be raised past the preset by repeated presses");
-        // ...and the same for the overshoot the open-loop stop inevitably leaves behind.
-        assertTrue(ShooterSubsystem.hoodMoveReached(TARGET + 1.2, TARGET, true));
+    void everyPressStepsAgainFromWhereTheHoodActuallyIs() {
+        double step = ShooterSubsystemConstants.HOOD_UP_STEP_UNITS;
+        double hood = FLOOR;
+        for (int press = 0; press < 5; press++) {
+            double target = hood + step;      // what the binding asks for, read off the hood
+            assertTrue(target > hood, "every press must ask for a rise");
+            assertEquals(target, ShooterSubsystem.clampDesiredAngle(target, FLOOR, true), 1e-9,
+                "and the clamp must let it through");
+            assertFalse(ShooterSubsystem.hoodMoveReached(hood, target, true),
+                "a fresh press is never already-satisfied");
+            hood += 40;                        // the real overshoot: one powered loop, ~25-55
+        }
+        assertTrue(hood > FLOOR + 5 * step,
+            "five presses must have raised the hood, not stalled at the first target");
+    }
+
+    /** A press that has arrived stops driving -- including on the overshoot it leaves behind. */
+    @Test
+    void aPressStopsOnceItHasArrived() {
+        assertTrue(ShooterSubsystem.hoodMoveReached(TARGET, TARGET, true), "exactly there is there");
+        assertTrue(ShooterSubsystem.hoodMoveReached(TARGET + 40, TARGET, true),
+            "overshot is there -- the move must end, not chase back down");
     }
 
     /** The target must be reachable: above the floor and inside the travel window. */

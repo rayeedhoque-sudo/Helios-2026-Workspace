@@ -476,6 +476,17 @@ public class ShooterSubsystem extends SubsystemBase{
             return hoodFloorAngle(hoodBaseAngleDeg, hoodDatumValid);
         }
 
+        // Where the hood is right now, in raw encoder units. Public so DPAD-RIGHT can ask for a
+        // step RELATIVE TO THE HOOD rather than to a stored setpoint: one press at 7 V lands
+        // 25-55 units past the target (a powered loop is bigger than the step), and a target
+        // that stepped from itself would sit BELOW the hood afterwards -- every later press
+        // would be already-satisfied and do nothing, which is exactly the "clicks register and
+        // the hood never moves" failure of 2026-08-22. Reading the hood each press is
+        // self-correcting: the next target is always 5 above wherever it actually ended up.
+        public double getHoodAngle(){
+            return getShooterAngleDegrees();
+        }
+
         // DPAD UP/DOWN (press) = trim the RT flywheel target by rpmDelta motor RPM (team request
         // 2026-08-22). Takes effect on the NEXT loop of a live shot too, since
         // flywheelOnlyShotCommand re-reads the field every loop. runOnce, so a press is one step.
