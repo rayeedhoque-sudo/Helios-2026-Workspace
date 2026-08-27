@@ -124,9 +124,9 @@ public class HoodTrackingTest {
         assertEquals(Math.min(ShooterSubsystemConstants.MAX_ANGLE, base + window),
             ShooterSubsystem.clampDesiredAngle(999, base, true), 1e-9,
             "cannot be commanded further up than the window allows");
-        assertEquals(Math.max(ShooterSubsystemConstants.MIN_ANGLE, base - window),
+        assertEquals(base,
             ShooterSubsystem.clampDesiredAngle(-999, base, true), 1e-9,
-            "cannot be commanded further down than the window allows");
+            "can never be commanded BELOW the enable-time datum");
     }
 
     @Test
@@ -198,9 +198,30 @@ public class HoodTrackingTest {
             setpoint = ShooterSubsystem.clampDesiredAngle(
                 setpoint - STEP, base, true);
         }
-        assertEquals(Math.max(ShooterSubsystemConstants.MIN_ANGLE,
-                base - ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG),
-            setpoint, 1e-9, "100 steps down must stop at the other edge");
+        assertEquals(base, setpoint, 1e-9,
+            "100 steps down must stop at the enable-time datum, never below it");
+    }
+
+    /**
+     * The floor is the ENABLE-TIME DATUM, whether that sits above or below the fixed MIN_ANGLE
+     * soft limit -- a hood enabled raised cannot be driven back down past where it started,
+     * and a hood enabled resting below MIN_ANGLE is still not dragged up to it. Without a
+     * datum there is nothing measured to floor against, so MIN_ANGLE stands in. The one
+     * exception is a hood enabled above MAX_ANGLE, which must still be able to come down to
+     * it -- covered by enablingAboveTheCeilingIsHoldThenDownOnly.
+     */
+    @Test
+    void theFloorIsTheEnableTimeDatum() {
+        double resting = ShooterSubsystemConstants.MIN_ANGLE - 1.8;   // the ~3.2 deg rest
+        assertEquals(resting, ShooterSubsystem.hoodFloorAngle(resting, true), 1e-9);
+        assertEquals(resting, ShooterSubsystem.clampDesiredAngle(-999, resting, true), 1e-9);
+        double raised = 30.0;
+        assertEquals(raised, ShooterSubsystem.hoodFloorAngle(raised, true), 1e-9);
+        assertEquals(raised, ShooterSubsystem.clampDesiredAngle(5.0, raised, true), 1e-9,
+            "a commanded shot angle below the enable position is floored too");
+        assertEquals(ShooterSubsystemConstants.MIN_ANGLE,
+            ShooterSubsystem.hoodFloorAngle(raised, false), 1e-9,
+            "no datum yet -> the fixed soft limit stands in");
     }
 
     /** One click must move the setpoint by exactly the step, mid-range. */

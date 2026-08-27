@@ -515,10 +515,10 @@ public class ShooterSubsystem extends SubsystemBase{
             return rawDelta * ShooterSubsystemConstants.HOOD_DEG_PER_RAW_UNIT;
         }
 
-        // Clamp a requested angle into what the hood can actually reach: the usual soft limits,
-        // AND no more than HOOD_TRAVEL_WINDOW_DEG from where the hood sat when the robot was
-        // enabled. Wherever it was enabled, a setpoint can never ask for more travel than the
-        // mechanism has.
+        // Clamp a requested angle into what the hood can actually reach: never BELOW the
+        // enable-time datum (hoodFloorAngle), and never more than HOOD_TRAVEL_WINDOW_DEG ABOVE
+        // it. Wherever it was enabled, a setpoint can never ask for more travel than the
+        // mechanism has, and never asks for a descent past where this enable started.
         //
         // THE SOFT BAND MAY NEVER DEMAND MOTION (2026-08-26, team request: "it should not move
         // at all when enabled"). The hood RESTS at ~3.2 deg, below the 5.0 deg MIN_ANGLE floor.
@@ -536,15 +536,37 @@ public class ShooterSubsystem extends SubsystemBase{
         // low <= baseAngleDeg <= high always holds now, so the limits can no longer cross and
         // the old degenerate-window branch is gone. Package-private + static for HoodTrackingTest.
         static double clampDesiredAngle(double angle, double baseAngleDeg, boolean datumValid){
-            double low = ShooterSubsystemConstants.MIN_ANGLE;
+            double low = hoodFloorAngle(baseAngleDeg, datumValid);
             double high = ShooterSubsystemConstants.MAX_ANGLE;
             if (datumValid) {
-                low = Math.min(low, baseAngleDeg);   // never demand a rise to reach the floor
                 high = Math.max(high, baseAngleDeg); // never demand a drop to reach the ceiling
-                low = Math.max(low, baseAngleDeg - ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG);
                 high = Math.min(high, baseAngleDeg + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG);
             }
-            return MathUtil.clamp(angle, low, high);
+            return MathUtil.clamp(angle, low, Math.max(low, high));
+        }
+
+        // THE FLOOR THE HOOD MAY NEVER GO BELOW (team request 2026-08-27): the enable-time
+        // datum itself. hoodBaseAngleDeg is re-captured from the raw encoder on every
+        // disable -> enable edge (see captureHoodDatum), so the floor is wherever the hood
+        // actually sat when this enable started -- not a fixed number, and not carried over
+        // from the last session. Before any datum exists the fixed MIN_ANGLE soft limit stands
+        // in, since there is nothing measured to floor against yet.
+        //
+        // This replaces the old base - HOOD_TRAVEL_WINDOW_DEG lower edge, which let the DPAD
+        // walk the hood a whole window BELOW the enable position and into the bottom stop.
+        // CONSEQUENCE, on purpose: enable the robot with the hood already raised and it cannot
+        // be lowered past that point for the rest of the enable -- by the DPAD or by a
+        // commanded shot angle. Enable with the hood resting (~3.2 deg), which is the normal
+        // case, and nothing changes. The one exception is a hood enabled above MAX_ANGLE --
+        // see the cap below. Used by BOTH clampDesiredAngle and the hard travel guard in
+        // periodic(), so the open-loop DPAD drive is bounded by it too.
+        // Package-private + static for HoodTrackingTest.
+        static double hoodFloorAngle(double baseAngleDeg, boolean datumValid){
+            // Capped at MAX_ANGLE: a hood enabled ABOVE the safe ceiling (already in the
+            // belt-skip zone) must still be able to come DOWN to it. That is the one case
+            // where descending below the enable position is required, not forbidden.
+            return datumValid ? Math.min(baseAngleDeg, ShooterSubsystemConstants.MAX_ANGLE)
+                              : ShooterSubsystemConstants.MIN_ANGLE;
         }
 
         // The datum angle for a fresh capture: the absolute map, CLAMPED into the physical
@@ -1133,15 +1155,16 @@ public class ShooterSubsystem extends SubsystemBase{
                 }
                 // HARD travel guard (team request 2026-07-18: "by no means exceed the max angle"
                 // -- the hood was over-extending and skipping the belt). Positive volts raise the
-                // hood: once at/above MAX_ANGLE never drive UP, once at/below MIN_ANGLE never drive
-                // DOWN, whatever the PID or the DPAD jog asks. MAX_ANGLE sits ~6.5 deg below the
+                // hood: once at/above MAX_ANGLE never drive UP, once at/below the enable-time floor
+                // (hoodFloorAngle -- the datum, re-read from the raw encoder every enable) never
+                // drive DOWN, whatever the PID or the DPAD jog asks. MAX_ANGLE sits ~6.5 deg below the
                 // physical 44.5 stop, so a little coast after the cut never reaches the stop /
                 // skips the belt. Outside the branches above so it bounds BOTH the closed loop
                 // and the open-loop jog.
                 if (currentHoodAngle >= ShooterSubsystemConstants.MAX_ANGLE && hoodVolts > 0) {
                     hoodVolts = 0;
                 }
-                if (currentHoodAngle <= ShooterSubsystemConstants.MIN_ANGLE && hoodVolts < 0) {
+                if (currentHoodAngle <= hoodFloorAngle(hoodBaseAngleDeg, hoodDatumValid) && hoodVolts < 0) {
                     hoodVolts = 0;
                 }
                 shooterAngle.setVoltage(hoodVolts);
