@@ -230,9 +230,9 @@ public class SubsystemConstants {
             public static final int SHOOTER_ID_C = 15;
             public static final int SHOOTER_ID_D = 16;
             //PID - Angle
-                public static double SHOOTER_ANGLE_kP = 0.4;
+                public static double SHOOTER_ANGLE_kP = 0.1;
                 public static double SHOOTER_ANGLE_kI = 0.0;
-                public static double SHOOTER_ANGLE_kD = 0.0;
+                public static double SHOOTER_ANGLE_kD = 0.5;
             //PID - Speed
                 public static double SHOOTER_SPEED_kP = 0.2;
                 public static double SHOOTER_SPEED_kI = 0.0;
@@ -295,13 +295,25 @@ public class SubsystemConstants {
                 // stop angles, neither of which moves when the encoder re-zeroes.
                 public static double HOOD_DEG_AT_FULL_UP   = 44.5;
                 public static double HOOD_DEG_AT_FULL_DOWN = 3.224;
-                // Raw units spanned by the hood's ENTIRE travel, bottom stop to top stop (measured
-                // 2026-08-24: 650.4 - 360.0 unwrapped). A DISTANCE, not a position -- an encoder
-                // that re-zeroes does not change it. TODO on robot: this is the one hood number a
-                // REV Hardware Client edit can still invalidate (positionConversionFactor is never
-                // pinned in code), and three sweeps have given three spans (77.6, 263.6, 290.4).
-                // If the hood tracks at the wrong RATE, re-measure this; the offset no longer matters.
-                public static double HOOD_RAW_UNITS_PER_FULL_TRAVEL = 290.4;
+                // Raw units spanned by the hood's ENTIRE travel, bottom stop to top stop. A
+                // DISTANCE, not a position -- an encoder that re-zeroes does not change it.
+                //
+                // DERIVED FROM GEOMETRY, not from a hand sweep (2026-08-27): the encoder is belted
+                // 1:1 to the 24T pinion (team-confirmed pulley), and the 24T -> 180T sector is
+                // 7.5:1 to the hood, so the whole 41.276 deg stroke is 41.276 x 7.5 = 309.57 raw
+                // units. Geometry wins here because hand sweeps cannot agree: four stop-to-stop
+                // sweeps have given 77.6, 263.6, 290.4, and (two on 08-27) 328 and 347. Pressing a
+                // hood against its hard stop by hand adds compliance and backlash, which inflates
+                // the span -- the 08-27 pair bracket the geometric value from above, and the two
+                // top-of-stroke readings differed by 15 units (~2 deg) on their own.
+                //
+                // The old 290.4 made the code over-report travel by ~6.6%, so the hood stopped
+                // short of every commanded angle (a commanded 30 deg moved ~28).
+                //
+                // TODO on robot: this is the one hood number a REV Hardware Client edit can still
+                // invalidate (positionConversionFactor is never pinned in code). If the hood tracks
+                // at the wrong RATE, re-measure; the encoder's offset no longer matters at all.
+                public static double HOOD_RAW_UNITS_PER_FULL_TRAVEL = 309.6;
                 // CONTINUOUS TRACKING (2026-08-22). The absolute reading cannot be trusted on its
                 // own: the encoder drifts against the hood over a session (the hood physically
                 // cannot pass its up stop at raw ~55-71, yet readings wander toward the split),
