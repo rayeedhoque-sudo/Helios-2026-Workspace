@@ -192,11 +192,6 @@ public class SubsystemConstants {
             // Earlier "kicker not working" was NOT the ID: the kicker only fires when the
             // flywheels are at speed (ShooterSubsystem.isReadyToShoot), and the shooter was disabled.
             public static final int KICKER_MOTOR_ID = 17;
-
-            // Belt inversion. The two NEOs sit in different positions of ONE ~12:1 gearbox;
-            // B is always the OPPOSITE of this value (set that way in HopperSubsystem). Flip
-            // this single boolean to reverse the pair's feed direction -- never make them equal.
-            public static final boolean HOPPER_A_INVERTED = true;
             
             //SPEED CONSTANTS
                 public static final double INDEXER_SPEED = 0.75;
