@@ -71,7 +71,8 @@ public class RobotContainer {
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
-    // Hood: DPAD LEFT/RIGHT are PRESSED to step the hood HOOD_STEP_DEG down/up in teleop, and
+    // Hood: DPAD LEFT/RIGHT are PRESSED to send the hood to the floor / HOOD_UP_PRESET_DEG in
+    // teleop, and
     // HELD to jog it open loop at HOOD_JOG_UP/DOWN_VOLTS in test mode
     // (ShooterSubsystem.jogHoodCommand). Jog speed is the voltage itself, so no SlewRateLimiter
     // and no setpoint ramp is involved.
@@ -255,15 +256,18 @@ public class RobotContainer {
                 joystick2.povDown().and(RobotModeTriggers.teleop())
                     .onTrue(shooterSS.trimRtSpeedCommand(-kRtSpeedTrimRpm));
 
-            // DPAD-LEFT/RIGHT (PRESS) = move the hood down / up by HOOD_STEP_DEG (team request
-            // 2026-08-27, replacing the held rate jog). Still driven open loop at
-            // HOOD_JOG_*_VOLTS -- only the STOP is by angle, off the measured encoder -- so the
-            // stick-slip that killed the old setpoint step cannot come back. See
-            // ShooterSubsystem.stepHoodCommand; the travel guards still bound the result.
+            // DPAD-LEFT/RIGHT (PRESS) = two hood positions (team request 2026-08-27). RIGHT
+            // raises to HOOD_UP_PRESET_DEG and stops there -- pressing it again does nothing,
+            // the target is absolute and already reached. LEFT returns the hood to the floor
+            // (this enable's datum), and RIGHT can raise it again after that. Still driven open
+            // loop at HOOD_JOG_*_VOLTS -- only the STOP is by angle, off the measured encoder --
+            // so the stick-slip that killed the old setpoint step cannot come back. See
+            // ShooterSubsystem.moveHoodToCommand; the travel guards still bound the result.
                 joystick2.povLeft().and(RobotModeTriggers.teleop())
-                    .onTrue(shooterSS.stepHoodCommand(-ShooterSubsystemConstants.HOOD_STEP_DEG));
+                    .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
                 joystick2.povRight().and(RobotModeTriggers.teleop())
-                    .onTrue(shooterSS.stepHoodCommand(ShooterSubsystemConstants.HOOD_STEP_DEG));
+                    .onTrue(shooterSS.moveHoodToCommand(
+                        () -> ShooterSubsystemConstants.HOOD_UP_PRESET_DEG));
 
             drivetrain.registerTelemetry(logger::telemeterize);
 

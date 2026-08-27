@@ -19,9 +19,9 @@ public class SubsystemConstants {
             // aim/align command -- rotateToAngle, searchAndAlignCommand, aimUntilAligned. These
             // were three duplicated 5.0 literals in CommandSwerveDrivetrain; one copy so there is
             // a single thing to tune. Radians in, rad/s out. TODO tune on robot.
-            public static double HEADING_kP = 4.0;
+            public static double HEADING_kP = 1.0;
             public static double HEADING_kI = 0.0;
-            public static double HEADING_kD = 8.0;
+            public static double HEADING_kD = 1.0;
         }
 
         public static class LightSensor{
@@ -524,19 +524,22 @@ public class SubsystemConstants {
                 // stay above the ~7 V breakaway or the hood will not move at all.
                 public static double HOOD_JOG_UP_VOLTS = 7.0;    // [assumed] = measured breakaway
                 public static double HOOD_JOG_DOWN_VOLTS = 3.0;  // [assumed] gravity assists here
-                // DPAD STEP SIZE (2026-08-27, team request): one press of DPAD right/left moves
-                // the hood this many degrees up/down, driven at the HOOD_JOG_*_VOLTS above and
-                // STOPPED on the measured hood angle (see ShooterSubsystem.stepHoodCommand).
-                // This is a measured-travel THRESHOLD, not a guaranteed step: isFinished is
-                // checked after periodic() has already applied a loop of voltage, so expect
-                // roughly a degree of overshoot plus mechanical coast. TODO on robot: if the
-                // observed step reads long, trim this down; do NOT pre-compensate blind.
-                public static double HOOD_STEP_DEG = 5.0;
-                // Hard stop on how long one DPAD step may drive. The step normally ends on the
+                // DPAD UP PRESET (2026-08-27, team request): one press of DPAD RIGHT sends the
+                // hood here and no further -- pressing right again does nothing, because this is
+                // an absolute target the hood has already reached. DPAD LEFT returns it to the
+                // floor (the enable-time datum), after which right raises it again.
+                // Comfortably below MAX_ANGLE (38), so it never approaches the belt-skip inset.
+                // The hood STOPS on the measured angle, so expect roughly a degree of overshoot
+                // plus mechanical coast; TODO on robot, trim if it lands high.
+                public static double HOOD_UP_PRESET_DEG = 30.0;
+                // Hard stop on how long ONE DPAD move may drive. It normally ends on the
                 // encoder; this ends it when the hood does not move at all (the 2026-08-26 trace
                 // showed -6 V for 4.5 s and zero motion), so a dead/jammed hood cannot sit
-                // energized. Generous: 5 deg of travel takes ~0.15 s at the observed jog rate.
-                public static double HOOD_STEP_TIMEOUT_SEC = 1.0;
+                // energized. The full floor -> preset stroke is ~27 deg = ~0.6 s at the observed
+                // jog rate, so 3 s is generous for the UP stroke; the gravity-assisted DOWN
+                // stroke at 3 V is slower and unmeasured. TODO on robot: shorten this to just
+                // over the real worst-case stroke once both directions have been timed.
+                public static double HOOD_MOVE_TIMEOUT_SEC = 3.0;
                 // HOOD_REENGAGE_DEG is the degree at which the hood needs to readjust hold
                 public static double HOOD_REENGAGE_DEG = 0.75;
                 // HOOD_LOWER_FF_VOLTS is self explanatory, based off raise volts

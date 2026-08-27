@@ -35,6 +35,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import java.util.function.DoubleSupplier;
+
 import java.util.OptionalDouble;
 
 import frc.robot.Constants.FieldConstants;
@@ -416,8 +418,12 @@ public class ShooterSubsystem extends SubsystemBase{
             return Commands.runEnd(() -> hoodJogVolts = volts, () -> hoodJogVolts = 0);
         }
 
-        // DPAD LEFT/RIGHT (press) = move the hood a FIXED amount, left down / right up (team
-        // request 2026-08-27). One press = one step of HOOD_STEP_DEG.
+        // DPAD LEFT/RIGHT (press) = send the hood to a FIXED angle, right up to
+        // HOOD_UP_PRESET_DEG, left all the way back down to the floor (team request
+        // 2026-08-27). Two positions, not a jog and not a step: press right and the hood rises
+        // to the preset and STOPS there -- pressing right again does nothing, because the
+        // target is an absolute angle it has already reached. Press left and it returns to the
+        // floor, after which right raises it again.
         //
         // This is NOT the per-click setpoint step that 5af2471 removed. That handed the
         // position loop a step it answered at full feedforward (a 2 deg click flew 9.5 deg).
@@ -426,32 +432,48 @@ public class ShooterSubsystem extends SubsystemBase{
         //
         // The voltage goes through hoodJogVolts, so periodic() still applies the feedback
         // sanity gate and the MIN/MAX hard travel guards exactly as for the held jog. The
-        // target is clamped with clampDesiredAngle (not a raw MIN/MAX clamp) so a hood parked
-        // outside the soft band is not dragged back into it, and a press already at the limit
-        // ends at once instead of pushing into the guard for the whole timeout.
+        // target is put through clampDesiredAngle (not a raw MIN/MAX clamp), so it can never
+        // ask for a rise past MAX_ANGLE or a descent below the enable-time floor.
+        //
+        // execute() drives 0 V once the target is reached rather than the jog voltage, so a
+        // press at the preset cannot creep the hood up by the one loop that runs before
+        // isFinished is checked. Leaning on the button changes nothing either: onTrue fires on
+        // the rising edge, and a re-press while the move is still running is swallowed.
         //
         // The timeout is load-bearing, not a formality: if the hood does not move (the
         // 2026-08-26 trace showed -6 V for 4.5 s producing no motion at all), this is the only
         // thing that ends the press. Drive is bounded by the guards and the 20 A smart limit
-        // throughout. A second press of the same direction while a step is still running is
-        // swallowed (one instance per binding) -- one step per press, by design.
+        // throughout.
         //
         // Requires NO subsystem, for the same reason jogHoodCommand does not: the RT shot group
         // runs kCancelIncoming and would block a requiring command for the whole hold.
-        public Command stepHoodCommand(double degreesDelta){
-            double volts = degreesDelta > 0
-                ? ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS
-                : -ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS;
+        public Command moveHoodToCommand(DoubleSupplier targetDegrees){
             double[] stopAt = new double[1];
+            boolean[] rising = new boolean[1];
             return new FunctionalCommand(
-                    () -> stopAt[0] = clampDesiredAngle(getShooterAngleDegrees() + degreesDelta,
-                                                        hoodBaseAngleDeg, hoodDatumValid),
-                    () -> hoodJogVolts = volts,
+                    () -> {
+                        stopAt[0] = clampDesiredAngle(targetDegrees.getAsDouble(),
+                                                      hoodBaseAngleDeg, hoodDatumValid);
+                        rising[0] = stopAt[0] > getShooterAngleDegrees();
+                    },
+                    () -> hoodJogVolts = hoodMoveReached(getShooterAngleDegrees(), stopAt[0], rising[0])
+                        ? 0
+                        : (rising[0] ? ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS
+                                     : -ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS),
                     interrupted -> hoodJogVolts = 0,
-                    () -> degreesDelta > 0
-                        ? getShooterAngleDegrees() >= stopAt[0]
-                        : getShooterAngleDegrees() <= stopAt[0])
-                .withTimeout(ShooterSubsystemConstants.HOOD_STEP_TIMEOUT_SEC);
+                    () -> hoodMoveReached(getShooterAngleDegrees(), stopAt[0], rising[0]))
+                .withTimeout(ShooterSubsystemConstants.HOOD_MOVE_TIMEOUT_SEC);
+        }
+
+        // Has a hood move arrived? Direction-aware: a rising move is done at or above the
+        // target, a falling one at or below it. Package-private + static for HoodMoveTest.
+        static boolean hoodMoveReached(double currentDeg, double targetDeg, boolean rising){
+            return rising ? currentDeg >= targetDeg : currentDeg <= targetDeg;
+        }
+
+        // The floor this enable: what DPAD-LEFT drives back down to. See hoodFloorAngle.
+        public double getHoodFloorAngle(){
+            return hoodFloorAngle(hoodBaseAngleDeg, hoodDatumValid);
         }
 
         // DPAD UP/DOWN (press) = trim the RT flywheel target by rpmDelta motor RPM (team request
