@@ -61,11 +61,9 @@ public class ShooterSubsystem extends SubsystemBase{
     // position) -- the safe state if the angle feedback ever misbehaves again. Re-enabled 2026-07-18
     // after getShooterAngleDegrees() was recalibrated to the absolute encoder's real two-point map
     // (HOOD_*_AT_FULL_UP / HOOD_*_AT_FULL_DOWN); the old motor-rotation math railed the hood.
-    // RE-ENABLED 2026-08-22 after the wrap fix was verified on the robot: a disabled hand
-    // sweep traced 3.2 deg (down stop) -> 44.7 deg (up stop) continuously, max 2.03 deg
-    // between samples straight through the rollover -- where the old map jumped 191 deg in
-    // one sample and drove the hood into the bottom stop. See unwrapHoodRaw() and
-    // HoodAngleMapTest. NOTE: the hood PID gains and HOOD_RAISE_FF_VOLTS were tuned against
+    // The absolute raw -> degrees map it refers to is DELETED (2026-08-27): the angle comes
+    // from the fixed enable-time datum plus accumulated raw deltas, so no raw reading is ever
+    // interpreted as a position. See captureHoodDatum. NOTE: the hood PID gains and HOOD_RAISE_FF_VOLTS were tuned against
     // the OLD broken mapping, so they are effectively untuned -- expect overshoot or
     // sluggishness and retune on robot.
     private static final boolean HOOD_CLOSED_LOOP_ENABLED = true;
@@ -302,30 +300,6 @@ public class ShooterSubsystem extends SubsystemBase{
         private double getShooterFlywheelVelocity(){
             return 
                 shooterA.getVelocity().getValueAsDouble() * ShooterSubsystemConstants.FLYWHEEL_ROTATIONS_PER_MOTOR_ROTATION * 2 * Math.PI * ShooterSubsystemConstants.FLYWHEEL_RADIUS_METERS ;
-        }
-
-        // Lift a raw hood encoder reading into the CONTINUOUS coordinate the anchors are
-        // expressed in. The hood's travel crosses the absolute encoder's 0/360 rollover
-        // (measured 2026-08-22: full DOWN raw 151.7, up through 359 -> 0, full UP raw 55.3),
-        // so a plain raw value is not monotonic across the stroke -- mid-travel the old map
-        // produced -86 deg .. +105 deg and the PID drove the hood into the bottom stop.
-        // Anything below the split lies past the rollover and belongs 360 higher.
-        // Package-private + static for HoodAngleMapTest.
-        static double unwrapHoodRaw(double raw){
-            return raw < ShooterSubsystemConstants.HOOD_RAW_WRAP_SPLIT ? raw + 360.0 : raw;
-        }
-
-        // Two-point linear map of the UNWRAPPED hood encoder reading -> PHYSICAL hood degrees,
-        // from the on-robot HARD-STOP anchors (SubsystemConstants): unwrapped 415.3 (full up) =
-        // 44.5 deg, unwrapped 151.7 (full down) = 3.224 deg. Anchored to the PHYSICAL stops, NOT
-        // the soft MIN/MAX_ANGLE limits, so insetting those limits never shifts this scale.
-        // Package-private + static for HoodAngleMapTest.
-        static double hoodDegreesFromRaw(double raw){
-            double unwrapped = unwrapHoodRaw(raw);
-            return ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP
-                + (unwrapped - ShooterSubsystemConstants.HOOD_RAW_AT_FULL_UP)
-                  * (ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN - ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP)
-                  / (ShooterSubsystemConstants.HOOD_RAW_AT_FULL_DOWN - ShooterSubsystemConstants.HOOD_RAW_AT_FULL_UP);
         }
 
         // Is a raw hood reading trustworthy enough to close the loop on? Package-private +
@@ -569,24 +543,15 @@ public class ShooterSubsystem extends SubsystemBase{
                               : ShooterSubsystemConstants.MIN_ANGLE;
         }
 
-        // The datum angle for a fresh capture: the absolute map, CLAMPED into the physical
-        // stops. The clamp is the defence against capturing a flipped reading -- the -4.3 deg
-        // and +52 deg the fixed split produces either side of raw 103.5 both land back on a
-        // real stop instead of seeding the tracker with a fiction.
-        // Package-private + static for HoodTrackingTest.
-        static double hoodDatumAngle(double raw){
-            return MathUtil.clamp(hoodDegreesFromRaw(raw),
-                ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN,
-                ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP);
-        }
-
-        // Live hood angle: the datum plus everything travelled since. Falls back to the raw
-        // absolute map only before a datum exists (first loops after boot, robot never enabled).
+        // Live hood angle: the datum plus everything travelled since. Before a datum exists
+        // (first loops after boot, robot never enabled) the hood has not been driven, so the
+        // resting bottom stop is the honest answer -- there is nothing to interpret a raw
+        // reading against.
         private double getShooterAngleDegrees(){
             if (hoodDatumValid) {
                 return hoodBaseAngleDeg + hoodRelativeDeg;
             }
-            return hoodDatumAngle(shooterAngleEncoder.getPosition());
+            return ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN;
         }
 
         // Capture a fresh datum HERE: this position becomes the reference every later reading
@@ -611,7 +576,22 @@ public class ShooterSubsystem extends SubsystemBase{
         }
 
         private void captureHoodDatum(double raw){
-            hoodBaseAngleDeg = hoodDatumAngle(raw);
+            // THE DATUM IS A CONSTANT, NOT A READING (2026-08-27, team direction: "the code has
+            // to work no matter what the encoder angle is"). Every enable assumes the hood is
+            // sitting on its bottom stop, which is where it rests. The raw value is kept only as
+            // the delta reference (hoodLastRaw) -- it is never turned into an angle.
+            //
+            // This is what makes an encoder re-zero a non-event. The absolute map it replaces
+            // read the resting hood at raw 311.169 as 44.5 deg (the TOP stop), so the travel
+            // guard killed every upward volt and the DPAD was dead -- captured live 2026-08-27.
+            //
+            // ponytail: the ceiling is only as true as that assumption. Enable with the hood
+            // ALREADY RAISED and the code believes 3.224 deg, so a commanded MAX_ANGLE drives
+            // ~35 deg of real travel from wherever it actually is -- through the top stop and
+            // into the belt-skip zone MAX_ANGLE exists to avoid. Drop the hood to its rest
+            // before enabling. Upgrade path if that ever bites: a bottom limit switch, or a
+            // slow find-the-stop homing move on the first enable.
+            hoodBaseAngleDeg = ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN;
             hoodRelativeDeg = 0;
             hoodLastRaw = raw;
             hoodDatumValid = true;

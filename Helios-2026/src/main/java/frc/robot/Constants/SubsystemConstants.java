@@ -285,18 +285,23 @@ public class SubsystemConstants {
                 // ShooterSubsystem configures the hood with kNoResetSafeParameters specifically to
                 // keep whatever was flashed, so anyone opening the REV Hardware Client silently
                 // re-scales the hood and these anchors go stale again. Pin it in code to stop this.
-                public static double HOOD_RAW_AT_FULL_UP   = 650.4;
+                // The RAW ANCHORS ARE GONE (2026-08-27). They were absolute POSITIONS, and the
+                // encoder's zero offset moves: live capture found the hood resting at raw 311.169,
+                // inside the arc the anchors said travel never occupies, so the map read the bottom
+                // rest as the TOP stop (base 44.5 deg) and the travel guard killed every upward
+                // volt -- the DPAD was dead. Nothing maps a raw reading to an angle any more; raw is
+                // used ONLY for frame-to-frame DELTAS, which no offset can affect. What survives is
+                // the SCALE (how many raw units the hood's whole travel spans) and the two PHYSICAL
+                // stop angles, neither of which moves when the encoder re-zeroes.
                 public static double HOOD_DEG_AT_FULL_UP   = 44.5;
-                public static double HOOD_RAW_AT_FULL_DOWN = 360.0;
                 public static double HOOD_DEG_AT_FULL_DOWN = 3.224;
-                // Wrap split for the hood absolute encoder, in RAW units. Travel runs raw ~359.6
-                // (down stop) THROUGH the 0/360 rollover up to ~290.4 (up stop), so the hood
-                // occupies [359.6, 360) + [0, 290.4] and NEVER the ~69-unit arc between 290.4 and
-                // 359.6. The split sits at that arc's midpoint -- as far from either end of travel
-                // as possible. A raw reading below the split is past the rollover and gets +360,
-                // which keeps the map continuous across zero (raw 359.9 -> 3.210 deg, raw 0.1 ->
-                // 3.238 deg). At the old 103.5 the split cut straight through live travel.
-                public static double HOOD_RAW_WRAP_SPLIT = 325.0;
+                // Raw units spanned by the hood's ENTIRE travel, bottom stop to top stop (measured
+                // 2026-08-24: 650.4 - 360.0 unwrapped). A DISTANCE, not a position -- an encoder
+                // that re-zeroes does not change it. TODO on robot: this is the one hood number a
+                // REV Hardware Client edit can still invalidate (positionConversionFactor is never
+                // pinned in code), and three sweeps have given three spans (77.6, 263.6, 290.4).
+                // If the hood tracks at the wrong RATE, re-measure this; the offset no longer matters.
+                public static double HOOD_RAW_UNITS_PER_FULL_TRAVEL = 290.4;
                 // CONTINUOUS TRACKING (2026-08-22). The absolute reading cannot be trusted on its
                 // own: the encoder drifts against the hood over a session (the hood physically
                 // cannot pass its up stop at raw ~55-71, yet readings wander toward the split),
@@ -314,7 +319,7 @@ public class SubsystemConstants {
                 // left the incremental tracker on a different scale than the absolute map.
                 public static double HOOD_DEG_PER_RAW_UNIT =
                     (HOOD_DEG_AT_FULL_UP - HOOD_DEG_AT_FULL_DOWN)
-                        / (HOOD_RAW_AT_FULL_UP - HOOD_RAW_AT_FULL_DOWN);   // ~0.1421 deg/unit
+                        / HOOD_RAW_UNITS_PER_FULL_TRAVEL;   // ~0.1421 deg/unit
                 // Ignore deltas smaller than this (raw units): measured encoder noise is +-0.08,
                 // and noise must never accumulate into phantom travel. 0.2 clears it with margin
                 // and costs 0.03 deg of resolution -- far below the 0.5 deg angle tolerance.
@@ -324,18 +329,14 @@ public class SubsystemConstants {
                 // travel (the logged hand sweeps peaked at ~1.6 units per loop). A dropped/garbled
                 // frame lands here instead of jumping the tracker.
                 public static double HOOD_RAW_MAX_STEP = 20.0;
-                // How far the hood may be commanded from its enable-time position (deg, team
-                // choice 2026-08-22). Matches the usable MIN_ANGLE..MAX_ANGLE band, so a setpoint
-                // can never ask for more travel than the mechanism has, wherever it was enabled.
-                public static double HOOD_TRAVEL_WINDOW_DEG = 33.0;
-                // Sanity band for the UNWRAPPED hood encoder reading (apply the wrap split FIRST):
-                // the anchors above +- ~1.5 deg of travel of slack. Outside this band the feedback
-                // is treated as FAULTED (dead encoder, boot-transient frames, wiring damage) and
-                // periodic() holds the hood at 0 V instead of closing the loop on garbage.
-                // Widened 2026-08-22 alongside the re-anchor -- the old [96, 208] RAW band both
-                // rejected most of the real travel AND accepted post-wrap garbage.
-                public static double HOOD_RAW_SANE_MIN = 142.0;   // unwrapped
-                public static double HOOD_RAW_SANE_MAX = 425.0;   // unwrapped
+                // How far the hood may be commanded from its enable-time position (deg). This is
+                // the hood's FULL physical travel now: with the datum fixed at the bottom rest
+                // (see ShooterSubsystem.captureHoodDatum) the window no longer needs to bound
+                // anything on its own -- MIN_ANGLE/MAX_ANGLE do that -- and 33.0 would have capped
+                // every commanded shot angle at 3.224 + 33 = 36.2, permanently 1.8 deg below the
+                // MAX_ANGLE the shot model asks for.
+                public static double HOOD_TRAVEL_WINDOW_DEG =
+                    HOOD_DEG_AT_FULL_UP - HOOD_DEG_AT_FULL_DOWN;   // 41.276
             //SHOT MODEL (distance -> velocity; quadratic-drag ballistics for the OFFICIAL FUEL
             // ball -- 5.91 in / 0.203-0.227 kg foam, Cd~0.5, manual sec.5.10.1 -- validated
             // against the no-drag closed form. Angle rule: FIXED at MAX_ANGLE (38 deg since the

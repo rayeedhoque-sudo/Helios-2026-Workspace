@@ -95,24 +95,30 @@ public class HoodTrackingTest {
         assertEquals(2.0 * DEG_PER_UNIT, ShooterSubsystem.hoodDeltaDegrees(2.0), 1e-9);
     }
 
-    // ---- datum capture: a flipped reading must not seed the tracker ----
+    // ---- datum capture: offset-independent by construction ----
 
+    /**
+     * THE DATUM IS A CONSTANT, NOT A READING (2026-08-27). No raw value is interpreted as a
+     * position any more, so an encoder that re-zeroes cannot move the reference. The bug this
+     * pins: the live hood resting at raw 311.169 was mapped to 44.5 deg (the TOP stop), which
+     * put the travel guard permanently in "never drive up" and killed the DPAD.
+     *
+     * captureHoodDatum is not static, so the property is pinned where it is reachable: the
+     * base every consumer sees is the bottom stop, and a full-height shot angle survives the
+     * clamp against it.
+     */
     @Test
-    void datumClampsAFlippedReadingBackOntoARealStop() {
-        // Either side of the split the map still has a cliff -- that is unavoidable with a
-        // fixed split. What matters is WHERE it sits: re-anchored 2026-08-24 the split is 325,
-        // inside the ~69-unit arc the hood never occupies, instead of 103.5 which cut through
-        // live travel. Both readings here are fictions; both must land on a stop.
-        assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP,
-            ShooterSubsystem.hoodDatumAngle(324.9), 1e-9, "+49 deg fiction clamps to the up stop");
-        assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN,
-            ShooterSubsystem.hoodDatumAngle(325.1), 1e-9, "-1.7 deg fiction clamps to the down stop");
-    }
-
-    @Test
-    void datumPassesThroughARealReading() {
-        assertEquals(ShooterSubsystem.hoodDegreesFromRaw(200.0),
-            ShooterSubsystem.hoodDatumAngle(200.0), 1e-9);
+    void theDatumIsTheBottomStopWhateverTheEncoderReads() {
+        double base = ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN;
+        assertEquals(base, ShooterSubsystem.hoodFloorAngle(base, true), 1e-9,
+            "the floor is the bottom stop, not something derived from a raw reading");
+        assertEquals(ShooterSubsystemConstants.MAX_ANGLE,
+            ShooterSubsystem.clampDesiredAngle(ShooterSubsystemConstants.MAX_ANGLE, base, true),
+            1e-9, "a commanded MAX_ANGLE must survive the clamp -- the travel window may not cap it");
+        assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP
+                - ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN,
+            ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG, 1e-9,
+            "the window is the hood's full travel, so it bounds nothing MIN/MAX_ANGLE does not");
     }
 
     // ---- travel window ----
