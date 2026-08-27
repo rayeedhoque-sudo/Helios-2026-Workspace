@@ -93,17 +93,8 @@ public class HopperSubsystem extends SubsystemBase{
             // motors fight. This matches the original 2026-07-14 direction test ("positive output
             // moves BOTH belts the same way"). If the belts feed BACKWARD (away from the shooter),
             // flip BOTH booleans together -- never just one.
-            //
-            // REVERSED 2026-08-27 (team observed the motors FIGHTING on B with both same-sign):
-            // A and B now get OPPOSITE inversion. This supersedes the 07-18 note above -- the
-            // same-sign pairing it prescribed is what is fighting today.
-            // TODO on robot: hold B. Belts should feed UP toward the shooter. If they run
-            // BACKWARD, swap the two booleans (A=true, B=false) -- keep them OPPOSITE, never
-            // make them equal again. If they still fight/stall at the 20 A limit, it is not
-            // inversion: use the TEST-mode LB/RB single-motor direction tests.
-            hopperConfig.inverted(HopperSubsystemConstants.HOPPER_A_INVERTED);
+            hopperConfig.inverted(false);
             REVLibError hopperACfg = hopperMotorA.configure(hopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-            hopperConfig.inverted(!HopperSubsystemConstants.HOPPER_A_INVERTED);
             REVLibError hopperBCfg = hopperMotorB.configure(hopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
             // Surface configure failures LOUDLY (2026-07-18): if configure() fails (CAN timeout =
             // controller unpowered or off the bus), NONE of the above -- reset, follower-disable,
