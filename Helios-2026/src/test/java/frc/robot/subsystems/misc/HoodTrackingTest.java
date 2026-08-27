@@ -23,9 +23,9 @@ public class HoodTrackingTest {
 
     /**
      * An arbitrary commanded step, in degrees. These tests exercise clampDesiredAngle, which
-     * does not care HOW a setpoint was asked for -- the DPAD now jogs at a rate
-     * (HOOD_JOG_DEG_PER_SEC) rather than stepping per click, so a local constant keeps the
-     * clamp tests independent of that tuning.
+     * does not care HOW a setpoint was asked for -- the DPAD steps the hood open loop and
+     * stops on the measured angle (HOOD_STEP_DEG), so a local constant keeps the clamp tests
+     * independent of that tuning. clampDesiredAngle is also what bounds a DPAD step's target.
      */
     private static final double STEP = 2.0;
 

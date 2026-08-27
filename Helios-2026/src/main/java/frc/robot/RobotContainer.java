@@ -71,7 +71,8 @@ public class RobotContainer {
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
-    // Hood: DPAD LEFT/RIGHT are HELD to jog the hood open loop at HOOD_JOG_UP/DOWN_VOLTS
+    // Hood: DPAD LEFT/RIGHT are PRESSED to step the hood HOOD_STEP_DEG down/up in teleop, and
+    // HELD to jog it open loop at HOOD_JOG_UP/DOWN_VOLTS in test mode
     // (ShooterSubsystem.jogHoodCommand). Jog speed is the voltage itself, so no SlewRateLimiter
     // and no setpoint ramp is involved.
 
@@ -254,14 +255,15 @@ public class RobotContainer {
                 joystick2.povDown().and(RobotModeTriggers.teleop())
                     .onTrue(shooterSS.trimRtSpeedCommand(-kRtSpeedTrimRpm));
 
-            // DPAD-LEFT/RIGHT (HOLD) = jog the hood down / up at HOOD_JOG_*_VOLTS. Hold to
-            // move, release to stop where it is. The jog is open loop (a held DPAD is a velocity
-            // request); ramping a setpoint instead made the hood stick-slip, see
-            // ShooterSubsystem.jogHoodCommand. The travel guards still bound the result.
+            // DPAD-LEFT/RIGHT (PRESS) = move the hood down / up by HOOD_STEP_DEG (team request
+            // 2026-08-27, replacing the held rate jog). Still driven open loop at
+            // HOOD_JOG_*_VOLTS -- only the STOP is by angle, off the measured encoder -- so the
+            // stick-slip that killed the old setpoint step cannot come back. See
+            // ShooterSubsystem.stepHoodCommand; the travel guards still bound the result.
                 joystick2.povLeft().and(RobotModeTriggers.teleop())
-                    .whileTrue(shooterSS.jogHoodCommand(-ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS));
+                    .onTrue(shooterSS.stepHoodCommand(-ShooterSubsystemConstants.HOOD_STEP_DEG));
                 joystick2.povRight().and(RobotModeTriggers.teleop())
-                    .whileTrue(shooterSS.jogHoodCommand(ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS));
+                    .onTrue(shooterSS.stepHoodCommand(ShooterSubsystemConstants.HOOD_STEP_DEG));
 
             drivetrain.registerTelemetry(logger::telemeterize);
 

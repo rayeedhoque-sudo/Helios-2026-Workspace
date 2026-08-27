@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.util.OptionalDouble;
@@ -439,6 +440,44 @@ public class ShooterSubsystem extends SubsystemBase{
         // hood trim that flywheelOnlyShotCommand explicitly depends on.
         public Command jogHoodCommand(double volts){
             return Commands.runEnd(() -> hoodJogVolts = volts, () -> hoodJogVolts = 0);
+        }
+
+        // DPAD LEFT/RIGHT (press) = move the hood a FIXED amount, left down / right up (team
+        // request 2026-08-27). One press = one step of HOOD_STEP_DEG.
+        //
+        // This is NOT the per-click setpoint step that 5af2471 removed. That handed the
+        // position loop a step it answered at full feedforward (a 2 deg click flew 9.5 deg).
+        // Here the DRIVE is still the proven open-loop jog voltage; only the STOP is new, and
+        // it comes from the measured hood angle, so the travel cannot outrun the request.
+        //
+        // The voltage goes through hoodJogVolts, so periodic() still applies the feedback
+        // sanity gate and the MIN/MAX hard travel guards exactly as for the held jog. The
+        // target is clamped with clampDesiredAngle (not a raw MIN/MAX clamp) so a hood parked
+        // outside the soft band is not dragged back into it, and a press already at the limit
+        // ends at once instead of pushing into the guard for the whole timeout.
+        //
+        // The timeout is load-bearing, not a formality: if the hood does not move (the
+        // 2026-08-26 trace showed -6 V for 4.5 s producing no motion at all), this is the only
+        // thing that ends the press. Drive is bounded by the guards and the 20 A smart limit
+        // throughout. A second press of the same direction while a step is still running is
+        // swallowed (one instance per binding) -- one step per press, by design.
+        //
+        // Requires NO subsystem, for the same reason jogHoodCommand does not: the RT shot group
+        // runs kCancelIncoming and would block a requiring command for the whole hold.
+        public Command stepHoodCommand(double degreesDelta){
+            double volts = degreesDelta > 0
+                ? ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS
+                : -ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS;
+            double[] stopAt = new double[1];
+            return new FunctionalCommand(
+                    () -> stopAt[0] = clampDesiredAngle(getShooterAngleDegrees() + degreesDelta,
+                                                        hoodBaseAngleDeg, hoodDatumValid),
+                    () -> hoodJogVolts = volts,
+                    interrupted -> hoodJogVolts = 0,
+                    () -> degreesDelta > 0
+                        ? getShooterAngleDegrees() >= stopAt[0]
+                        : getShooterAngleDegrees() <= stopAt[0])
+                .withTimeout(ShooterSubsystemConstants.HOOD_STEP_TIMEOUT_SEC);
         }
 
         // DPAD UP/DOWN (press) = trim the RT flywheel target by rpmDelta motor RPM (team request
