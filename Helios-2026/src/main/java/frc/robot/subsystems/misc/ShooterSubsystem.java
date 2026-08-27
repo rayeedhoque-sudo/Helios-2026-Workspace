@@ -533,11 +533,7 @@ public class ShooterSubsystem extends SubsystemBase{
         // the old degenerate-window branch is gone. Package-private + static for HoodTrackingTest.
         static double clampDesiredAngle(double angle, double baseAngleDeg, boolean datumValid){
             double low = hoodFloorAngle(baseAngleDeg, datumValid);
-            double high = ShooterSubsystemConstants.MAX_ANGLE;
-            if (datumValid) {
-                high = Math.max(high, baseAngleDeg); // never demand a drop to reach the ceiling
-                high = Math.min(high, baseAngleDeg + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG);
-            }
+            double high = hoodCeilingAngle(baseAngleDeg, datumValid);
             return MathUtil.clamp(angle, low, Math.max(low, high));
         }
 
@@ -558,17 +554,29 @@ public class ShooterSubsystem extends SubsystemBase{
         // periodic(), so the open-loop DPAD drive is bounded by it too.
         // Package-private + static for HoodTrackingTest.
         static double hoodFloorAngle(double baseAngleDeg, boolean datumValid){
-            // Capped at MAX_ANGLE: a hood enabled ABOVE the safe ceiling (already in the
-            // belt-skip zone) must still be able to come DOWN to it. That is the one case
-            // where descending below the enable position is required, not forbidden.
-            return datumValid ? Math.min(baseAngleDeg, ShooterSubsystemConstants.MAX_ANGLE)
-                              : ShooterSubsystemConstants.MIN_ANGLE;
+            // The MAX_ANGLE cap that used to sit here is GONE (2026-08-27). MAX_ANGLE is a
+            // PHYSICAL degree (38) and the datum is now a RAW ENCODER reading (~311), so the
+            // min() collapsed the floor to 38 -- the down-guard would never fire and DPAD-left
+            // would drive the hood ~270 units into its bottom stop. The floor is the datum,
+            // full stop; nothing on this scale can be compared against MAX_ANGLE any more.
+            return datumValid ? baseAngleDeg : ShooterSubsystemConstants.MIN_ANGLE;
         }
 
-        // Live hood angle: the datum plus everything travelled since. Before a datum exists
-        // (first loops after boot, robot never enabled) the hood has not been driven, so the
-        // resting bottom stop is the honest answer -- there is nothing to interpret a raw
-        // reading against.
+        // THE CEILING: the enable-time datum plus the hood's full travel, in raw units. This
+        // replaces every MAX_ANGLE comparison the hood used to make -- see hoodFloorAngle for
+        // why a physical degree cannot bound a raw reading. Before a datum exists nothing
+        // drives (the feedback gate holds 0 V), so MAX_ANGLE stands in as it always did.
+        // Package-private + static for HoodTrackingTest.
+        static double hoodCeilingAngle(double baseAngleDeg, boolean datumValid){
+            return datumValid ? baseAngleDeg + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG
+                              : ShooterSubsystemConstants.MAX_ANGLE;
+        }
+
+        // Live hood angle, in RAW ENCODER UNITS: the datum (the raw reading at enable) plus
+        // everything travelled since, so this tracks the raw encoder 1:1. Before a datum exists
+        // (first loops after boot, before any valid raw reading) there is nothing measured to
+        // report; the physical bottom stop stands in, and the feedback gate holds the hood at
+        // 0 V through those loops anyway.
         private double getShooterAngleDegrees(){
             if (hoodDatumValid) {
                 return hoodBaseAngleDeg + hoodRelativeDeg;
@@ -586,34 +594,35 @@ public class ShooterSubsystem extends SubsystemBase{
         // also means the travel guard still knows which way is blocked.
         // Package-private + static for HoodTrackingTest.
         static double accumulateHoodTravel(double relativeDeg, double baseAngleDeg, double deltaDeg){
-            double proposed = relativeDeg + deltaDeg;
-            double angle = baseAngleDeg + proposed;
-            if (angle > ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP) {
-                return ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP - baseAngleDeg;
-            }
-            if (angle < ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN) {
-                return ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN - baseAngleDeg;
-            }
-            return proposed;
+            // Saturate at the SAME two limits the guards use -- the enable-time floor and the
+            // travel window above it. It used to saturate at the physical-degree anchors
+            // (3.224 / 44.5); with the datum now being the raw encoder reading (~311) those
+            // anchors are not on this scale at all, and the first loop would have pinned the
+            // tracked angle at 44.5 forever.
+            double angle = MathUtil.clamp(baseAngleDeg + relativeDeg + deltaDeg,
+                hoodFloorAngle(baseAngleDeg, true), hoodCeilingAngle(baseAngleDeg, true));
+            return angle - baseAngleDeg;
         }
 
         private void captureHoodDatum(double raw){
-            // THE DATUM IS A CONSTANT, NOT A READING (2026-08-27, team direction: "the code has
-            // to work no matter what the encoder angle is"). Every enable assumes the hood is
-            // sitting on its bottom stop, which is where it rests. The raw value is kept only as
-            // the delta reference (hoodLastRaw) -- it is never turned into an angle.
+            // THE DATUM IS THE RAW ENCODER READING (2026-08-27, team request: "make the hood
+            // angle the exact same as the raw encoder angle ... the raw encoder is checked so
+            // raw encoder when enabled = base angle"). The tracked angle is therefore the raw
+            // reading itself: base is raw at enable, and every later loop adds the raw delta
+            // 1:1 (HOOD_DEG_PER_RAW_UNIT = 1.0). Nothing on the hood is in physical degrees any
+            // more -- the bands and gains were converted once, in HOOD_UNITS_PER_DEG.
             //
-            // This is what makes an encoder re-zero a non-event. The absolute map it replaces
-            // read the resting hood at raw 311.169 as 44.5 deg (the TOP stop), so the travel
-            // guard killed every upward volt and the DPAD was dead -- captured live 2026-08-27.
+            // Re-read on every disable -> enable edge, so an encoder re-zero between sessions
+            // is a non-event: whatever it reads at enable IS the base, and the floor and
+            // ceiling are placed around it.
             //
-            // ponytail: the ceiling is only as true as that assumption. Enable with the hood
-            // ALREADY RAISED and the code believes 3.224 deg, so a commanded MAX_ANGLE drives
-            // ~35 deg of real travel from wherever it actually is -- through the top stop and
-            // into the belt-skip zone MAX_ANGLE exists to avoid. Drop the hood to its rest
-            // before enabling. Upgrade path if that ever bites: a bottom limit switch, or a
-            // slow find-the-stop homing move on the first enable.
-            hoodBaseAngleDeg = ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN;
+            // ponytail: the CEILING is still only as true as the assumption that the hood is
+            // enabled resting on its bottom stop -- the window is the full stroke above the
+            // datum. Enable with the hood ALREADY RAISED and the ceiling sits that much too
+            // high, so a large commanded rise can reach the top stop. Drop the hood to its rest
+            // before enabling. Upgrade path if that bites: a bottom limit switch, or a slow
+            // find-the-stop homing move on the first enable.
+            hoodBaseAngleDeg = raw;
             hoodRelativeDeg = 0;
             hoodLastRaw = raw;
             hoodDatumValid = true;
@@ -933,6 +942,11 @@ public class ShooterSubsystem extends SubsystemBase{
                     ShooterSubsystemConstants.FEED_DRAG_MULT_BASE
                         + ShooterSubsystemConstants.FEED_DRAG_MULT_PER_METER * dEff);
             }
+            // MAX_ANGLE is the PHYSICAL degree the shot model was fit at (38); the hood
+            // setpoint is in raw units now, so this clamps to the enable-time floor and
+            // commands no motion. That matches the standing "no automatic hood motion"
+            // rule (2026-08-26) -- the model still assumes the hood is parked at 38 deg by
+            // hand. TODO: express the model's angle in hood units if auto-aim ever drives it.
             setDesired_Angle(ShooterSubsystemConstants.MAX_ANGLE);
             setDesiredFlywheelVelocity(vSurface);
             hasShotTarget = vSurface > 0;
@@ -1163,7 +1177,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 // physical 44.5 stop, so a little coast after the cut never reaches the stop /
                 // skips the belt. Outside the branches above so it bounds BOTH the closed loop
                 // and the open-loop jog.
-                if (currentHoodAngle >= ShooterSubsystemConstants.MAX_ANGLE && hoodVolts > 0) {
+                if (currentHoodAngle >= hoodCeilingAngle(hoodBaseAngleDeg, hoodDatumValid) && hoodVolts > 0) {
                     hoodVolts = 0;
                 }
                 if (currentHoodAngle <= hoodFloorAngle(hoodBaseAngleDeg, hoodDatumValid) && hoodVolts < 0) {

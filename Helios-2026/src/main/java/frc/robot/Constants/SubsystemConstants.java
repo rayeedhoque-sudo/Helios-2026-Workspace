@@ -229,10 +229,28 @@ public class SubsystemConstants {
             public static final int SHOOTER_ID_B = 14;
             public static final int SHOOTER_ID_C = 15;
             public static final int SHOOTER_ID_D = 16;
-            //PID - Angle
-                public static double SHOOTER_ANGLE_kP = 0.1;
+            // HOOD ANGLE UNITS (2026-08-27, team request: "make the hood angle the exact same as
+            // the raw encoder angle"). The tracked hood angle is now the RAW ENCODER READING --
+            // 1 hood unit = 1 raw encoder unit, and the enable-time datum is the raw value itself
+            // (see ShooterSubsystem.captureHoodDatum). Every hood band and gain below is therefore
+            // in RAW UNITS, not physical degrees; this factor converts the on-robot tuning
+            // (which was measured in physical degrees) into them, so the physical behaviour of
+            // the loop is UNCHANGED -- only the numbers it counts in are.
+            // 309.6 raw units / 41.276 deg of travel = 7.5 units per physical degree.
+            // Declared HERE, ahead of the gains, because Java static initializers run in textual
+            // order and the gains divide by it. It mirrors
+            //   HOOD_RAW_UNITS_PER_FULL_TRAVEL / (HOOD_DEG_AT_FULL_UP - HOOD_DEG_AT_FULL_DOWN)
+            // declared further down -- HoodTrackingTest pins the two together, so an edit to one
+            // that misses the other fails the build.
+            // NOTE: MIN_ANGLE / MAX_ANGLE stay PHYSICAL degrees -- they belong to the shot model
+            // (modelSurfaceSpeed fits at 38 deg), not to the hood tracker. The hood's own travel
+            // limits are the enable-time floor and HOOD_TRAVEL_WINDOW_DEG above it.
+            public static double HOOD_UNITS_PER_DEG = 309.6 / (44.5 - 3.224);
+            //PID - Angle (RAW UNITS, see HOOD_UNITS_PER_DEG: the same physical stiffness as the
+            // 0.1 / 0.5 that was tuned in degrees, since the error is now 7.5x larger)
+                public static double SHOOTER_ANGLE_kP = 0.1 / HOOD_UNITS_PER_DEG;
                 public static double SHOOTER_ANGLE_kI = 0.0;
-                public static double SHOOTER_ANGLE_kD = 0.5;
+                public static double SHOOTER_ANGLE_kD = 0.5 / HOOD_UNITS_PER_DEG;
             //PID - Speed
                 public static double SHOOTER_SPEED_kP = 0.2;
                 public static double SHOOTER_SPEED_kI = 0.0;
@@ -326,12 +344,13 @@ public class SubsystemConstants {
                 // then accumulate shortest-path deltas. A 359 -> 0 step is a small delta, never a
                 // flip, and slow drift cannot move the hood because only CHANGES are counted.
                 //
-                // Degrees per raw unit. DERIVED from the anchors above rather than typed: it was
-                // a hand-copied literal before, which is how it drifted out of sync with them and
-                // left the incremental tracker on a different scale than the absolute map.
-                public static double HOOD_DEG_PER_RAW_UNIT =
-                    (HOOD_DEG_AT_FULL_UP - HOOD_DEG_AT_FULL_DOWN)
-                        / HOOD_RAW_UNITS_PER_FULL_TRAVEL;   // ~0.1421 deg/unit
+                // Hood units per raw unit -- 1.0 (2026-08-27, team request: the hood angle IS the
+                // raw encoder angle). It used to convert raw units into physical degrees
+                // (~0.1421); the physical scale now lives in HOOD_UNITS_PER_DEG at the top of this
+                // class, where it converts the degree-tuned bands and gains INTO these units.
+                // Set this back to (HOOD_DEG_AT_FULL_UP - HOOD_DEG_AT_FULL_DOWN) /
+                // HOOD_RAW_UNITS_PER_FULL_TRAVEL to return the tracker to physical degrees.
+                public static double HOOD_DEG_PER_RAW_UNIT = 1.0;
                 // Ignore deltas smaller than this (raw units): measured encoder noise is +-0.08,
                 // and noise must never accumulate into phantom travel. 0.2 clears it with margin
                 // and costs 0.03 deg of resolution -- far below the 0.5 deg angle tolerance.
@@ -358,14 +377,14 @@ public class SubsystemConstants {
                 // and cuts drive, the fail-safe direction, but it is not a substitute for the
                 // motor-vs-hood skip detector (step 4).
                 public static double HOOD_RAW_MAX_STEP = 120.0;
-                // How far the hood may be commanded from its enable-time position (deg). This is
-                // the hood's FULL physical travel now: with the datum fixed at the bottom rest
-                // (see ShooterSubsystem.captureHoodDatum) the window no longer needs to bound
-                // anything on its own -- MIN_ANGLE/MAX_ANGLE do that -- and 33.0 would have capped
-                // every commanded shot angle at 3.224 + 33 = 36.2, permanently 1.8 deg below the
-                // MAX_ANGLE the shot model asks for.
-                public static double HOOD_TRAVEL_WINDOW_DEG =
-                    HOOD_DEG_AT_FULL_UP - HOOD_DEG_AT_FULL_DOWN;   // 41.276
+                // How far ABOVE its enable-time position the hood may be commanded, in RAW UNITS
+                // (2026-08-27). This is the ONLY upper travel limit now: MAX_ANGLE is a physical
+                // degree belonging to the shot model and cannot be compared against a raw reading.
+                // The hood's whole stroke is HOOD_RAW_UNITS_PER_FULL_TRAVEL, so this permits
+                // exactly the full travel above the datum -- same assumption as before, that the
+                // hood is enabled resting on its bottom stop. Enable it already raised and the
+                // ceiling sits that much too high; see captureHoodDatum's note.
+                public static double HOOD_TRAVEL_WINDOW_DEG = HOOD_RAW_UNITS_PER_FULL_TRAVEL; // 309.6
             //SHOT MODEL (distance -> velocity; quadratic-drag ballistics for the OFFICIAL FUEL
             // ball -- 5.91 in / 0.203-0.227 kg foam, Cd~0.5, manual sec.5.10.1 -- validated
             // against the no-drag closed form. Angle rule: FIXED at MAX_ANGLE (38 deg since the
@@ -428,6 +447,11 @@ public class SubsystemConstants {
                 // NOTE: reaching it also needed more UP torque -- see HOOD_MAX_UP_VOLTAGE (6 V could
                 // not lift the hood against gravity). MUST stay < MAX_ANGLE. TODO retune
                 // RB_FEED_SURFACE_SPEED for this flatter 25 deg lob on robot.
+                // STALE UNITS since 2026-08-27: this is a PHYSICAL degree and the hood setpoint
+                // is now in raw encoder units, so it clamps to the enable-time floor and
+                // commands no hood motion. Harmless -- the RB binding itself is disabled (see
+                // RobotContainer) -- but multiply by HOOD_UNITS_PER_DEG and re-anchor it to the
+                // enable-time base before RB is ever restored.
                 public static double RB_FEED_ANGLE = 25.0;           // deg (must be < MAX_ANGLE)
                 // RT flywheel-only shot surface speed (m/s) -- team request 2026-08-22: RT now
                 // just spins the wheels to this speed and the hood angle is set by hand on the
@@ -527,7 +551,8 @@ public class SubsystemConstants {
                 // Narrowed 2.0 -> 1.0 on 2026-08-22 alongside the FF raise: the FF reaches full a
                 // degree sooner, so breakaway comes sooner and the steps shorten further. The fade
                 // is what keeps this from being the step function that caused the original lurch.
-                public static double HOOD_FF_FADE_DEG = 1.0;
+                // RAW UNITS (2026-08-27): the tuned 1.0 physical degree, converted.
+                public static double HOOD_FF_FADE_DEG = 1.0 * HOOD_UNITS_PER_DEG;   // 7.5 raw units
                 // Surface-speed gate for the kicker, m/s. TIGHTENED 0.3 -> 0.2 (spec 6): at the
                 // 3.0 m minimum, 0.3 m/s maps to 0.30 m of along-track error -- more than the
                 // 0.226 m half-window through the opening; 0.2 closes the budget exactly.
@@ -538,7 +563,8 @@ public class SubsystemConstants {
                 // nothing lowering the hood on its own, the only motion left for them to block
                 // was a driver DPAD-down while the flywheels spun, which must never be blocked.
                 // Hood gate, deg: worst contribution 0.078 m at 3 m, shrinking with distance.
-                public static double ANGLE_TOLERANCE = 0.5;
+                // RAW UNITS (2026-08-27): the tuned 0.5 physical degree, converted.
+                public static double ANGLE_TOLERANCE = 0.5 * HOOD_UNITS_PER_DEG;   // 3.75 raw units
                 
                 // DPAD hood jog DRIVE VOLTAGE (2026-08-26): HOLD DPAD right to raise, left to
                 // lower, release to stop and hold. Open loop ON PURPOSE. Ramping a SETPOINT at
@@ -553,14 +579,19 @@ public class SubsystemConstants {
                 // stay above the ~7 V breakaway or the hood will not move at all.
                 public static double HOOD_JOG_UP_VOLTS = 7.0;    // [assumed] = measured breakaway
                 public static double HOOD_JOG_DOWN_VOLTS = 3.0;  // [assumed] gravity assists here
-                // DPAD UP PRESET (2026-08-27, team request): one press of DPAD RIGHT sends the
-                // hood here and no further -- pressing right again does nothing, because this is
-                // an absolute target the hood has already reached. DPAD LEFT returns it to the
-                // floor (the enable-time datum), after which right raises it again.
-                // Comfortably below MAX_ANGLE (38), so it never approaches the belt-skip inset.
-                // The hood STOPS on the measured angle, so expect roughly a degree of overshoot
-                // plus mechanical coast; TODO on robot, trim if it lands high.
-                public static double HOOD_UP_PRESET_DEG = 30.0;
+                // DPAD UP STEP (2026-08-27, team request: "dpad right makes the hood go up
+                // 5 degrees ... it adds 5 degrees to the base angle"). One press of DPAD RIGHT
+                // sends the hood to base + this and no further -- pressing right again does
+                // nothing, because that is an absolute target it has already reached. DPAD LEFT
+                // returns it to the base (the enable-time datum), after which right raises it again.
+                // The base is re-read from the raw encoder on every enable (captureHoodDatum).
+                //
+                // RAW UNITS, deliberately NOT converted: the team asked for 5 on the same scale as
+                // the raw encoder readout, so this is 5 raw units = 0.67 PHYSICAL degrees of hood.
+                // Multiply by HOOD_UNITS_PER_DEG (-> 37.5) if 5 physical degrees was meant.
+                // The hood STOPS on the measured angle, so expect some overshoot plus mechanical
+                // coast; TODO on robot, trim if it lands high.
+                public static double HOOD_UP_STEP_UNITS = 5.0;
                 // Hard stop on how long ONE DPAD move may drive. It normally ends on the
                 // encoder; this ends it when the hood does not move at all (the 2026-08-26 trace
                 // showed -6 V for 4.5 s and zero motion), so a dead/jammed hood cannot sit
@@ -570,7 +601,8 @@ public class SubsystemConstants {
                 // over the real worst-case stroke once both directions have been timed.
                 public static double HOOD_MOVE_TIMEOUT_SEC = 3.0;
                 // HOOD_REENGAGE_DEG is the degree at which the hood needs to readjust hold
-                public static double HOOD_REENGAGE_DEG = 0.75;
+                // RAW UNITS (2026-08-27): the tuned 0.75 physical degree, converted.
+                public static double HOOD_REENGAGE_DEG = 0.75 * HOOD_UNITS_PER_DEG;   // 5.63 raw units
                 // HOOD_LOWER_FF_VOLTS is self explanatory, based off raise volts
                 public static double HOOD_LOWER_FF_VOLTS = 6.0;
         }

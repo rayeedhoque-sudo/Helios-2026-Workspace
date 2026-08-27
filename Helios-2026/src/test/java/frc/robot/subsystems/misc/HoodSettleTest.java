@@ -55,11 +55,12 @@ public class HoodSettleTest {
     @Test
     void aClickSettlesAndStaysSettled() {
         boolean holding = false;
-        // Approaching the new target from 2 deg away.
-        holding = ShooterSubsystem.hoodShouldHold(2.0, holding);
-        assertTrue(!holding, "2 deg away: drive");
+        // Approaching the new target from well outside the band. Scaled off TOL rather than a
+        // literal: the bands are in RAW ENCODER UNITS now (2026-08-27), not degrees.
+        holding = ShooterSubsystem.hoodShouldHold(4 * TOL, holding);
+        assertTrue(!holding, "well outside the band: drive");
         // It arrives, overshooting slightly.
-        holding = ShooterSubsystem.hoodShouldHold(-0.3, holding);
+        holding = ShooterSubsystem.hoodShouldHold(-0.6 * TOL, holding);
         assertTrue(holding, "arrived (with overshoot): stop driving");
         // Now it must STAY held through ordinary jitter and small sag -- this is the anti-hunt.
         // Scaled off REENGAGE so retuning the band on the robot doesn't fail this test:
@@ -95,6 +96,8 @@ public class HoodSettleTest {
     @Test
     void settleBandIsInsideTheReengageBand() {
         assertTrue(TOL < REENGAGE, "hysteresis requires the re-engage threshold to be the wider one");
-        assertEquals(0.5, TOL, 1e-9, "guards against a tolerance change silently widening the deadband");
+        assertEquals(0.5 * ShooterSubsystemConstants.HOOD_UNITS_PER_DEG, TOL, 1e-9,
+            "guards against a tolerance change silently widening the deadband -- the band is the"
+                + " tuned half-degree, expressed in raw encoder units");
     }
 }

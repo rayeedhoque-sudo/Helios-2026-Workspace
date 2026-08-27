@@ -59,11 +59,14 @@ public class HoodTrackingTest {
         for (int i = 1; i < sweep.length; i++) {
             double step = ShooterSubsystem.hoodDeltaDegrees(
                 ShooterSubsystem.shortestRawDelta(sweep[i - 1], sweep[i]));
-            assertTrue(Math.abs(step) < 2.0,
-                "no step across the old split may be large; got " + step + " deg");
+            assertTrue(Math.abs(step) < 8.0,
+                "no step across the old split may be large; got " + step + " units");
             travelled += step;
         }
-        assertEquals((115.0 - 95.0) * DEG_PER_UNIT, travelled, 0.05,
+        // The 103.4 -> 103.6 step lands right on the noise deadband and may be filtered out
+        // (binary 0.2 is a hair under it), so allow one deadband of slack.
+        assertEquals((115.0 - 95.0) * DEG_PER_UNIT, travelled,
+            ShooterSubsystemConstants.HOOD_RAW_NOISE_DEADBAND + 0.05,
             "total travel must equal the raw span times the scale");
     }
 
@@ -111,27 +114,59 @@ public class HoodTrackingTest {
     // ---- datum capture: offset-independent by construction ----
 
     /**
-     * THE DATUM IS A CONSTANT, NOT A READING (2026-08-27). No raw value is interpreted as a
-     * position any more, so an encoder that re-zeroes cannot move the reference. The bug this
-     * pins: the live hood resting at raw 311.169 was mapped to 44.5 deg (the TOP stop), which
-     * put the travel guard permanently in "never drive up" and killed the DPAD.
-     *
-     * captureHoodDatum is not static, so the property is pinned where it is reachable: the
-     * base every consumer sees is the bottom stop, and a full-height shot angle survives the
-     * clamp against it.
+     * THE DATUM IS THE RAW ENCODER READING (2026-08-27, team request: the hood angle is the raw
+     * encoder angle, and the raw value at enable IS the base). Everything the hood bounds
+     * itself with is therefore placed around that reading -- nothing compares it against a
+     * physical degree, which is what killed the DPAD before (the resting hood at raw 311.169
+     * was read as 44.5 deg, the TOP stop, so the guard never allowed an upward volt).
      */
     @Test
-    void theDatumIsTheBottomStopWhateverTheEncoderReads() {
-        double base = ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN;
+    void theDatumIsWhateverTheEncoderReadsAtEnable() {
+        double base = 311.169;   // the live resting reading, captured 2026-08-27
         assertEquals(base, ShooterSubsystem.hoodFloorAngle(base, true), 1e-9,
-            "the floor is the bottom stop, not something derived from a raw reading");
-        assertEquals(ShooterSubsystemConstants.MAX_ANGLE,
-            ShooterSubsystem.clampDesiredAngle(ShooterSubsystemConstants.MAX_ANGLE, base, true),
-            1e-9, "a commanded MAX_ANGLE must survive the clamp -- the travel window may not cap it");
-        assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP
-                - ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN,
+            "the floor is the raw reading at enable");
+        assertEquals(base + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG,
+            ShooterSubsystem.hoodCeilingAngle(base, true), 1e-9,
+            "the ceiling is one full travel above it -- MAX_ANGLE may never bound a raw reading");
+        assertEquals(base + 5,
+            ShooterSubsystem.clampDesiredAngle(base + 5, base, true), 1e-9,
+            "DPAD-RIGHT's base + 5 must survive the clamp at any encoder offset");
+        assertEquals(ShooterSubsystemConstants.HOOD_RAW_UNITS_PER_FULL_TRAVEL,
             ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG, 1e-9,
-            "the window is the hood's full travel, so it bounds nothing MIN/MAX_ANGLE does not");
+            "the window is the hood's whole stroke, in raw units");
+    }
+
+    /**
+     * THE HEADLINE PROPERTY (2026-08-27): the tracked angle IS the raw encoder reading. Datum
+     * at enable plus 1:1 deltas must land back on whatever the encoder says, wander included.
+     */
+    @Test
+    void theTrackedAngleIsTheRawEncoderReading() {
+        double[] raws = { 311.169, 313.0, 318.5, 316.0, 314.25 };
+        double base = raws[0];
+        double relative = 0;
+        for (int i = 1; i < raws.length; i++) {
+            relative = ShooterSubsystem.accumulateHoodTravel(relative, base,
+                ShooterSubsystem.hoodDeltaDegrees(
+                    ShooterSubsystem.shortestRawDelta(raws[i - 1], raws[i])));
+        }
+        assertEquals(raws[raws.length - 1], base + relative, 1e-9,
+            "the hood angle must equal the raw encoder angle, not a scaled version of it");
+    }
+
+    /**
+     * The degree-tuned bands and gains were converted into raw units by ONE factor. If it ever
+     * drifts from the measured anchors the whole loop is mistuned silently, so pin it.
+     */
+    @Test
+    void theUnitFactorMatchesTheMeasuredAnchors() {
+        assertEquals(ShooterSubsystemConstants.HOOD_RAW_UNITS_PER_FULL_TRAVEL
+                / (ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP
+                    - ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN),
+            ShooterSubsystemConstants.HOOD_UNITS_PER_DEG, 1e-9,
+            "HOOD_UNITS_PER_DEG must stay in step with the calibration anchors");
+        assertEquals(1.0, ShooterSubsystemConstants.HOOD_DEG_PER_RAW_UNIT, 1e-9,
+            "the tracker counts raw units 1:1");
     }
 
     // ---- travel window ----
@@ -140,11 +175,11 @@ public class HoodTrackingTest {
     void windowLimitsTravelFromTheEnablePosition() {
         double base = 10.0;
         double window = ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG;
-        assertEquals(Math.min(ShooterSubsystemConstants.MAX_ANGLE, base + window),
-            ShooterSubsystem.clampDesiredAngle(999, base, true), 1e-9,
+        assertEquals(base + window,
+            ShooterSubsystem.clampDesiredAngle(9999, base, true), 1e-9,
             "cannot be commanded further up than the window allows");
         assertEquals(base,
-            ShooterSubsystem.clampDesiredAngle(-999, base, true), 1e-9,
+            ShooterSubsystem.clampDesiredAngle(-9999, base, true), 1e-9,
             "can never be commanded BELOW the enable-time datum");
     }
 
@@ -160,18 +195,19 @@ public class HoodTrackingTest {
 
     @Test
     void travelSaturatesAtTheUpStop() {
-        double base = 40.0;
-        double relative = ShooterSubsystem.accumulateHoodTravel(4.0, base, 10.0);
-        assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_UP, base + relative, 1e-9,
-            "accumulation must saturate at the up stop, not run past it");
+        double base = 311.169;
+        double window = ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG;
+        double relative = ShooterSubsystem.accumulateHoodTravel(window - 1, base, 10.0);
+        assertEquals(base + window, base + relative, 1e-9,
+            "accumulation must saturate one full travel above the datum, not run past it");
     }
 
     @Test
     void travelSaturatesAtTheDownStop() {
-        double base = 5.0;
+        double base = 311.169;
         double relative = ShooterSubsystem.accumulateHoodTravel(-1.0, base, -40.0);
-        assertEquals(ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN, base + relative, 1e-9,
-            "a -32.96 deg reading on a 3.2-44.5 deg mechanism must be impossible");
+        assertEquals(base, base + relative, 1e-9,
+            "the tracked angle may never fall below the enable-time datum");
     }
 
     @Test
@@ -205,29 +241,27 @@ public class HoodTrackingTest {
     void repeatedNudgesSaturateAtTheWindowEdge() {
         double base = 10.0;
         double setpoint = base;
-        for (int click = 0; click < 100; click++) {
+        // Enough clicks to walk the whole window (309.6 units at 2 per click) and then some.
+        for (int click = 0; click < 400; click++) {
             setpoint = ShooterSubsystem.clampDesiredAngle(
                 setpoint + STEP, base, true);
         }
-        assertEquals(Math.min(ShooterSubsystemConstants.MAX_ANGLE,
-                base + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG),
-            setpoint, 1e-9, "100 steps up must stop at the window edge");
+        assertEquals(base + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG,
+            setpoint, 1e-9, "400 steps up must stop at the window edge");
 
-        for (int click = 0; click < 100; click++) {
+        for (int click = 0; click < 400; click++) {
             setpoint = ShooterSubsystem.clampDesiredAngle(
                 setpoint - STEP, base, true);
         }
         assertEquals(base, setpoint, 1e-9,
-            "100 steps down must stop at the enable-time datum, never below it");
+            "400 steps down must stop at the enable-time datum, never below it");
     }
 
     /**
      * The floor is the ENABLE-TIME DATUM, whether that sits above or below the fixed MIN_ANGLE
      * soft limit -- a hood enabled raised cannot be driven back down past where it started,
      * and a hood enabled resting below MIN_ANGLE is still not dragged up to it. Without a
-     * datum there is nothing measured to floor against, so MIN_ANGLE stands in. The one
-     * exception is a hood enabled above MAX_ANGLE, which must still be able to come down to
-     * it -- covered by enablingAboveTheCeilingIsHoldThenDownOnly.
+     * datum there is nothing measured to floor against, so MIN_ANGLE stands in.
      */
     @Test
     void theFloorIsTheEnableTimeDatum() {
@@ -297,23 +331,28 @@ public class HoodTrackingTest {
             1e-9, "the band opens toward the hood, it does not trap it");
     }
 
-    /** Enabled ABOVE the ceiling: hold, and allow only downward commands (belt protection). */
+    /**
+     * THE REGRESSION THIS REPLACES (2026-08-27): the floor used to be min(base, MAX_ANGLE), so
+     * a raw datum of ~311 collapsed the floor to 38 -- the down guard could never fire and a
+     * lowering command would have driven ~270 units into the bottom stop. A raw reading is
+     * never compared against a physical degree now: the floor is the datum, wherever it sits.
+     */
     @Test
-    void enablingAboveTheCeilingIsHoldThenDownOnly() {
-        double high = ShooterSubsystemConstants.MAX_ANGLE + 2.0;
-        assertEquals(high, ShooterSubsystem.clampDesiredAngle(high, high, true), 1e-9,
-            "must hold where it was enabled");
-        assertEquals(high, ShooterSubsystem.clampDesiredAngle(high + 5, high, true), 1e-9,
-            "must never be commanded further up");
-        assertEquals(high - STEP,
-            ShooterSubsystem.clampDesiredAngle(high - STEP, high, true),
-            1e-9, "but must still come down");
+    void aRawDatumAboveMaxAngleIsStillFlooredAtTheDatum() {
+        double high = 311.169;   // far above MAX_ANGLE (38) -- a raw reading, not a degree
+        assertEquals(high, ShooterSubsystem.hoodFloorAngle(high, true), 1e-9,
+            "the floor may never collapse to MAX_ANGLE");
+        assertEquals(high, ShooterSubsystem.clampDesiredAngle(high - 200, high, true), 1e-9,
+            "no command may take the hood below the datum");
+        assertEquals(high + STEP,
+            ShooterSubsystem.clampDesiredAngle(high + STEP, high, true), 1e-9,
+            "and it must still be able to rise");
     }
 
     /** The widened band must never invert, whatever the datum. */
     @Test
     void theBandAlwaysContainsTheDatum() {
-        for (double base = -10; base <= 90; base += 0.5) {
+        for (double base = -10; base <= 360; base += 0.5) {
             assertEquals(base, ShooterSubsystem.clampDesiredAngle(base, base, true), 1e-9,
                 "clamping the datum to itself must be a no-op at base=" + base);
         }

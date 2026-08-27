@@ -74,10 +74,17 @@ public class RobotContainer {
     // KILL SWITCH for the teleop DPAD hood moves (2026-08-27). false = the bindings are not
     // registered at all, so nothing can drive the hood from the driver station; the hood still
     // holds on its brake and commanded shot angles are unaffected. See the bindings below.
-    private static final boolean HOOD_DPAD_MOVES_ENABLED = false;
+    // RE-ENABLED 2026-08-27 with the raw-unit rework: the gate was set false because the
+    // moves stop on a MEASURED angle whose scale (HOOD_RAW_UNITS_PER_FULL_TRAVEL) was
+    // unverified. The hood angle IS the raw encoder reading now, so there is no scale left to
+    // be wrong about, and the step is 5 raw units (~0.67 physical deg) rather than a 27 deg
+    // stroke. A STUCK encoder is still not caught -- that path is bounded by
+    // HOOD_MOVE_TIMEOUT_SEC and the 20 A smart limit. Flip this back to false to kill the
+    // bindings outright.
+    private static final boolean HOOD_DPAD_MOVES_ENABLED = true;
 
-    // Hood: DPAD LEFT/RIGHT are PRESSED to send the hood to the floor / HOOD_UP_PRESET_DEG in
-    // teleop, and
+    // Hood: DPAD LEFT/RIGHT are PRESSED to send the hood to the base / base + HOOD_UP_STEP_UNITS
+    // in teleop, and
     // HELD to jog it open loop at HOOD_JOG_UP/DOWN_VOLTS in test mode
     // (ShooterSubsystem.jogHoodCommand). Jog speed is the voltage itself, so no SlewRateLimiter
     // and no setpoint ramp is involved.
@@ -262,27 +269,21 @@ public class RobotContainer {
                     .onTrue(shooterSS.trimRtSpeedCommand(-kRtSpeedTrimRpm));
 
             // DPAD-LEFT/RIGHT (PRESS) = two hood positions (team request 2026-08-27). RIGHT
-            // raises to HOOD_UP_PRESET_DEG and stops there -- pressing it again does nothing,
-            // the target is absolute and already reached. LEFT returns the hood to the floor
-            // (this enable's datum), and RIGHT can raise it again after that. Still driven open
-            // loop at HOOD_JOG_*_VOLTS -- only the STOP is by angle, off the measured encoder --
-            // so the stick-slip that killed the old setpoint step cannot come back. See
+            // raises to BASE + HOOD_UP_STEP_UNITS and stops there -- pressing it again does
+            // nothing, the target is absolute and already reached. The base is this enable's
+            // datum, re-read from the raw encoder every enable, so "up 5" is always 5 above
+            // where the hood was when the robot was enabled. LEFT returns the hood to that base,
+            // and RIGHT can raise it again after that. Still driven open loop at
+            // HOOD_JOG_*_VOLTS -- only the STOP is by angle, off the measured encoder -- so the
+            // stick-slip that killed the old setpoint step cannot come back. See
             // ShooterSubsystem.moveHoodToCommand; the travel guards still bound the result.
-                // GATED 2026-08-27 after the hood ground its belt on a DPAD-right press. The
-                // moves stop on the MEASURED hood angle, and the measurement is not currently
-                // trustworthy: HOOD_RAW_UNITS_PER_FULL_TRAVEL is unverified (five hand sweeps gave
-                // five answers, and hand sweeps cannot back-drive a 187.5:1 train), so the travel
-                // guard's MAX_ANGLE threshold does not correspond to a known physical angle.
-                // Re-enable at step 4 of the hood bring-up, once the scale is measured against an
-                // angle finder and the motor-vs-hood skip detector is in. The TEST-mode held jog
-                // below is deliberately left live -- it is supervised, stops on release, and is
-                // what the calibration pass needs.
                 if (HOOD_DPAD_MOVES_ENABLED) {
                     joystick2.povLeft().and(RobotModeTriggers.teleop())
                         .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
                     joystick2.povRight().and(RobotModeTriggers.teleop())
                         .onTrue(shooterSS.moveHoodToCommand(
-                            () -> ShooterSubsystemConstants.HOOD_UP_PRESET_DEG));
+                            () -> shooterSS.getHoodFloorAngle()
+                                + ShooterSubsystemConstants.HOOD_UP_STEP_UNITS));
                 }
 
             drivetrain.registerTelemetry(logger::telemeterize);
