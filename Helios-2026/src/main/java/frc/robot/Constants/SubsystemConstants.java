@@ -19,9 +19,9 @@ public class SubsystemConstants {
             // aim/align command -- rotateToAngle, searchAndAlignCommand, aimUntilAligned. These
             // were three duplicated 5.0 literals in CommandSwerveDrivetrain; one copy so there is
             // a single thing to tune. Radians in, rad/s out. TODO tune on robot.
-            public static double HEADING_kP = 1.0;
+            public static double HEADING_kP = 5.0;
             public static double HEADING_kI = 0.0;
-            public static double HEADING_kD = 1.0;
+            public static double HEADING_kD = 0.0;
         }
 
         public static class LightSensor{
