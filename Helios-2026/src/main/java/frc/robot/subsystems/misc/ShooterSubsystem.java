@@ -461,21 +461,31 @@ public class ShooterSubsystem extends SubsystemBase{
         // Clamp a requested angle into what the hood can actually reach: the usual soft limits,
         // AND no more than HOOD_TRAVEL_WINDOW_DEG from where the hood sat when the robot was
         // enabled. Wherever it was enabled, a setpoint can never ask for more travel than the
-        // mechanism has. Package-private + static for HoodTrackingTest.
+        // mechanism has.
+        //
+        // THE SOFT BAND MAY NEVER DEMAND MOTION (2026-08-26, team request: "it should not move
+        // at all when enabled"). The hood RESTS at ~3.2 deg, below the 5.0 deg MIN_ANGLE floor.
+        // The old band clamped the enable-time seed (see captureHoodDatum) up to 5.0, so every
+        // enable produced a 1.8 deg error -- past ANGLE_TOLERANCE and past HOOD_FF_FADE_DEG, so
+        // the full lift feedforward fired and drove the hood UP at ~7.6 V the instant the robot
+        // was enabled. Widening each limit to include the datum makes the seeded setpoint equal
+        // the enable position EXACTLY, so the hood holds until something commands it.
+        //
+        // The band still only ever OPENS toward where the hood already is, so it cannot be used
+        // to escape: enabled below MIN_ANGLE the hood can only be commanded UP, enabled above
+        // MAX_ANGLE only DOWN. The hard travel guard in periodic() is what actually protects the
+        // belt at the top, and it is unchanged.
+        //
+        // low <= baseAngleDeg <= high always holds now, so the limits can no longer cross and
+        // the old degenerate-window branch is gone. Package-private + static for HoodTrackingTest.
         static double clampDesiredAngle(double angle, double baseAngleDeg, boolean datumValid){
             double low = ShooterSubsystemConstants.MIN_ANGLE;
             double high = ShooterSubsystemConstants.MAX_ANGLE;
             if (datumValid) {
+                low = Math.min(low, baseAngleDeg);   // never demand a rise to reach the floor
+                high = Math.max(high, baseAngleDeg); // never demand a drop to reach the ceiling
                 low = Math.max(low, baseAngleDeg - ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG);
                 high = Math.min(high, baseAngleDeg + ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG);
-                if (high < low) {
-                    // Degenerate window: the datum sits outside the soft band entirely, so the
-                    // two limits crossed. Collapse to the datum pulled INTO the soft band -- never
-                    // to `low`, which would hand back a setpoint above MAX_ANGLE.
-                    low = MathUtil.clamp(baseAngleDeg,
-                        ShooterSubsystemConstants.MIN_ANGLE, ShooterSubsystemConstants.MAX_ANGLE);
-                    high = low;
-                }
             }
             return MathUtil.clamp(angle, low, high);
         }
@@ -677,13 +687,14 @@ public class ShooterSubsystem extends SubsystemBase{
         }
 
         // No firing solution: wheels to 0 (CoastOut path -- the at-speed gate can never open,
-        // so belts/kicker never feed). Hood arg: MAX = staged (valid tag in view, range/legality
-        // wrong), MIN = stowed (no usable target at all).
-        private void refuseShot(double hoodAngleDeg){
+        // so belts/kicker never feed). THE HOOD IS DELIBERATELY NOT TOUCHED (2026-08-26, team
+        // request: no auto-stow anywhere). This used to take a hood argument and every caller
+        // passed MIN_ANGLE, so a refused or released shot yanked the hood down and threw away
+        // wherever the driver had jogged it.
+        private void refuseShot(){
             hasShotTarget = false;
             movingCompMeters = 0;
             setDesiredFlywheelVelocity(0);
-            setDesired_Angle(hoodAngleDeg);
         }
 
         // RT targeting core -- one pass per loop while visionShotCommand() is scheduled.
@@ -705,7 +716,7 @@ public class ShooterSubsystem extends SubsystemBase{
             if (effClass == TargetClass.NONE) {
                 target_distance = 0;
                 aimHeadingValid = false;
-                refuseShot(ShooterSubsystemConstants.MIN_ANGLE);
+                refuseShot();
                 return;
             }
 
@@ -745,8 +756,10 @@ public class ShooterSubsystem extends SubsystemBase{
                 if (effClass == TargetClass.SCORE
                         && !FieldConstants.isLegalScoringX(robot.getX(), alliance)) {
                     // Rule G407: never spin up a scoring shot from outside our alliance zone.
+                    // Hood untouched -- this used to stage it to MAX, which is the robot moving
+                    // the hood on its own (no auto motion, 2026-08-26).
                     target_distance = 0;
-                    refuseShot(ShooterSubsystemConstants.MAX_ANGLE);
+                    refuseShot();
                     return;
                 }
                 // Radial speed: rotate the robot-relative chassis speeds into the field frame
@@ -786,7 +799,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 // conservative branch).
                 target_distance = 0;
                 aimHeadingValid = false;
-                refuseShot(ShooterSubsystemConstants.MIN_ANGLE);
+                refuseShot();
                 return;
             }
             // Degenerate-pose guard: a garbage botpose sitting ON the target point would divide
@@ -795,7 +808,7 @@ public class ShooterSubsystem extends SubsystemBase{
             if (!(distance > 0.01)) {   // also catches NaN
                 target_distance = 0;
                 aimHeadingValid = false;
-                refuseShot(ShooterSubsystemConstants.MIN_ANGLE);
+                refuseShot();
                 return;
             }
             target_distance = distance;
@@ -816,10 +829,11 @@ public class ShooterSubsystem extends SubsystemBase{
             double vSurface;
             if (effClass == TargetClass.SCORE) {
                 // Outside [3.0, 6.2] m the shot is a guaranteed miss or illegal (spec 2.3) --
-                // refuse, hood staged at MAX (a valid tag is in view, only the range is wrong).
+                // refuse. The hood used to be staged to MAX here; it is now left alone, since
+                // nothing may move the hood without a driver command (2026-08-26).
                 if (dEff < ShooterSubsystemConstants.MIN_SCORE_DISTANCE_METERS
                         || dEff > ShooterSubsystemConstants.MAX_SCORE_DISTANCE_METERS) {
-                    refuseShot(ShooterSubsystemConstants.MAX_ANGLE);
+                    refuseShot();
                     return;
                 }
                 vSurface = modelSurfaceSpeed(dEff,
@@ -867,26 +881,29 @@ public class ShooterSubsystem extends SubsystemBase{
            return Commands.runOnce(
             ()->{
                 this.enableComp = isEnabled;
-                // Leaving live-data mode: zero the setpoints ONCE here (this used to happen
-                // every loop in periodic(), which also stomped preset shot commands).
+                // Leaving live-data mode: zero the VELOCITY ONCE here (this used to happen
+                // every loop in periodic(), which also stomped preset shot commands). The hood
+                // is left alone -- this line also drove it to MIN_ANGLE, and it wrote the field
+                // directly, so it bypassed setDesired_Angle's clamp entirely (2026-08-26).
                 if (!isEnabled) {
                     desired_Velocity = 0;
-                    desired_Angle = ShooterSubsystemConstants.MIN_ANGLE;
                 }
             }
             );
         }
 
-        // Coast the flywheels down and drop the hood to its floor angle.
+        // Coast the flywheels down. The HOOD IS LEFT WHERE IT IS (2026-08-26, team request: no
+        // auto-stow anywhere) -- this used to drop it to MIN_ANGLE, throwing away whatever angle
+        // the driver had jogged it to every time a shot was released.
         public Command stopShooterCommand(){
-            return setAngleAndVelocityCommand(ShooterSubsystemConstants.MIN_ANGLE, 0);
+            return runOnce(() -> setDesiredFlywheelVelocity(0));
         }
 
         // RT (hold) = precision vision shot. Every loop: classify the primary tag (SCORE own
         // alliance / FEED / NONE), pick the distance source (botpose, else camera-space for
         // SCORE only), moving-comp, envelope gates, then hood MAX + model velocity. NONE or any
         // refusal keeps velocity 0 so belts/kicker never feed. Release: flywheels coast
-        // (0 -> CoastOut), hood recesses to MIN, target flags clear.
+        // (0 -> CoastOut), hood LEFT WHERE IT IS (no auto-stow, 2026-08-26), target flags clear.
         // (The old testSpinCommand/hoodJogCommand and their RT/DPAD bindings are superseded and
         // deleted per team spec 2026-07-16.)
         public Command visionShotCommand(){
@@ -896,7 +913,7 @@ public class ShooterSubsystem extends SubsystemBase{
                     runVisionTargeting();
                 },
                 () -> {
-                    refuseShot(ShooterSubsystemConstants.MIN_ANGLE);
+                    refuseShot();
                     target_distance = 0;
                     aimHeadingValid = false;
                     heldClass = TargetClass.NONE; // next press must acquire a fresh tag
@@ -910,8 +927,8 @@ public class ShooterSubsystem extends SubsystemBase{
         // and NEVER touch the hood -- the angle is whatever the DPAD jog left it at, which is
         // the whole point (manual range control). No vision, no model, no aim. The RT binding
         // runs belts always and gates the kicker on isFlywheelAtSpeed(). Release: velocity 0
-        // (CoastOut), hood deliberately left where it is -- stopShooterCommand would yank it
-        // back to MIN and undo the driver's setting.
+        // (CoastOut), hood deliberately left where it is. (stopShooterCommand no longer moves
+        // the hood either, so nothing can undo the driver's setting any more.)
         public Command flywheelOnlyShotCommand(){
             return runEnd(
                 () -> {
@@ -928,7 +945,7 @@ public class ShooterSubsystem extends SubsystemBase{
         // RB (hold) = fixed blind feed: fixed hood angle + fixed tunable feed surface speed.
         // The RB binding runs belts always and gates the kicker on isFlywheelAtSpeed() (team
         // request 2026-07-18) -- fuel feeds only once the wheels actually reach the commanded
-        // speed, never into wheels still spinning up. Release: flywheels coast, hood -> MIN.
+        // speed, never into wheels still spinning up. Release: flywheels coast, hood unchanged.
         public Command feedAngleShotCommand(){
             return runEnd(
                 () -> {
@@ -936,7 +953,7 @@ public class ShooterSubsystem extends SubsystemBase{
                     setDesired_Angle(ShooterSubsystemConstants.RB_FEED_ANGLE);
                     setDesiredFlywheelVelocity(ShooterSubsystemConstants.RB_FEED_SURFACE_SPEED);
                 },
-                () -> refuseShot(ShooterSubsystemConstants.MIN_ANGLE));
+                () -> refuseShot());
         }
 
     @Override
@@ -982,13 +999,11 @@ public class ShooterSubsystem extends SubsystemBase{
                 }
 
             //Shooter Angle
-                // Hood-lower interlock (team request 2026-07-17): never drive the hood down INTO
-                // THE STOW REGION (below HOOD_STOW_INTERLOCK_FLOOR_DEG) while the flywheels spin
-                // above HOOD_LOWER_MAX_SURFACE_SPEED -- hold and let them coast down first, so
-                // "the hood only auto-recesses when the flywheels are low / stopped". Lowering
-                // WITHIN the shot band stays live while spinning, so a staged shot can still
-                // settle to its firing angle. Raising is never gated. desired_Angle stays
-                // latched, so the stow drop happens on its own the moment the wheels are slow enough.
+                // NO AUTOMATIC HOOD MOTION (team request 2026-08-26). The hood moves only when
+                // something explicitly commands an angle -- in the match bindings that is the
+                // DPAD jog and nothing else. Enabling re-datums to wherever the hood sits and
+                // seeds the setpoint there, so the hood holds; the old hood-lower interlock and
+                // the coast-down auto-recess it gated are both gone.
                 double rawHood = shooterAngleEncoder.getPosition();
                 // CONTINUOUS TRACKING. Datum on the disable -> enable edge (a session's drift is
                 // discarded, never carried across enables), then accumulate shortest-path deltas.
@@ -1004,18 +1019,16 @@ public class ShooterSubsystem extends SubsystemBase{
                 }
                 hoodWasEnabled = nowEnabled;
                 double currentHoodAngle = getShooterAngleDegrees();
-                double hoodTarget = MathUtil.clamp(desired_Angle, ShooterSubsystemConstants.MIN_ANGLE, ShooterSubsystemConstants.MAX_ANGLE);
-                if (hoodTarget < currentHoodAngle
-                        && hoodTarget < ShooterSubsystemConstants.HOOD_STOW_INTERLOCK_FLOOR_DEG
-                        // Gate ONLY the coast-down auto-recess (velocity commanded 0). A LIVE shot
-                        // that commands its own low angle (RB's 25 deg) must be allowed to lower
-                        // while its flywheels spin -- otherwise pressing RB with the hood staged
-                        // high (e.g. right after RT) would freeze the hood at the OLD angle for
-                        // the whole hold while the ungated kicker fires (verify-review 2026-07-18).
-                        && desired_Velocity == 0
-                        && Math.abs(getShooterFlywheelVelocity()) > ShooterSubsystemConstants.HOOD_LOWER_MAX_SURFACE_SPEED) {
-                    hoodTarget = currentHoodAngle; // stow drop while flywheels fast -- hold, don't lower yet
-                }
+                // SAME band as setDesired_Angle -- one definition, both callers. A raw
+                // clamp(desired_Angle, MIN_ANGLE, MAX_ANGLE) here would re-introduce the
+                // enable-time lurch even with the setter fixed, by pulling a hood parked below
+                // the 5.0 deg floor back up to it every loop.
+                double hoodTarget = clampDesiredAngle(desired_Angle, hoodBaseAngleDeg, hoodDatumValid);
+                // The stow interlock that used to sit here (hold the hood up while the flywheels
+                // coast down) is GONE with auto-stow itself (2026-08-26): nothing lowers the hood
+                // on its own any more, so the only thing it could still block was a DPAD-down
+                // press while the wheels spun -- which is exactly the one motion the driver is
+                // supposed to always get.
                 // FEEDBACK SANITY GATE (verify-review 2026-07-18): only close the loop on a raw
                 // reading inside the calibrated band. An unplugged/silent absolute encoder reads 0,
                 // which the two-point map turns into ~105 deg -- the PID would then drive DOWN at

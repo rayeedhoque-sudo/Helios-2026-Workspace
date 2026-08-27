@@ -205,13 +205,69 @@ public class HoodTrackingTest {
             "one click moves exactly one step, whatever the step is tuned to");
     }
 
-    /** A datum far outside the soft band must not invert the window into an empty range. */
+    /** A datum far outside the soft band must still produce a usable, non-inverted range. */
     @Test
-    void degenerateWindowHoldsInsteadOfInverting() {
+    void aDatumOutsideTheBandStillYieldsARealSetpoint() {
         double clamped = ShooterSubsystem.clampDesiredAngle(20, 80, true);
         assertTrue(Double.isFinite(clamped), "must produce a real setpoint, not NaN");
-        assertTrue(clamped >= ShooterSubsystemConstants.MIN_ANGLE
-                && clamped <= ShooterSubsystemConstants.MAX_ANGLE,
-            "must stay inside the soft limits: " + clamped);
+        // The band now widens to include the datum instead of collapsing, so the limits can
+        // never cross. The setpoint stays between the datum and the band it is heading toward.
+        assertTrue(clamped >= ShooterSubsystemConstants.MIN_ANGLE && clamped <= 80,
+            "must be a reachable setpoint between the soft floor and the datum: " + clamped);
+    }
+
+    // ---- the soft band must never DEMAND motion (team request 2026-08-26) ----
+    // The hood RESTS at ~3.2 deg, below the 5.0 deg MIN_ANGLE floor. The band used to clamp the
+    // enable-time seed up to the floor, so every enable drove the hood up at ~7.6 V. These pin
+    // that it holds instead.
+
+    /** THE REGRESSION GUARD: enabling with the hood parked below the soft floor must not move it. */
+    @Test
+    void enablingBelowTheSoftFloorDoesNotCommandMotion() {
+        double rest = ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN; // ~3.224, below MIN_ANGLE
+        assertTrue(rest < ShooterSubsystemConstants.MIN_ANGLE,
+            "precondition: the hood's rest position is below the soft floor");
+        assertEquals(rest, ShooterSubsystem.clampDesiredAngle(rest, rest, true), 1e-9,
+            "the seeded setpoint must equal the enable position exactly, or the hood lurches on enable");
+    }
+
+    /** DPAD-down at the floor holds; it must never jump the hood UP to satisfy MIN_ANGLE. */
+    @Test
+    void nudgingDownBelowTheFloorHoldsInsteadOfRising() {
+        double rest = ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN;
+        double commanded = ShooterSubsystem.clampDesiredAngle(
+            rest - ShooterSubsystemConstants.HOOD_NUDGE_DEG, rest, true);
+        assertEquals(rest, commanded, 1e-9, "must hold at the enable position, not rise to MIN_ANGLE");
+    }
+
+    /** Enabled below the floor, the hood may still be commanded UP toward the band. */
+    @Test
+    void nudgingUpFromBelowTheFloorStillWorks() {
+        double rest = ShooterSubsystemConstants.HOOD_DEG_AT_FULL_DOWN;
+        assertEquals(rest + ShooterSubsystemConstants.HOOD_NUDGE_DEG,
+            ShooterSubsystem.clampDesiredAngle(rest + ShooterSubsystemConstants.HOOD_NUDGE_DEG, rest, true),
+            1e-9, "the band opens toward the hood, it does not trap it");
+    }
+
+    /** Enabled ABOVE the ceiling: hold, and allow only downward commands (belt protection). */
+    @Test
+    void enablingAboveTheCeilingIsHoldThenDownOnly() {
+        double high = ShooterSubsystemConstants.MAX_ANGLE + 2.0;
+        assertEquals(high, ShooterSubsystem.clampDesiredAngle(high, high, true), 1e-9,
+            "must hold where it was enabled");
+        assertEquals(high, ShooterSubsystem.clampDesiredAngle(high + 5, high, true), 1e-9,
+            "must never be commanded further up");
+        assertEquals(high - ShooterSubsystemConstants.HOOD_NUDGE_DEG,
+            ShooterSubsystem.clampDesiredAngle(high - ShooterSubsystemConstants.HOOD_NUDGE_DEG, high, true),
+            1e-9, "but must still come down");
+    }
+
+    /** The widened band must never invert, whatever the datum. */
+    @Test
+    void theBandAlwaysContainsTheDatum() {
+        for (double base = -10; base <= 90; base += 0.5) {
+            assertEquals(base, ShooterSubsystem.clampDesiredAngle(base, base, true), 1e-9,
+                "clamping the datum to itself must be a no-op at base=" + base);
+        }
     }
 }

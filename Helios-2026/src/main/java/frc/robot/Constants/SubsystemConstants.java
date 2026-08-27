@@ -12,7 +12,7 @@ public class SubsystemConstants {
          * for a dashboard value to reach a motor controller. Flip to true and redeploy once at the
          * start of a tuning session, then flip it back.
          */
-        public static final boolean TUNING_MODE = false;
+        public static final boolean TUNING_MODE = true;
 
         public static class DriveConstants{
             // Heading servo (SwerveRequest.FieldCentricFacingAngle) gains, shared by every
@@ -235,12 +235,12 @@ public class SubsystemConstants {
                 public static double SHOOTER_ANGLE_kD = 0.0;
             //PID - Speed
                 public static double SHOOTER_SPEED_kP = 0.4;
-                public static double SHOOTER_SPEED_kI = 0;
+                public static double SHOOTER_SPEED_kI = 0.0;
                 public static double SHOOTER_SPEED_kD = 0.01;
             //FEEDFORWARD - Speed
-                public static double SHOOTER_SPEED_kS = 0;
+                public static double SHOOTER_SPEED_kS = 0.0;
                 public static double SHOOTER_SPEED_kV = 0.12625;
-                public static double SHOOTER_SPEED_kA = 0;
+                public static double SHOOTER_SPEED_kA = 0.0;
             //HARDWARE CONSTANTS
                 public static final double FLYWHEEL_ROTATIONS_PER_MOTOR_ROTATION = 1.5;
                     // Flywheel rotations per motor rotation.
@@ -503,17 +503,10 @@ public class SubsystemConstants {
                 // 0.226 m half-window through the opening; 0.2 closes the budget exactly.
                 public static double SPEED_TOLERANCE = 0.2;
                 public static double FLYWHEEL_RADIUS_METERS = Units.inchesToMeters(2);
-                // Hood-lower interlock (team request 2026-07-17): the hood may only be driven DOWN
-                // when the flywheel SURFACE speed is at/below this -- above it the hood holds its
-                // current angle and waits for the flywheels to coast down (raising is never gated).
-                // Low value = "nearly stopped". [assumed] TODO tune on robot: raise if the hood
-                // should start dropping sooner, lower it toward 0 to wait for a fuller stop.
-                public static double HOOD_LOWER_MAX_SURFACE_SPEED = 2.0;   // m/s surface
-                // Interlock SCOPE (2026-07-18): the gate above only blocks drops BELOW this angle
-                // (the stow region) and only during the coast-down auto-recess (desired velocity
-                // commanded 0). A live shot's own low angle (RB's 25 deg) and lowering within the
-                // shot band are never gated, so a staged shot can always settle to its firing angle.
-                public static double HOOD_STOW_INTERLOCK_FLOOR_DEG = 30.0;
+                // HOOD_LOWER_MAX_SURFACE_SPEED / HOOD_STOW_INTERLOCK_FLOOR_DEG were DELETED
+                // 2026-08-26 along with auto-stow. They gated the coast-down auto-recess -- with
+                // nothing lowering the hood on its own, the only motion left for them to block
+                // was a driver DPAD-down while the flywheels spun, which must never be blocked.
                 // Hood gate, deg: worst contribution 0.078 m at 3 m, shrinking with distance.
                 public static double ANGLE_TOLERANCE = 0.5;
                 

@@ -306,7 +306,7 @@ public class RobotContainer {
             // auto-aim shot): spin the flywheels to RT_FLYWHEEL_SURFACE_SPEED, belts always,
             // kicker after a 2 s spin-up delay (KICKER_SPINUP_DELAY_SEC). The HOOD IS NOT COMMANDED -- it stays
             // wherever the DPAD jog left it, and it stays there on release too (no
-            // stopShooterCommand, which would pull it back to MIN). Aiming is the driver's
+            // stopShooterCommand, which no longer moves the hood at all). Aiming is the driver's
             // job: no vision, no auto-rotate. Same drive + intake lockout as RB, so aim BEFORE
             // pressing. Release: flywheels coast, hood unchanged.
             joystick2.rightTrigger().and(RobotModeTriggers.teleop())
