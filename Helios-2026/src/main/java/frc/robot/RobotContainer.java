@@ -74,14 +74,18 @@ public class RobotContainer {
     // KILL SWITCH for the teleop DPAD hood moves (2026-08-27). false = the bindings are not
     // registered at all, so nothing can drive the hood from the driver station; the hood still
     // holds on its brake and commanded shot angles are unaffected. See the bindings below.
-    // RE-ENABLED 2026-08-27 with the raw-unit rework: the gate was set false because the
-    // moves stop on a MEASURED angle whose scale (HOOD_RAW_UNITS_PER_FULL_TRAVEL) was
-    // unverified. The hood angle IS the raw encoder reading now, so there is no scale left to
-    // be wrong about, and the step is 5 raw units (~0.67 physical deg) rather than a 27 deg
-    // stroke. A STUCK encoder is still not caught -- that path is bounded by
-    // HOOD_MOVE_TIMEOUT_SEC and the 20 A smart limit. Flip this back to false to kill the
-    // bindings outright.
-    private static final boolean HOOD_DPAD_MOVES_ENABLED = true;
+    // STILL GATED OFF (team decision 2026-08-27, after the raw-unit rework). The unverified
+    // SCALE that first closed this gate is gone -- the hood angle is the raw encoder reading
+    // now -- but the other half of the reason stands: these moves stop on the MEASURED angle,
+    // and the measurement cannot resolve a move this short. A powered hood steps 25-55 raw
+    // units per 20 ms loop, so the first loop of a base + 5 press overshoots the target by
+    // 20-50 units (3-7 physical deg) before the stop can fire, every press, toward the top
+    // stop -- the belt grind of 2026-08-26. Driving softer is not a fix either: the hood does
+    // not break away below ~7.5 V, so ~25 units is the smallest move the mechanism can make.
+    // To re-enable, the step has to be BIGGER than one loop of powered travel (~60 units,
+    // ~8 physical deg) -- team's call, not a code decision. The TEST-mode held jog below stays
+    // live: it is supervised and stops on release.
+    private static final boolean HOOD_DPAD_MOVES_ENABLED = false;
 
     // Hood: DPAD LEFT/RIGHT are PRESSED to send the hood to the base / base + HOOD_UP_STEP_UNITS
     // in teleop, and
