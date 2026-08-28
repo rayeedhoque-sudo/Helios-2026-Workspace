@@ -181,7 +181,11 @@ public class HopperSubsystem extends SubsystemBase{
             () -> {
                 stopIndex();
                 stopKickFuel();
-            });
+                setBeltCurrentLimit(HopperSubsystemConstants.HOPPER_CURRENT_LIMIT_A);
+            })
+            // Belts get 30 A while B is held (team request 2026-08-27), restored in end()
+            // above -- same raise/restore pattern the shot feed already uses.
+            .beforeStarting(() -> setBeltCurrentLimit(HopperSubsystemConstants.HOPPER_MANUAL_CURRENT_LIMIT_A));
     }
 
     /**
