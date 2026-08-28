@@ -253,7 +253,7 @@ public class SubsystemConstants {
             public static double HOOD_UNITS_PER_DEG = 309.6 / (44.5 - 3.224);
             //PID - Angle (RAW UNITS, see HOOD_UNITS_PER_DEG: the same physical stiffness as the
             // 0.1 / 0.5 that was tuned in degrees, since the error is now 7.5x larger)
-                public static double SHOOTER_ANGLE_kP = 0.001;
+                public static double SHOOTER_ANGLE_kP = 0.0;
                 public static double SHOOTER_ANGLE_kI = 0.0;
                 public static double SHOOTER_ANGLE_kD = 0.0;
             //PID - Speed
