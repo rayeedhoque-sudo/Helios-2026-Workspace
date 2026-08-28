@@ -251,11 +251,33 @@ public class SubsystemConstants {
             // (modelSurfaceSpeed fits at 38 deg), not to the hood tracker. The hood's own travel
             // limits are the enable-time floor and HOOD_TRAVEL_WINDOW_DEG above it.
             public static double HOOD_UNITS_PER_DEG = 309.6 / (44.5 - 3.224);
-            //PID - Angle (RAW UNITS, see HOOD_UNITS_PER_DEG: the same physical stiffness as the
-            // 0.1 / 0.5 that was tuned in degrees, since the error is now 7.5x larger)
-                public static double SHOOTER_ANGLE_kP = 0.0;
+            //PID - Angle (RAW UNITS, see HOOD_UNITS_PER_DEG). THE HOOD IS NOW POSITION-CONTROLLED
+            // ONLY (2026-08-28, team direction: "the DPAD should be based on PID, voltage
+            // throttle removed"): these gains, plus hoodLiftFeedforward, are the ONLY thing that
+            // moves the hood. There is no open-loop jog path left.
+            //
+            // BASE GAINS, chosen to minimise oscillation given a hood that needs ~7.5 V just to
+            // break away from stiction:
+            //  kP 0.18 -- the feedforward ramp supplies ~5.83 V at a one-step (10 unit) error,
+            //    and the hood does not move below ~7.5 V, so P must find the remaining ~1.7 V:
+            //    0.18 x 10 = 1.8 V, total 7.63 V, just over breakaway and just under the 8 V cap.
+            //    Below ~0.167 a single DPAD press cannot break the hood away at all; above ~0.25
+            //    the approach carries enough surplus to bounce out the far side of the band.
+            //    (HoodSettleTest pins the one-step sum against breakaway and the cap.)
+            //  kI 0 -- DELIBERATE, do not add. An integrator sitting against stiction winds up
+            //    for as long as the hood refuses to move, then dumps it all at once; that is a
+            //    lurch, not a correction. The gravity feedforward already does the job kI would.
+            //  kD 0.004 -- THE ANTI-OSCILLATION TERM, and the one to tune first. At the observed
+            //    approach rate it subtracts ~1.5-2 V near the target, dropping the total below
+            //    breakaway a few units EARLY so the hood coasts the last bit instead of arriving
+            //    with surplus and bouncing out the far side of the settle band. TODO on robot:
+            //    if the hood still hunts after a press, raise kD in 0.002 steps before touching
+            //    kP; if presses become sluggish or the hood stops short, lower it.
+            // Every value is live-tunable from the Shooter tab (see the tune* entries) and
+            // reverts to these on redeploy.
+                public static double SHOOTER_ANGLE_kP = 0.18;
                 public static double SHOOTER_ANGLE_kI = 0.0;
-                public static double SHOOTER_ANGLE_kD = 0.0;
+                public static double SHOOTER_ANGLE_kD = 0.004;
             //PID - Speed
                 public static double SHOOTER_SPEED_kP = 0.2;
                 public static double SHOOTER_SPEED_kI = 0.0;
@@ -571,19 +593,16 @@ public class SubsystemConstants {
                 // RAW UNITS (2026-08-27): the tuned 0.5 physical degree, converted.
                 public static double ANGLE_TOLERANCE = 0.5 * HOOD_UNITS_PER_DEG;   // 3.75 raw units
                 
-                // DPAD hood jog DRIVE VOLTAGE (2026-08-26): HOLD DPAD right to raise, left to
-                // lower, release to stop and hold. Open loop ON PURPOSE. Ramping a SETPOINT at
-                // a few deg/sec (the previous HOOD_JOG_DEG_PER_SEC) could never move the hood
-                // smoothly: the hood needs ~7 V to break away, so the position loop sat held at
-                // 0 V until the ramped error grew past HOOD_REENGAGE_DEG *and* the feedforward
-                // faded in, then slammed ~7.5 V, jumped ~1.5 deg, overshot into the settle band
-                // and stopped -- a ~0.75 s stick-slip cycle the driver sees as oscillation.
-                // A held jog is a VELOCITY request, so it is driven as one; these two volts are
-                // the jog speed knob and are independent of the shot loop's tuned gains.
-                // TODO tune on robot: raise for a faster jog, lower for a slower one. UP must
-                // stay above the ~7 V breakaway or the hood will not move at all.
-                public static double HOOD_JOG_UP_VOLTS = 7.0;    // [assumed] = measured breakaway
-                public static double HOOD_JOG_DOWN_VOLTS = 3.0;  // [assumed] gravity assists here
+                // HOOD_JOG_UP_VOLTS / HOOD_JOG_DOWN_VOLTS are DELETED (2026-08-28, team
+                // direction: "voltage throttle should be entirely removed, the only throttle
+                // available should be for rpm on the shooter"). The hood has no open-loop drive
+                // path any more, in teleop or in test mode -- every hood volt now comes out of
+                // the position loop (SHOOTER_ANGLE_k* + hoodLiftFeedforward), bounded by
+                // HOOD_MAX_UP_VOLTAGE / HOOD_MAX_DOWN_VOLTAGE and the travel guards.
+                // CONSEQUENCE, accepted by the team: parking the hood ON a hard stop to re-read
+                // the encoder anchors is no longer possible from the controller -- every setpoint
+                // is clamped to [enable datum, datum + travel]. Move it by hand, or re-add a
+                // test-mode-only jog if that calibration is needed again.
                 // DPAD UP STEP (2026-08-27, team direction: "in teleop the hood should go up
                 // 5 degrees every press", raised to 10 the same day). EVERY press of DPAD RIGHT
                 // raises the hood by this much, measured from where the hood IS at the moment of
@@ -594,22 +613,15 @@ public class SubsystemConstants {
                 // scale as the raw encoder readout, so this is 10 raw units = 1.33 PHYSICAL
                 // degrees. Multiply by HOOD_UNITS_PER_DEG (-> 75) if 10 physical degrees was meant.
                 //
-                // WHAT ACTUALLY HAPPENS ON THE ROBOT, accepted knowingly by the team: a press
-                // moves 25-55 raw units (3-7 physical deg), NOT 10, and 5 -> 10 does not change
-                // that. The drive is open loop at the ~7.5 V breakaway and the stop is checked
-                // once per 20 ms loop, so ONE loop of powered travel is still bigger than this
-                // step -- the stop cannot resolve a move this short, and no lower voltage moves
-                // the hood at all. The step only starts to mean something past ~60, where it
-                // finally exceeds one loop of travel and the stop can land on it.
+                // WHAT ACTUALLY HAPPENS ON THE ROBOT, accepted knowingly by the team (re-confirmed
+                // 2026-08-28): a press moves 25-55 raw units (3-7 physical deg), NOT 10. Closing
+                // the loop does not change that number -- it is set by the hardware. The hood
+                // cannot move at all below ~7.5 V, and one 20 ms loop AT that voltage already
+                // carries it further than this step, so the smallest move the hood can make is
+                // several times the step being asked for. kD (see SHOOTER_ANGLE_kD) shortens the
+                // arrival, and the settle band absorbs what is left, but a 10-unit step will
+                // still land long. The step only becomes literal past ~60 units.
                 public static double HOOD_UP_STEP_UNITS = 10.0;
-                // Hard stop on how long ONE DPAD move may drive. It normally ends on the
-                // encoder; this ends it when the hood does not move at all (the 2026-08-26 trace
-                // showed -6 V for 4.5 s and zero motion), so a dead/jammed hood cannot sit
-                // energized. The full floor -> preset stroke is ~27 deg = ~0.6 s at the observed
-                // jog rate, so 3 s is generous for the UP stroke; the gravity-assisted DOWN
-                // stroke at 3 V is slower and unmeasured. TODO on robot: shorten this to just
-                // over the real worst-case stroke once both directions have been timed.
-                public static double HOOD_MOVE_TIMEOUT_SEC = 3.0;
                 // HOOD_REENGAGE_DEG is the degree at which the hood needs to readjust hold
                 // RAW UNITS (2026-08-27): the tuned 0.75 physical degree, converted.
                 public static double HOOD_REENGAGE_DEG = 0.75 * HOOD_UNITS_PER_DEG;   // 5.63 raw units

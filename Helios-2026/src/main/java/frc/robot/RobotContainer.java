@@ -76,20 +76,19 @@ public class RobotContainer {
     // holds on its brake and commanded shot angles are unaffected. See the bindings below.
     // ON (team direction 2026-08-27: "in teleop the hood should go up 5 degrees every
     // press"), with the overshoot accepted knowingly. THE RISK, restated so it is not
-    // rediscovered on the belt: the move stops on the MEASURED angle, and a powered hood steps
-    // 25-55 raw units per 20 ms loop, so ONE press actually moves 25-55 units (3-7 physical
-    // deg), not 5 -- the stop cannot resolve a move shorter than its own sample. Driving
-    // softer is not available either: the hood does not break away below ~7.5 V. So each press
-    // is roughly one physical "notch" of ~3-7 deg, and about 6-12 of them reach the ceiling
-    // guard at base + one full travel, which is what protects the top stop.
-    // Set false to kill the teleop bindings outright; the TEST-mode held jog is separate.
+    // rediscovered on the belt: a powered hood steps 25-55 raw units per 20 ms loop, so ONE
+    // press actually moves 25-55 units (3-7 physical deg), not 10 -- no loop can resolve a move
+    // shorter than one sample of its own travel, closed loop included. Driving softer is not
+    // available either: the hood does not break away below ~7.5 V. So each press is roughly one
+    // physical "notch" of ~3-7 deg, and about 6-12 of them reach the ceiling guard at base +
+    // one full travel, which is what protects the top stop.
+    // Set false to kill the teleop bindings outright; the test-mode bindings are separate.
     private static final boolean HOOD_DPAD_MOVES_ENABLED = true;
 
     // Hood: DPAD LEFT/RIGHT are PRESSED to send the hood to the base / one HOOD_UP_STEP_UNITS
-    // step above where it currently sits, in teleop, and
-    // HELD to jog it open loop at HOOD_JOG_UP/DOWN_VOLTS in test mode
-    // (ShooterSubsystem.jogHoodCommand). Jog speed is the voltage itself, so no SlewRateLimiter
-    // and no setpoint ramp is involved.
+    // step above where it currently sits -- in teleop AND in test mode, the same closed-loop
+    // move in both (ShooterSubsystem.moveHoodToCommand). Since 2026-08-28 there is no hood
+    // voltage binding of any kind: the position loop is the only thing that drives it.
 
     // Intake-live slowdown: halve translation while the intake rollers spin (LT/Y hold,
     // intake or outtake) so the extended intake can't be rammed at full speed. Applied
@@ -273,14 +272,14 @@ public class RobotContainer {
             // DPAD-RIGHT (PRESS) = raise the hood by HOOD_UP_STEP_UNITS, EVERY PRESS (team
             // direction 2026-08-27). The target is read off the hood itself at the moment of
             // the press -- current + step -- not off a stored setpoint, so presses keep working
-            // after the inevitable overshoot instead of going dead (see
-            // ShooterSubsystem.getHoodAngle). DPAD-LEFT still returns the hood all the way to
-            // this enable's base in one press.
+            // from wherever the hood actually ended up (see ShooterSubsystem.getHoodAngle).
+            // DPAD-LEFT returns the hood to this enable's base in one press.
             //
-            // Driven open loop at HOOD_JOG_*_VOLTS; only the STOP is by angle, off the measured
-            // encoder. See ShooterSubsystem.moveHoodToCommand -- the ceiling and floor guards
-            // in periodic() still bound the result, and HOOD_MOVE_TIMEOUT_SEC ends a press that
-            // produces no motion at all.
+            // CLOSED LOOP since 2026-08-27 (team direction: "make the DPAD use PID"). A press
+            // writes a setpoint and nothing else; the position loop in periodic() drives it,
+            // bounded by the settle band, the voltage caps and the travel guards. Read
+            // ShooterSubsystem.moveHoodToCommand before tuning this -- it needs a NON-ZERO kP
+            // (>= ~0.17) to break the hood away at all, and there is no move timeout any more.
                 if (HOOD_DPAD_MOVES_ENABLED) {
                     joystick2.povLeft().and(RobotModeTriggers.teleop())
                         .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
@@ -415,15 +414,22 @@ public class RobotContainer {
                     .alongWith(hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed,
                         () -> false)))
                 .onFalse(shooterSS.stopShooterCommand());
-            // DPAD LEFT / RIGHT (HOLD) = jog the hood down / up, the same mechanism as the
-            // match bindings (ShooterSubsystem.jogHoodCommand). Flywheels stay off, and
-            // periodic() still applies the travel guard and the feedback gate. Releasing leaves
-            // the hood where it lands, which is what lets it be parked at a precise angle to
-            // read the encoder anchors (handoff on-robot verify item 2).
+            // DPAD LEFT / RIGHT (PRESS) = the SAME closed-loop hood moves as the match
+            // bindings (ShooterSubsystem.moveHoodToCommand): right steps up by
+            // HOOD_UP_STEP_UNITS from wherever the hood is, left returns it to this enable's
+            // base. Flywheels stay off; periodic() still applies the travel guard and the
+            // feedback gate.
+            //
+            // The held OPEN-LOOP jog that used to live here is GONE (2026-08-28, team
+            // direction: hood voltage throttle removed everywhere). CONSEQUENCE: the hood can
+            // no longer be driven ONTO a hard stop from the controller -- every setpoint is
+            // clamped to [enable datum, datum + travel] -- so the encoder-anchor calibration
+            // (handoff on-robot verify item 2) has to be done by moving the hood by hand.
             joystick2.povLeft().and(RobotModeTriggers.test())
-                .whileTrue(shooterSS.jogHoodCommand(-ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS));
+                .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
             joystick2.povRight().and(RobotModeTriggers.test())
-                .whileTrue(shooterSS.jogHoodCommand(ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS));
+                .onTrue(shooterSS.moveHoodToCommand(
+                    () -> shooterSS.getHoodAngle() + ShooterSubsystemConstants.HOOD_UP_STEP_UNITS));
     }
 
     /**

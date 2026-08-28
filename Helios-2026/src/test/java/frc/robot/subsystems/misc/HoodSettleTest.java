@@ -77,20 +77,23 @@ public class HoodSettleTest {
     }
 
     /**
-     * The open-loop DPAD jog (2026-08-26) must stay inside the drive caps the closed loop is
-     * held to -- a jog voltage is still a voltage into a 20 A NEO 550, and UP must clear the
-     * ~7 V breakaway or holding the DPAD does nothing at all.
+     * THE ONLY HOOD DRIVE IS THE POSITION LOOP (2026-08-28): the open-loop jog volts are gone,
+     * so the gains themselves have to be able to break the hood away. At a one-step error the
+     * P term plus the gravity feedforward must clear the ~7.5 V breakaway, or a DPAD press
+     * writes a setpoint and the hood never moves -- and the total must still fit the up cap.
      */
     @Test
-    void jogVoltsStayInsideTheDriveCaps() {
-        assertTrue(ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS > 0
-                && ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS
-                    <= ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE,
-            "up jog must be positive and within HOOD_MAX_UP_VOLTAGE");
-        assertTrue(ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS > 0
-                && ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS
-                    <= ShooterSubsystemConstants.HOOD_MAX_DOWN_VOLTAGE,
-            "down jog must be positive (the sign is applied at the binding) and within cap");
+    void aOneStepPressCanBreakTheHoodAway() {
+        double step = ShooterSubsystemConstants.HOOD_UP_STEP_UNITS;
+        double drive = ShooterSubsystemConstants.SHOOTER_ANGLE_kP * step
+            + ShooterSubsystem.hoodLiftFeedforward(step);
+        assertTrue(drive >= 7.4, "one step must ask for at least the ~7.5 V breakaway, got " + drive);
+        assertTrue(drive <= ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE + 1e-9,
+            "and must not exceed the up cap before clamping, got " + drive);
+        assertEquals(0.0, ShooterSubsystemConstants.SHOOTER_ANGLE_kI, 1e-12,
+            "kI must stay 0 -- an integrator against stiction winds up and then lurches");
+        assertTrue(ShooterSubsystemConstants.SHOOTER_ANGLE_kD > 0,
+            "kD is the anti-overshoot term; a zero kD is the oscillating tune");
     }
 
     @Test

@@ -32,7 +32,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.util.function.DoubleSupplier;
@@ -170,10 +169,6 @@ public class ShooterSubsystem extends SubsystemBase{
        private double hoodLastRaw;        // previous raw reading, for the delta
        private boolean hoodDatumValid;    // false until a datum has been captured
        private boolean hoodWasEnabled;    // rising-edge detect on DriverStation.isEnabled()
-       private boolean hoodWasJogging;    // falling-edge detect on hoodJogVolts -- see hoodJogJustEnded
-       // Open-loop hood jog request, volts; 0 = not jogging. Set by jogHoodCommand while the
-       // DPAD is held, applied (and guarded) in periodic(). See jogHoodCommand.
-       private double hoodJogVolts;
        private double desired_Velocity;
        private double desired_Angle;
        private double target_distance;
@@ -395,101 +390,39 @@ public class ShooterSubsystem extends SubsystemBase{
             return rtSurfaceSpeed;
         }
 
-        // DPAD LEFT/RIGHT (HOLD) = jog the hood at a constant VOLTAGE, left down / right up.
-        // Hold to move, release to stop where it is.
+        // DPAD LEFT/RIGHT (press) = move the hood ON THE POSITION LOOP. Team direction
+        // 2026-08-27 ("make the DPAD use PID"), completed 2026-08-28 ("voltage throttle should
+        // be entirely removed"). A press only writes a SETPOINT; the closed-loop branch in
+        // periodic() does all the driving, with its settle band, its gravity feedforward and its
+        // asymmetric voltage caps. THERE IS NO OPEN-LOOP HOOD PATH LEFT ANYWHERE -- the held jog
+        // and hoodJogVolts are deleted, in teleop and in test mode alike.
         //
-        // OPEN LOOP on purpose (2026-08-26). This used to ramp the SETPOINT at
-        // HOOD_JOG_DEG_PER_SEC and let the position loop chase it, which oscillated: the hood
-        // needs ~7 V to break away, so the loop sat HELD at 0 V until the ramped error passed
-        // HOOD_REENGAGE_DEG and the feedforward faded in, then slammed ~7.5 V, jumped past the
-        // target into the settle band and stopped dead -- stick-slip, roughly 0.75 s per cycle.
-        // No gain retune fixes that; a position loop fed a slow setpoint through that much
-        // stiction must stick-slip. A held jog is a velocity request, so it is driven as one.
+        // RIGHT asks for current + HOOD_UP_STEP_UNITS, read off the hood at the press, so every
+        // press steps again from wherever it actually ended up. LEFT asks for the enable-time
+        // base. setDesired_Angle applies clampDesiredAngle, so neither can ask for a rise past
+        // the ceiling or a descent below the floor.
         //
-        // The voltage is applied in periodic() (see hoodJogVolts), NOT here, so the jog still
-        // passes through the feedback sanity gate and the MIN/MAX_ANGLE hard travel guards --
-        // the dead-encoder and belt-skip protections are unchanged. periodic() also keeps the
-        // setpoint pinned to the live angle while jogging, so releasing hands back to the
-        // position loop at zero error and the brake holds it there.
+        // runOnce: the press is one setpoint write, and the loop owns everything after it.
+        // Requires NO subsystem, deliberately -- the RT shot group runs kCancelIncoming and
+        // would block a requiring command for the whole hold, killing the mid-hold hood trim.
         //
-        // Requires NO subsystem, deliberately. The RT shot group runs kCancelIncoming, so a
-        // requiring command would be BLOCKED for the whole hold -- which would kill the mid-hold
-        // hood trim that flywheelOnlyShotCommand explicitly depends on.
-        public Command jogHoodCommand(double volts){
-            return Commands.runEnd(() -> hoodJogVolts = volts, () -> hoodJogVolts = 0);
-        }
-
-        // DPAD LEFT/RIGHT (press) = send the hood to a FIXED angle, right up to
-        // HOOD_UP_PRESET_DEG, left all the way back down to the floor (team request
-        // 2026-08-27). Two positions, not a jog and not a step: press right and the hood rises
-        // to the preset and STOPS there -- pressing right again does nothing, because the
-        // target is an absolute angle it has already reached. Press left and it returns to the
-        // floor, after which right raises it again.
-        //
-        // This is NOT the per-click setpoint step that 5af2471 removed. That handed the
-        // position loop a step it answered at full feedforward (a 2 deg click flew 9.5 deg).
-        // Here the DRIVE is still the proven open-loop jog voltage; only the STOP is new, and
-        // it comes from the measured hood angle, so the travel cannot outrun the request.
-        //
-        // The voltage goes through hoodJogVolts, so periodic() still applies the feedback
-        // sanity gate and the MIN/MAX hard travel guards exactly as for the held jog. The
-        // target is put through clampDesiredAngle (not a raw MIN/MAX clamp), so it can never
-        // ask for a rise past MAX_ANGLE or a descent below the enable-time floor.
-        //
-        // execute() drives 0 V once the target is reached rather than the jog voltage, so a
-        // press at the preset cannot creep the hood up by the one loop that runs before
-        // isFinished is checked. Leaning on the button changes nothing either: onTrue fires on
-        // the rising edge, and a re-press while the move is still running is swallowed.
-        //
-        // The timeout is load-bearing, not a formality: if the hood does not move (the
-        // 2026-08-26 trace showed -6 V for 4.5 s producing no motion at all), this is the only
-        // thing that ends the press. Drive is bounded by the guards and the 20 A smart limit
-        // throughout.
-        //
-        // Requires NO subsystem, for the same reason jogHoodCommand does not: the RT shot group
-        // runs kCancelIncoming and would block a requiring command for the whole hold.
+        // WHAT THIS DEPENDS ON, and what the old open-loop version did not:
+        //  - NON-ZERO GAINS. The hood needs ~7.5 V to break away and hoodLiftFeedforward tops
+        //    out at HOOD_RAISE_FF_VOLTS (7.0), deliberately just BELOW breakaway so the
+        //    feedforward can never move the hood by itself -- P supplies the rest. kP is 0.18
+        //    for exactly that reason (0.18 x a 10-unit step = 1.8 V, and 5.83 + 1.8 clears the
+        //    7.5 V breakaway); drop it to 0 and a press writes a setpoint and nothing moves.
+        //    See SHOOTER_ANGLE_kP for the full gain rationale.
+        //  - NO MOVE TIMEOUT. A setpoint has no end, so a jammed hood is held against by the
+        //    loop until the setpoint changes. What bounds it is the 20 A smart limit, the
+        //    travel guards, and the driver pressing LEFT.
+        //  - A LONG LANDING at this step size. One powered loop moves the hood 25-55 raw units
+        //    and the step is 10, so the hood arrives past its target however it is driven; kD
+        //    (0.004) cuts the drive early so it coasts in, and the settle band latches on
+        //    whatever it lands on rather than chasing back down. If it still hunts on the robot,
+        //    raise kD first, then widen ANGLE_TOLERANCE -- not kP.
         public Command moveHoodToCommand(DoubleSupplier targetDegrees){
-            double[] stopAt = new double[1];
-            boolean[] rising = new boolean[1];
-            return new FunctionalCommand(
-                    () -> {
-                        stopAt[0] = clampDesiredAngle(targetDegrees.getAsDouble(),
-                                                      hoodBaseAngleDeg, hoodDatumValid);
-                        rising[0] = stopAt[0] > getShooterAngleDegrees();
-                    },
-                    () -> hoodJogVolts = hoodMoveReached(getShooterAngleDegrees(), stopAt[0], rising[0])
-                        ? 0
-                        : (rising[0] ? ShooterSubsystemConstants.HOOD_JOG_UP_VOLTS
-                                     : -ShooterSubsystemConstants.HOOD_JOG_DOWN_VOLTS),
-                    interrupted -> hoodJogVolts = 0,
-                    () -> hoodMoveReached(getShooterAngleDegrees(), stopAt[0], rising[0]))
-                .withTimeout(ShooterSubsystemConstants.HOOD_MOVE_TIMEOUT_SEC);
-        }
-
-        // Did the open-loop jog END on this loop? THE HOOD MUST STAY WHERE A PRESS PUT IT
-        // (team requirement 2026-08-27), and without this it did not.
-        //
-        // The jog branch in periodic() pins the setpoint to the measured angle every loop, but
-        // it reads that angle BEFORE the loop's voltage reaches the motor. The last powered
-        // loop then moves the hood 25-55 raw units, the jog ends, and the position loop wakes
-        // up against a setpoint one whole loop of travel BELOW the hood: a ~40 unit negative
-        // error, which is past the re-engage band, so the lowering feedforward fires and up to
-        // HOOD_MAX_DOWN_VOLTAGE drives the hood straight back down. Every press would rise and
-        // then sink.
-        //
-        // On the falling edge the setpoint is re-seeded from the angle measured AFTER all of
-        // that travel, so the error is ~0, the settle band latches, and the brake parks the
-        // hood at its new angle. Applies to the DPAD press moves and the test-mode held jog
-        // alike -- both route through hoodJogVolts, so this is fixed once, where they meet.
-        // Package-private + static for HoodHoldTest.
-        static boolean hoodJogJustEnded(boolean wasJogging, boolean jogging){
-            return wasJogging && !jogging;
-        }
-
-        // Has a hood move arrived? Direction-aware: a rising move is done at or above the
-        // target, a falling one at or below it. Package-private + static for HoodMoveTest.
-        static boolean hoodMoveReached(double currentDeg, double targetDeg, boolean rising){
-            return rising ? currentDeg >= targetDeg : currentDeg <= targetDeg;
+            return Commands.runOnce(() -> setDesired_Angle(targetDegrees.getAsDouble()));
         }
 
         // The floor this enable: what DPAD-LEFT drives back down to. See hoodFloorAngle.
@@ -1149,17 +1082,6 @@ public class ShooterSubsystem extends SubsystemBase{
                 }
                 hoodWasEnabled = nowEnabled;
                 double currentHoodAngle = getShooterAngleDegrees();
-                // THE JOG JUST ENDED -> the hood keeps the angle it landed on. Re-seeding here,
-                // before hoodTarget is read off desired_Angle, is what stops the position loop
-                // pulling the hood back down by the last powered loop's worth of travel. See
-                // hoodJogJustEnded for the full mechanism.
-                boolean hoodJogging = hoodJogVolts != 0;
-                if (hoodJogJustEnded(hoodWasJogging, hoodJogging)) {
-                    setDesired_Angle(currentHoodAngle);
-                    shooterAnglePID.reset();
-                    hoodHolding = true;   // arrived: hold on the brake, do not re-drive
-                }
-                hoodWasJogging = hoodJogging;
                 // SAME band as setDesired_Angle -- one definition, both callers. A raw
                 // clamp(desired_Angle, MIN_ANGLE, MAX_ANGLE) here would re-introduce the
                 // enable-time lurch even with the setter fixed, by pulling a hood parked below
@@ -1178,17 +1100,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 // limit. Out-of-band or NaN (comparisons fail) -> 0 V; brake idle holds the hood.
                 boolean hoodFeedbackValid = isHoodFeedbackValid(rawHood);
                 double hoodVolts = 0; // kill switch / invalid feedback -> 0 V (brake idle holds)
-                if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid && hoodJogVolts != 0) {
-                    // HELD DPAD JOG: drive open loop at the requested voltage and keep the
-                    // setpoint pinned to where the hood actually is, so releasing resumes the
-                    // position loop at zero error (it latches into hold and the brake parks it)
-                    // instead of snapping back to a stale setpoint. The MIN/MAX guards after
-                    // the branches still apply to this voltage.
-                    hoodVolts = hoodJogVolts;
-                    setDesired_Angle(currentHoodAngle);
-                    hoodHolding = true;
-                    shooterAnglePID.reset();
-                } else if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid) {
+                if (HOOD_CLOSED_LOOP_ENABLED && hoodFeedbackValid) {
                     // SETTLE BAND (2026-08-22, team requirement: a DPAD click moves the hood
                     // 2 deg and it STAYS there). Once inside ANGLE_TOLERANCE the hood is driven
                     // with 0 V and the brake idle mode holds it; without this it HUNTS -- it
@@ -1197,11 +1109,21 @@ public class ShooterSubsystem extends SubsystemBase{
                     // Latching with a wider re-engage threshold (hysteresis) so the loop cannot
                     // chatter on and off at the band edge -- see hoodShouldHold().
                     hoodHolding = hoodShouldHold(hoodTarget - currentHoodAngle, hoodHolding);
-                    double anglePID = hoodHolding
-                        ? 0
-                        : shooterAnglePID.calculate(currentHoodAngle, hoodTarget);
-                    // Gravity LIFT feedforward: the pure-P loop under-drives against gravity at modest
-                    // errors (a 20 deg error only asks 5.5 V, below the ~7 V breakaway), so add an
+                    // RESET WHILE HELD (2026-08-28, needed now that kD is non-zero): the
+                    // controller is not called at all inside the band, so its stored previous
+                    // error goes stale. Without this reset the first loop after a press would
+                    // differentiate against an error from seconds ago and fire a D spike into
+                    // the hood. Resetting every held loop means every move starts from rest.
+                    double anglePID;
+                    if (hoodHolding) {
+                        anglePID = 0;
+                        shooterAnglePID.reset();
+                    } else {
+                        anglePID = shooterAnglePID.calculate(currentHoodAngle, hoodTarget);
+                    }
+                    // Gravity LIFT feedforward: the P term alone under-drives against gravity at
+                    // modest errors (kP 0.18 x a 10-unit step is 1.8 V, far below the ~7.5 V
+                    // breakaway), so add an
                     // up-bias while the hood is still BELOW its target. FADED IN across
                     // HOOD_FF_FADE_DEG rather than stepped at ANGLE_TOLERANCE (2026-08-22) -- the step
                     // made the DPAD jog lurch. Still 0 V at/inside the target, so the hood can never be

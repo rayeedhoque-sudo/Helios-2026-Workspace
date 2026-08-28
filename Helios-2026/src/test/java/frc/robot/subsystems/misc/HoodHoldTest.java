@@ -12,24 +12,15 @@ import frc.robot.Constants.SubsystemConstants.ShooterSubsystemConstants;
  * THE HOOD STAYS WHERE A DPAD PRESS PUT IT (team requirement 2026-08-27): it goes up, it locks
  * at the new angle, and nothing pulls it back down.
  *
- * The bug this pins: the jog branch in periodic() pins the setpoint to the measured angle every
- * loop, but reads it BEFORE that loop's voltage reaches the motor. The final powered loop moves
- * the hood 25-55 raw units, the jog ends, and the position loop wakes up against a setpoint one
- * whole loop of travel below the hood -- a large NEGATIVE error, which is exactly a command to
- * drive back down. These tests exercise the real decision functions on both sides of the fix.
+ * The failure this pins is the one that outlives the open-loop jog (deleted 2026-08-28): a
+ * powered loop carries the hood 25-55 raw units past its target, so the loop is left with a
+ * large NEGATIVE error -- which is exactly a command to drive back down. The settle band, not
+ * the setpoint arithmetic, is what has to absorb that.
  */
 public class HoodHoldTest {
 
     /** One loop of powered travel, mid-range of the 25-55 raw units measured on the robot. */
     private static final double POWERED_LOOP_TRAVEL = 40.0;
-
-    @Test
-    void theEdgeFiresOnlyWhenTheJogEnds() {
-        assertTrue(ShooterSubsystem.hoodJogJustEnded(true, false), "jogging -> not jogging");
-        assertFalse(ShooterSubsystem.hoodJogJustEnded(true, true), "still jogging is not an end");
-        assertFalse(ShooterSubsystem.hoodJogJustEnded(false, true), "starting is not an end");
-        assertFalse(ShooterSubsystem.hoodJogJustEnded(false, false), "idle is not an end");
-    }
 
     /**
      * WITHOUT the re-seed the loop drives the hood DOWN. Pinned so the failure mode stays
