@@ -219,9 +219,11 @@ public class SubsystemConstants {
                 public static final double KICKER_SPINUP_DELAY_SEC = 2.0;
                 public static final int HOPPER_CURRENT_LIMIT_A = 5;
                 public static final int HOPPER_SHOT_CURRENT_LIMIT_A = (int)(HOPPER_CURRENT_LIMIT_A * 1.2);
-                // Belt limit while B (manual hopper run) is held -- team request 2026-08-27.
-                // Within the data-sheet hopper tiers (Regular 40 / Cap 60 for a NEO 2.0).
-                public static final int HOPPER_MANUAL_CURRENT_LIMIT_A = 30;
+                // Belt limit while B (manual hopper run) is held -- team request 2026-08-27,
+                // raised 30 -> 60 the same day after the risk was flagged and confirmed.
+                // 60 A is the data-sheet CAP for a hopper NEO 2.0 (never exceed) and is above a
+                // 40 A breaker: on a real jam the BREAKER trips before this limit does anything.
+                public static final int HOPPER_MANUAL_CURRENT_LIMIT_A = 60;
         }
 
         public static class ShooterSubsystemConstants{
@@ -253,7 +255,7 @@ public class SubsystemConstants {
             // 0.1 / 0.5 that was tuned in degrees, since the error is now 7.5x larger)
                 public static double SHOOTER_ANGLE_kP = 0.1 / HOOD_UNITS_PER_DEG;
                 public static double SHOOTER_ANGLE_kI = 0.0;
-                public static double SHOOTER_ANGLE_kD = 4.0 / HOOD_UNITS_PER_DEG;
+                public static double SHOOTER_ANGLE_kD = 8.0 / HOOD_UNITS_PER_DEG;
             //PID - Speed
                 public static double SHOOTER_SPEED_kP = 0.2;
                 public static double SHOOTER_SPEED_kI = 0.0;
