@@ -170,6 +170,7 @@ public class ShooterSubsystem extends SubsystemBase{
        private double hoodLastRaw;        // previous raw reading, for the delta
        private boolean hoodDatumValid;    // false until a datum has been captured
        private boolean hoodWasEnabled;    // rising-edge detect on DriverStation.isEnabled()
+       private boolean hoodWasJogging;    // falling-edge detect on hoodJogVolts -- see hoodJogJustEnded
        // Open-loop hood jog request, volts; 0 = not jogging. Set by jogHoodCommand while the
        // DPAD is held, applied (and guarded) in periodic(). See jogHoodCommand.
        private double hoodJogVolts;
@@ -463,6 +464,26 @@ public class ShooterSubsystem extends SubsystemBase{
                     interrupted -> hoodJogVolts = 0,
                     () -> hoodMoveReached(getShooterAngleDegrees(), stopAt[0], rising[0]))
                 .withTimeout(ShooterSubsystemConstants.HOOD_MOVE_TIMEOUT_SEC);
+        }
+
+        // Did the open-loop jog END on this loop? THE HOOD MUST STAY WHERE A PRESS PUT IT
+        // (team requirement 2026-08-27), and without this it did not.
+        //
+        // The jog branch in periodic() pins the setpoint to the measured angle every loop, but
+        // it reads that angle BEFORE the loop's voltage reaches the motor. The last powered
+        // loop then moves the hood 25-55 raw units, the jog ends, and the position loop wakes
+        // up against a setpoint one whole loop of travel BELOW the hood: a ~40 unit negative
+        // error, which is past the re-engage band, so the lowering feedforward fires and up to
+        // HOOD_MAX_DOWN_VOLTAGE drives the hood straight back down. Every press would rise and
+        // then sink.
+        //
+        // On the falling edge the setpoint is re-seeded from the angle measured AFTER all of
+        // that travel, so the error is ~0, the settle band latches, and the brake parks the
+        // hood at its new angle. Applies to the DPAD press moves and the test-mode held jog
+        // alike -- both route through hoodJogVolts, so this is fixed once, where they meet.
+        // Package-private + static for HoodHoldTest.
+        static boolean hoodJogJustEnded(boolean wasJogging, boolean jogging){
+            return wasJogging && !jogging;
         }
 
         // Has a hood move arrived? Direction-aware: a rising move is done at or above the
@@ -953,11 +974,14 @@ public class ShooterSubsystem extends SubsystemBase{
                     ShooterSubsystemConstants.FEED_DRAG_MULT_BASE
                         + ShooterSubsystemConstants.FEED_DRAG_MULT_PER_METER * dEff);
             }
-            // MAX_ANGLE is the PHYSICAL degree the shot model was fit at (38); the hood
-            // setpoint is in raw units now, so this clamps to the enable-time floor and
-            // commands no motion. That matches the standing "no automatic hood motion"
-            // rule (2026-08-26) -- the model still assumes the hood is parked at 38 deg by
-            // hand. TODO: express the model's angle in hood units if auto-aim ever drives it.
+            // DEAD PATH, and it must stay dead until the units are fixed. MAX_ANGLE is the
+            // PHYSICAL degree the shot model was fit at (38) while the hood setpoint is in raw
+            // units, so clampDesiredAngle floors this at the enable-time base -- i.e. it would
+            // command the hood all the way back DOWN to where it was enabled, undoing whatever
+            // the driver set on the DPAD. Harmless today only because visionShotCommand (the
+            // sole caller of runVisionTargeting) is not bound to anything: RT runs
+            // flywheelOnlyShotCommand. Express the model's angle in hood units BEFORE binding
+            // this, or auto-aim will fight the driver's hood every loop.
             setDesired_Angle(ShooterSubsystemConstants.MAX_ANGLE);
             setDesiredFlywheelVelocity(vSurface);
             hasShotTarget = vSurface > 0;
@@ -1125,6 +1149,17 @@ public class ShooterSubsystem extends SubsystemBase{
                 }
                 hoodWasEnabled = nowEnabled;
                 double currentHoodAngle = getShooterAngleDegrees();
+                // THE JOG JUST ENDED -> the hood keeps the angle it landed on. Re-seeding here,
+                // before hoodTarget is read off desired_Angle, is what stops the position loop
+                // pulling the hood back down by the last powered loop's worth of travel. See
+                // hoodJogJustEnded for the full mechanism.
+                boolean hoodJogging = hoodJogVolts != 0;
+                if (hoodJogJustEnded(hoodWasJogging, hoodJogging)) {
+                    setDesired_Angle(currentHoodAngle);
+                    shooterAnglePID.reset();
+                    hoodHolding = true;   // arrived: hold on the brake, do not re-drive
+                }
+                hoodWasJogging = hoodJogging;
                 // SAME band as setDesired_Angle -- one definition, both callers. A raw
                 // clamp(desired_Angle, MIN_ANGLE, MAX_ANGLE) here would re-introduce the
                 // enable-time lurch even with the setter fixed, by pulling a hood parked below
