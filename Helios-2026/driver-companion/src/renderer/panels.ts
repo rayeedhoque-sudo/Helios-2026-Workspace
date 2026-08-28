@@ -545,6 +545,11 @@ function renderChooserStatus(): void {
 // RE-ENABLED, sticks swapped, MENU re-zero / DPAD hood jog / RT test shot removed).
 // MENU desc re-synced 2026-07-21: AprilTag auto-seed now stops at first enable, so
 // MENU is the only in-match re-zero.
+// RE-SYNCED 2026-08-27 (hood raw-unit rework): the hood angle IS the raw encoder reading
+// now -- every hood number the driver sees is in RAW ENCODER UNITS, not physical degrees
+// (7.5 units = 1 physical degree). Teleop DPAD -> steps the hood up 5 units per press and
+// DPAD <- returns it to the enable base in one press; the old +/-2 deg per click setpoint
+// nudge is gone. RB was already dead (disabled 2026-08-22) and is now shown as such.
 // TEST MODE bindings added 2026-07-21 (RobotContainer.configureTestBindings): the SAME
 // physical controller carries a second, mode-gated binding set active ONLY in Driver
 // Station Test mode (RobotModeTriggers.test() — mutually exclusive with the match set's
@@ -560,7 +565,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
       { btn: 'L STICK X', desc: 'Rotate' },
       { btn: 'LB', desc: 'X-lock wheels (toggle)' },
       { btn: 'MENU', desc: 'Re-zero field heading — the ONLY in-match re-zero (AprilTags seed the pose only before first enable / at boot)' },
-      { btn: 'DPAD ← / →', desc: 'Hood jog DOWN / UP — see the Shooter group (2026-08-22: replaced the ±90° heading snaps)' },
+      { btn: 'DPAD ← / →', desc: 'Hood DOWN to the enable base / UP one step per press — see the Shooter group (2026-08-22: replaced the ±90° heading snaps)' },
       { btn: 'A', desc: 'Hold: search-align — rotate slowly until OUR scoring tag is seen, then face it (re-aims every loop)' },
     ],
   },
@@ -573,12 +578,13 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     ],
   },
   {
-    group: 'Shooter — RT is flywheels-only, hood set by hand on the DPAD',
+    group: 'Shooter — RT is flywheels-only, hood set by hand on the DPAD (angles are RAW ENCODER UNITS)',
     rows: [
       { btn: 'DPAD ↑ / ↓', desc: 'Press: RT flywheel target +/- 200 motor RPM (~1.6 m/s surface each). Clamped to the motor ceiling; resets to the constant on redeploy' },
-      { btn: 'DPAD ← / →', desc: 'Press: hood setpoint −2° / +2° per click (clicks accumulate; clamped to the soft limits and the 33° window from where the hood sat at enable). This is how you set shot range now' },
+      { btn: 'DPAD →', desc: 'Press: hood UP one 5-unit step, measured from where the hood is at the press (2026-08-27; every press steps again). EXPECT MORE THAN 5: the drive is open loop at the ~7.5 V breakaway and the stop is checked once per 20 ms loop, so one press actually moves 25–55 units ≈ 3–7 physical degrees. ~6–12 presses reach the ceiling guard' },
+      { btn: 'DPAD ←', desc: 'Press: hood all the way back DOWN to the enable base — the raw encoder reading captured at this enable, which is also the floor nothing may drive below' },
       { btn: 'RT', desc: 'Hold: flywheels-only shot (2026-08-22) — fixed flywheel speed, belts always, kicker opens 2 s after the press (spin-up delay, NOT an at-speed check). NO vision, NO auto-aim, and the HOOD IS NOT COMMANDED: it stays at the DPAD-set angle, on press AND on release. Drive + intake locked for the hold, so aim BEFORE pressing' },
-      { btn: 'RB', desc: 'Hold: fixed feed — 25° hood + fixed tunable speed; belts always, kicker only once flywheels are at speed' },
+      { btn: 'RB', desc: 'Fixed 25° feed shot', off: 'DISABLED 2026-08-22 — the binding is commented out. It commanded a fixed 25°, and the hood angle is relative to the enable position (raw units since 2026-08-27), so a fixed number is not a real angle' },
     ],
   },
   {
@@ -612,8 +618,8 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     group: 'TEST MODE ONLY — Shooter (manual/fixed setpoints, no vision)',
     testOnly: true,
     rows: [
-      { btn: 'Y', desc: 'Hold: manual test-fire — fixed hood + speed (same as match RB), belts + kicker at-speed-gated — actually launches a ball' },
-      { btn: 'DPAD ← / →', desc: 'Press: hood setpoint −2° / +2° per click, flywheels off — same mechanism as the match bindings' },
+      { btn: 'Y', desc: 'Hold: manual test-fire — fixed feed flywheel speed, belts + kicker at-speed-gated — actually launches a ball. NOTE (2026-08-27): its hood request (RB_FEED_ANGLE, 25) is still a PHYSICAL degree while the hood setpoint is in raw units, so it clamps to the floor and the hood does NOT move — park the hood on the DPAD first' },
+      { btn: 'DPAD ← / →', desc: 'HOLD to jog the hood DOWN / UP at a constant voltage (3 V down / 7 V up), flywheels off; release stops it wherever it lands. This is a HELD jog, not the per-press step the teleop bindings use — it is the binding the encoder-anchor calibration pass needs' },
     ],
   },
   {
@@ -623,7 +629,8 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
       { btn: 'DPAD ↑ / ↓', desc: 'Hood jog', off: 'removed (↑ is now search-align)' },
       { btn: 'RT', desc: 'Test shot', off: 'replaced by precision shot' },
       { btn: 'RT', desc: 'Precision vision shot (auto-aim + shot model)', off: 'removed 2026-08-22 — RT is now flywheels-only, hood set by hand' },
-      { btn: 'DPAD ← / →', desc: 'Rotate ±90°', off: 'removed 2026-08-22 — DPAD ← / → now jog the hood' },
+      { btn: 'DPAD ← / →', desc: 'Rotate ±90°', off: 'removed 2026-08-22 — DPAD ← / → now move the hood' },
+      { btn: 'DPAD ← / →', desc: 'Hood setpoint −2° / +2° per click', off: 'replaced 2026-08-27 — DPAD → steps up 5 raw units per press, DPAD ← returns to the enable base' },
     ],
   },
 ];
