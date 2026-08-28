@@ -561,8 +561,8 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
   {
     group: 'Drive — field-centric (forward = shooter side)',
     rows: [
-      { btn: 'R STICK', desc: 'Translate (forward = stick forward on this controller; TODO verify)' },
-      { btn: 'L STICK X', desc: 'Rotate' },
+      { btn: 'L STICK', desc: 'Translate (forward = stick forward on this controller; TODO verify)' },
+      { btn: 'R STICK X', desc: 'Rotate' },
       { btn: 'LB', desc: 'X-lock wheels (toggle)' },
       { btn: 'MENU', desc: 'Re-zero field heading — the ONLY in-match re-zero (AprilTags seed the pose only before first enable / at boot)' },
       { btn: 'DPAD ← / →', desc: 'Hood DOWN to the enable base / UP one step per press — see the Shooter group (2026-08-22: replaced the ±90° heading snaps)' },
