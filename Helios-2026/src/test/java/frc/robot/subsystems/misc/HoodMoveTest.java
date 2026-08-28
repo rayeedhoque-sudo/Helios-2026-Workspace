@@ -40,26 +40,47 @@ public class HoodMoveTest {
             assertTrue(target > hood, "every press must ask for a rise");
             assertEquals(target, ShooterSubsystem.clampDesiredAngle(target, FLOOR, true), 1e-9,
                 "and the clamp must let it through");
-            assertTrue(target - hood >= step,
-                "a fresh press must always ask for a further rise, never an already-reached one");
+            assertFalse(ShooterSubsystem.hoodMoveReached(hood, target, true),
+                "a fresh press is never already-satisfied");
             hood += 40;                        // the real overshoot: one powered loop, ~25-55
         }
         assertTrue(hood > FLOOR + 5 * step,
             "five presses must have raised the hood, not stalled at the first target");
     }
 
+    /** A rising move is done at or above the target; a falling one at or below it. */
+    @Test
+    void reachedIsDirectionAware() {
+        assertFalse(ShooterSubsystem.hoodMoveReached(TARGET - 10, TARGET, true), "still climbing");
+        assertTrue(ShooterSubsystem.hoodMoveReached(TARGET, TARGET, true), "exactly there is there");
+        assertTrue(ShooterSubsystem.hoodMoveReached(TARGET + 1, TARGET, true), "overshot is there");
+
+        assertFalse(ShooterSubsystem.hoodMoveReached(FLOOR + 10, FLOOR, false), "still descending");
+        assertTrue(ShooterSubsystem.hoodMoveReached(FLOOR, FLOOR, false), "exactly there is there");
+        assertTrue(ShooterSubsystem.hoodMoveReached(FLOOR - 1, FLOOR, false), "undershot is there");
+    }
+
     /**
-     * A press that lands PAST its target must not be chased back down. The settle band is what
-     * ends the move now that the loop owns the drive: the overshoot the hood leaves behind sits
-     * inside the re-engage band once the setpoint is the angle it reached.
+     * THE LIMIT CYCLE, and the latch that closes it. A press lands one powered loop PAST its
+     * target, far outside the settle band -- so on its own the loop would read that as a large
+     * negative error and drive the hood back DOWN with gravity helping. The arrival latch fires
+     * first: reached -> re-seed the setpoint to where the hood actually is -> the band latches.
      */
     @Test
-    void anOvershootIsHeld_notChasedBack() {
+    void anOvershootIsLatched_notChasedBack() {
+        double landed = TARGET + 40;   // one powered loop past the request
+
+        assertFalse(ShooterSubsystem.hoodShouldHold(TARGET - landed, false),
+            "the raw error alone is way outside the band -- unlatched, the loop would drive DOWN");
+        assertTrue(ShooterSubsystem.hoodLiftFeedforward(TARGET - landed) < 0,
+            "and the feedforward it would fire is a LOWERING one: the hood sinks after every press");
+
+        assertTrue(ShooterSubsystem.hoodMoveReached(landed, TARGET, true),
+            "but the move has ARRIVED, so the latch fires first");
         assertTrue(ShooterSubsystem.hoodShouldHold(0, false),
-            "at the setpoint the loop holds on the brake");
-        assertTrue(ShooterSubsystem.hoodShouldHold(
-                -0.9 * ShooterSubsystemConstants.HOOD_REENGAGE_DEG, true),
-            "and stays held through the drift a landing leaves behind");
+            "and after the re-seed the error is 0, which latches the band and parks the brake");
+        assertEquals(landed, ShooterSubsystem.clampDesiredAngle(landed, FLOOR, true), 1e-9,
+            "the re-seeded angle must survive the clamp, or the hood is dragged off it again");
     }
 
     /** The target must be reachable: above the floor and inside the travel window. */

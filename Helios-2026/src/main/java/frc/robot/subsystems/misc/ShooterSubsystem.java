@@ -169,6 +169,9 @@ public class ShooterSubsystem extends SubsystemBase{
        private double hoodLastRaw;        // previous raw reading, for the delta
        private boolean hoodDatumValid;    // false until a datum has been captured
        private boolean hoodWasEnabled;    // rising-edge detect on DriverStation.isEnabled()
+       // Which way the current setpoint asked the hood to go, captured when the setpoint was
+       // written. The arrival latch in periodic() needs it -- see hoodMoveReached.
+       private boolean hoodMoveRising;
        private double desired_Velocity;
        private double desired_Angle;
        private double target_distance;
@@ -425,6 +428,20 @@ public class ShooterSubsystem extends SubsystemBase{
             return Commands.runOnce(() -> setDesired_Angle(targetDegrees.getAsDouble()));
         }
 
+        // Has the hood ARRIVED? Direction-aware: a rising move is done at or above its target, a
+        // falling one at or below it. THE HOOD MUST STAY WHERE A PRESS PUT IT (team requirement
+        // 2026-08-27), and the settle band alone cannot deliver that: the band is 3.75 raw units
+        // wide and one powered 20 ms loop carries the hood 25-55 units, so a press lands well
+        // OUTSIDE the band with a large negative error -- which the loop reads as "drive back
+        // down", at up to HOOD_MAX_DOWN_VOLTAGE with gravity helping. It overshoots downward,
+        // and that is the limit cycle. Latching on ARRIVAL instead of on the band closes it:
+        // the moment the hood is at or past what was asked for, the setpoint is re-seeded to
+        // where it actually landed and the brake parks it there.
+        // Package-private + static for HoodMoveTest.
+        static boolean hoodMoveReached(double currentDeg, double targetDeg, boolean rising){
+            return rising ? currentDeg >= targetDeg : currentDeg <= targetDeg;
+        }
+
         // The floor this enable: what DPAD-LEFT drives back down to. See hoodFloorAngle.
         public double getHoodFloorAngle(){
             return hoodFloorAngle(hoodBaseAngleDeg, hoodDatumValid);
@@ -642,6 +659,10 @@ public class ShooterSubsystem extends SubsystemBase{
 
         public void setDesired_Angle(double angle){
             desired_Angle = clampDesiredAngle(angle, hoodBaseAngleDeg, hoodDatumValid);
+            // Record the DIRECTION this setpoint asks for, against where the hood is right now.
+            // Every setpoint write goes through here, so the arrival latch in periodic() always
+            // has a fresh direction -- see hoodMoveReached.
+            hoodMoveRising = desired_Angle > getShooterAngleDegrees();
         }
         public double  getDesiredAngle(){
             return desired_Angle;
@@ -1108,6 +1129,16 @@ public class ShooterSubsystem extends SubsystemBase{
                     // back down with up to 6 V plus gravity, a limit cycle around the setpoint.
                     // Latching with a wider re-engage threshold (hysteresis) so the loop cannot
                     // chatter on and off at the band edge -- see hoodShouldHold().
+                    // ARRIVAL LATCH: the move is over the moment the hood is at or past what
+                    // was asked for, whatever the remaining error says. Re-seed the setpoint to
+                    // where it actually landed so the overshoot is never chased back down.
+                    // See hoodMoveReached for why the settle band cannot do this on its own.
+                    if (!hoodHolding && hoodMoveReached(currentHoodAngle, hoodTarget, hoodMoveRising)) {
+                        setDesired_Angle(currentHoodAngle);
+                        hoodTarget = currentHoodAngle;
+                        shooterAnglePID.reset();
+                        hoodHolding = true;
+                    }
                     hoodHolding = hoodShouldHold(hoodTarget - currentHoodAngle, hoodHolding);
                     // RESET WHILE HELD (2026-08-28, needed now that kD is non-zero): the
                     // controller is not called at all inside the band, so its stored previous

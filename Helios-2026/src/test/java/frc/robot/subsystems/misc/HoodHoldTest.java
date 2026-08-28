@@ -39,14 +39,18 @@ public class HoodHoldTest {
     }
 
     /**
-     * WITH the re-seed the setpoint is the angle the hood actually reached, so the loop holds
-     * on the brake instead of correcting. This is the requirement.
+     * WITH the arrival latch the setpoint is re-seeded to the angle the hood actually reached,
+     * so the loop holds on the brake instead of correcting. This is the requirement.
      */
     @Test
-    void reSeedingOnTheJogEndLocksTheHoodAtItsNewAngle() {
+    void theArrivalLatchLocksTheHoodAtItsNewAngle() {
         double base = 311.169;
+        double target = base + ShooterSubsystemConstants.HOOD_UP_STEP_UNITS;
         double hood = base + POWERED_LOOP_TRAVEL;                   // after the final powered loop
-        double setpoint = hood;                                     // what periodic() now seeds
+
+        assertTrue(ShooterSubsystem.hoodMoveReached(hood, target, true),
+            "the hood is past what was asked for, so the latch must fire");
+        double setpoint = hood;                                     // what the latch re-seeds
 
         assertTrue(ShooterSubsystem.hoodShouldHold(setpoint - hood, false),
             "zero error must latch the settle band -- 0 V, brake holds");

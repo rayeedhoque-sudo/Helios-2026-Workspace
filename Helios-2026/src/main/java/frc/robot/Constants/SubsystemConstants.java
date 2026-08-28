@@ -545,7 +545,8 @@ public class SubsystemConstants {
                 public static double HOOD_MAX_UP_VOLTAGE = 8.0;   // raising (fights gravity)
                 public static double HOOD_MAX_DOWN_VOLTAGE = 6.0;  // lowering (gravity-assisted, gentle)
                 // Hood gravity LIFT feedforward (volts), added to the angle-PID output ONLY while the
-                // hood is still below its target (raising). The hood loop is pure-P (kP 0.275), so at a
+                // hood is still below its target (raising). The hood loop is P+D (kP 0.18, kD 0.004,
+                // no integrator -- see SHOOTER_ANGLE_kP), so at a
                 // modest error it under-drives: e.g. a 20 deg error asks only 0.275*20 = 5.5 V, below
                 // the ~7 V breakaway needed to lift the hood against gravity -- which is exactly why it
                 // "sat fully down" at the 25 deg feed target. This constant bias breaks it away and
