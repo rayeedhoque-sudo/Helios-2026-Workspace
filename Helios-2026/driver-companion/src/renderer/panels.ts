@@ -581,7 +581,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     group: 'Shooter — RT is flywheels-only, hood set by hand on the DPAD (angles are RAW ENCODER UNITS)',
     rows: [
       { btn: 'DPAD ↑ / ↓', desc: 'Press: RT flywheel target +/- 200 motor RPM (~1.6 m/s surface each). Clamped to the motor ceiling; resets to the constant on redeploy' },
-      { btn: 'DPAD →', desc: 'Press: hood UP one 5-unit step, measured from where the hood is at the press (2026-08-27; every press steps again). EXPECT MORE THAN 5: the drive is open loop at the ~7.5 V breakaway and the stop is checked once per 20 ms loop, so one press actually moves 25–55 units ≈ 3–7 physical degrees. ~6–12 presses reach the ceiling guard' },
+      { btn: 'DPAD →', desc: 'Press: hood UP one 10-unit step, measured from where the hood is at the press (2026-08-27; every press steps again). EXPECT MORE THAN 10: the drive is open loop at the ~7.5 V breakaway and the stop is checked once per 20 ms loop, so one press actually moves 25–55 units ≈ 3–7 physical degrees. ~6–12 presses reach the ceiling guard' },
       { btn: 'DPAD ←', desc: 'Press: hood all the way back DOWN to the enable base — the raw encoder reading captured at this enable, which is also the floor nothing may drive below' },
       { btn: 'RT', desc: 'Hold: flywheels-only shot (2026-08-22) — fixed flywheel speed, belts always, kicker opens 2 s after the press (spin-up delay, NOT an at-speed check). NO vision, NO auto-aim, and the HOOD IS NOT COMMANDED: it stays at the DPAD-set angle, on press AND on release. Drive + intake locked for the hold, so aim BEFORE pressing' },
       { btn: 'RB', desc: 'Fixed 25° feed shot', off: 'DISABLED 2026-08-22 — the binding is commented out. It commanded a fixed 25°, and the hood angle is relative to the enable position (raw units since 2026-08-27), so a fixed number is not a real angle' },
@@ -630,7 +630,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
       { btn: 'RT', desc: 'Test shot', off: 'replaced by precision shot' },
       { btn: 'RT', desc: 'Precision vision shot (auto-aim + shot model)', off: 'removed 2026-08-22 — RT is now flywheels-only, hood set by hand' },
       { btn: 'DPAD ← / →', desc: 'Rotate ±90°', off: 'removed 2026-08-22 — DPAD ← / → now move the hood' },
-      { btn: 'DPAD ← / →', desc: 'Hood setpoint −2° / +2° per click', off: 'replaced 2026-08-27 — DPAD → steps up 5 raw units per press, DPAD ← returns to the enable base' },
+      { btn: 'DPAD ← / →', desc: 'Hood setpoint −2° / +2° per click', off: 'replaced 2026-08-27 — DPAD → steps up 10 raw units per press, DPAD ← returns to the enable base' },
     ],
   },
 ];

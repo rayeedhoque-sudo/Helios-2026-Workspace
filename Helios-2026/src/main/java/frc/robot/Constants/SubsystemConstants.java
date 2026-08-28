@@ -255,7 +255,7 @@ public class SubsystemConstants {
             // 0.1 / 0.5 that was tuned in degrees, since the error is now 7.5x larger)
                 public static double SHOOTER_ANGLE_kP = 0.1 / HOOD_UNITS_PER_DEG;
                 public static double SHOOTER_ANGLE_kI = 0.0;
-                public static double SHOOTER_ANGLE_kD = 8.0 / HOOD_UNITS_PER_DEG;
+                public static double SHOOTER_ANGLE_kD = 16.0 / HOOD_UNITS_PER_DEG;
             //PID - Speed
                 public static double SHOOTER_SPEED_kP = 0.2;
                 public static double SHOOTER_SPEED_kI = 0.0;
@@ -585,22 +585,23 @@ public class SubsystemConstants {
                 public static double HOOD_JOG_UP_VOLTS = 7.0;    // [assumed] = measured breakaway
                 public static double HOOD_JOG_DOWN_VOLTS = 3.0;  // [assumed] gravity assists here
                 // DPAD UP STEP (2026-08-27, team direction: "in teleop the hood should go up
-                // 5 degrees every press"). EVERY press of DPAD RIGHT raises the hood by this
-                // much, measured from where the hood IS at the moment of the press. DPAD LEFT
-                // returns it to the base (the enable-time datum, re-read from the raw encoder on
-                // every enable -- see captureHoodDatum).
+                // 5 degrees every press", raised to 10 the same day). EVERY press of DPAD RIGHT
+                // raises the hood by this much, measured from where the hood IS at the moment of
+                // the press. DPAD LEFT returns it to the base (the enable-time datum, re-read
+                // from the raw encoder on every enable -- see captureHoodDatum).
                 //
-                // RAW UNITS, deliberately NOT converted: the team asked for 5 on the same scale
-                // as the raw encoder readout, so this is 5 raw units = 0.67 PHYSICAL degrees.
-                // Multiply by HOOD_UNITS_PER_DEG (-> 37.5) if 5 physical degrees was meant.
+                // RAW UNITS, deliberately NOT converted: the team asked for a number on the same
+                // scale as the raw encoder readout, so this is 10 raw units = 1.33 PHYSICAL
+                // degrees. Multiply by HOOD_UNITS_PER_DEG (-> 75) if 10 physical degrees was meant.
                 //
                 // WHAT ACTUALLY HAPPENS ON THE ROBOT, accepted knowingly by the team: a press
-                // moves 25-55 raw units (3-7 physical deg), NOT 5. The drive is open loop at the
-                // ~7.5 V breakaway and the stop is checked once per 20 ms loop, so one loop of
-                // powered travel is already bigger than this step -- the stop cannot resolve a
-                // move this short, and no lower voltage moves the hood at all. Raising this
-                // above ~60 would make the step and the stop agree; lowering it changes nothing.
-                public static double HOOD_UP_STEP_UNITS = 5.0;
+                // moves 25-55 raw units (3-7 physical deg), NOT 10, and 5 -> 10 does not change
+                // that. The drive is open loop at the ~7.5 V breakaway and the stop is checked
+                // once per 20 ms loop, so ONE loop of powered travel is still bigger than this
+                // step -- the stop cannot resolve a move this short, and no lower voltage moves
+                // the hood at all. The step only starts to mean something past ~60, where it
+                // finally exceeds one loop of travel and the stop can land on it.
+                public static double HOOD_UP_STEP_UNITS = 10.0;
                 // Hard stop on how long ONE DPAD move may drive. It normally ends on the
                 // encoder; this ends it when the hood does not move at all (the 2026-08-26 trace
                 // showed -6 V for 4.5 s and zero motion), so a dead/jammed hood cannot sit
