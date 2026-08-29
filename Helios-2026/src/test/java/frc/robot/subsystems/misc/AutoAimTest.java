@@ -75,6 +75,25 @@ class AutoAimTest {
     }
 
     /**
+     * The tag-loss ride-through: a brief dropout freezes the whole targeting pass (hood
+     * setpoint and flywheel target keep their last values) instead of refusing and then
+     * re-commanding the hood the moment the tag comes back -- the re-command is what lurched.
+     * It only holds if a tag was actually seen first, so pressing RB with no tag does nothing.
+     */
+    @Test
+    void ridesThroughShortTagDropouts() {
+        double hold = ShooterSubsystemConstants.AUTOAIM_TAG_HOLD_SEC;
+        assertTrue(ShooterSubsystem.autoAimHoldingThroughDropout(true, 0.0), "a fresh dropout holds");
+        assertTrue(ShooterSubsystem.autoAimHoldingThroughDropout(true, hold / 2), "mid-window holds");
+        assertFalse(ShooterSubsystem.autoAimHoldingThroughDropout(true, hold),
+            "the window is over at exactly the hold");
+        assertFalse(ShooterSubsystem.autoAimHoldingThroughDropout(true, hold * 2),
+            "a real loss refuses");
+        assertFalse(ShooterSubsystem.autoAimHoldingThroughDropout(false, 0.0),
+            "no tag ever seen: nothing to hold, so a press with no tag does nothing");
+    }
+
+    /**
      * The retarget deadband: a setpoint is only rewritten when the target has moved further
      * than the settle band. Writing every loop clears the hood's park latch and re-drives it
      * at the breakaway floor every 20 ms -- the limit cycle hoodHolding exists to prevent.
