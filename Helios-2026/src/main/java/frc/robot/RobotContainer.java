@@ -187,7 +187,8 @@ public class RobotContainer {
         //   L stick     = translate (field-centric)      R stick X = rotate  (reverted 2026-07-17)
         //   LB          = hood all the way DOWN to this enable's base position (2026-08-29)
         //   LT (hold)   = intake (slider out -> rollers + belts; kicker stays OFF); release = stow
-        //   Y (hold)    = outtake (same choreography, rollers out); release = stow
+        //   A (hold)    = outtake (same choreography, rollers out); release = stow (was Y
+        //                 until 2026-08-29)
         //   X           = manual stow
         //   RT (hold)   = flywheels-only shot (2026-08-22): fixed flywheel speed, belts always,
         //                 kicker opens 2 s after the press, HOOD NOT COMMANDED (DPAD L/R).
@@ -199,7 +200,9 @@ public class RobotContainer {
         //   (Kicker at-speed gate added 2026-07-18 by team request.)
         //   B (hold)    = manual hopper belts only (kicker OFF)
         //   VIEW (hold) = hopper unjam: reverse belts + kicker (added 2026-07-18)
-        //   A (hold)    = search-align to our alliance's scoring tag
+        //   Y (hold)    = fixed feed shot (2026-08-29): fixed hood units + fixed flywheel
+        //                 RPM, otherwise identical to RT. (No search-align binding is left
+        //                 on the match layer -- A used to hold it.)
         //   DPAD-UP/DOWN       = RT flywheel target +/- 50 motor RPM per press (2026-08-22;
         //                        200 -> 50 on 2026-08-28). Does NOT affect RB's auto-aim speed.
         //   DPAD-LEFT/RIGHT    = step the hood DOWN / UP HOOD_UP_STEP_UNITS per press, on the
@@ -260,12 +263,13 @@ public class RobotContainer {
             // then face it). REASSIGNED to outtake 2026-08-29 by team request; there is no
             // search-align binding left on the match layer. searchAndAlignCommand and
             // seesScoringTag/getDegreesToAlignToTarget are all still there if it comes back.
-            // DPAD-UP / DOWN (press) = trim the RT flywheel target by +/- 200 motor RPM (team
+            // DPAD-UP / DOWN (press) = trim the RT flywheel target by +/- kRtSpeedTrimRpm motor
+            // RPM (team
             // request 2026-08-22). ~1.6 m/s of surface speed per press. Takes effect mid-hold:
             // flywheelOnlyShotCommand re-reads the target every loop. Clamped to
             // [0, SHOT_MAX_MOTOR_RPS] in the subsystem, and NOT persisted -- a redeploy returns
-            // it to RT_FLYWHEEL_SURFACE_SPEED. (DPAD-UP was a duplicate of A's search-align,
-            // which A still does.)
+            // it to RT_FLYWHEEL_SURFACE_SPEED. Trims RT ONLY -- RB's auto-aim speed is a
+            // separate constant and is not trimmable from the controller.
                 joystick2.povUp().and(RobotModeTriggers.teleop())
                     .onTrue(shooterSS.trimRtSpeedCommand(kRtSpeedTrimRpm));
                 joystick2.povDown().and(RobotModeTriggers.teleop())
@@ -393,7 +397,8 @@ public class RobotContainer {
             // the same 2 s spin-up delay, full drive + intake lockout -- with ONE difference:
             // the HOOD IS COMMANDED from the measured AprilTag distance
             // (ShooterSubsystem.runAutoAimTargeting -> AUTOAIM_HOOD_TABLE). No auto-rotate: the
-            // driver still points the robot (A search-aligns). No tag in view = velocity 0, so
+            // driver still points the robot by hand (search-align is no longer bound). No tag
+            // in view = velocity 0, so
             // the kicker never opens.
             // The hood moving on its own here is a deliberate, team-approved exception to the
             // 2026-08-26 no-automatic-hood-motion rule -- see autoAimShotCommand.
