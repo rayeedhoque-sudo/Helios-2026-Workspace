@@ -553,7 +553,7 @@ function renderChooserStatus(): void {
 // RE-SYNCED 2026-08-29 (full pass over every row against RobotContainer): RB is now the
 // AUTO-AIM shot (constant ~1000 motor RPM, hood angle from the AprilTag distance), LB drops
 // the hood to the enable base, DPAD <- steps DOWN (it no longer returns to the base), the
-// DPAD hood step is 2 raw units (was 10) and the RT speed trim is 50 motor RPM (was 200).
+// DPAD hood step is 2 raw units (was 10) and the RT speed trim is 25 motor RPM (was 200).
 // Test-mode DPAD <- / -> is the same per-press closed-loop step as teleop; the held voltage
 // jog it used to describe was deleted 2026-08-28. Same day: OUTTAKE moved from Y to A (no
 // search-align binding is left on the match layer) and Y became a FIXED FEED SHOT.
@@ -590,7 +590,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
   {
     group: 'Shooter — RT is flywheels-only, hood set by hand on the DPAD (angles are RAW ENCODER UNITS)',
     rows: [
-      { btn: 'DPAD ↑ / ↓', desc: 'Press: RT flywheel target +/- 50 motor RPM (2026-08-28, was 200). Clamped to the motor ceiling; resets to the constant on redeploy. Does NOT change RB’s auto-aim speed' },
+      { btn: 'DPAD ↑ / ↓', desc: 'Press: RT flywheel target +/- 25 motor RPM (2026-08-29; was 200, then 50). Clamped to the motor ceiling; resets to the constant on redeploy. Does NOT change RB’s auto-aim speed' },
       { btn: 'DPAD →', desc: 'Press: hood UP one 2-unit step, measured from where the hood is at the press (2026-08-28; every press steps again). EXPECT MORE THAN 2: the hood cannot move below ~7.5 V and one 20 ms loop at that voltage already carries it 25–55 units ≈ 3–7 physical degrees, so below ~60 units the step sets the DIRECTION of a press, not its distance. ~6–12 presses reach the ceiling guard' },
       { btn: 'DPAD ←', desc: 'Press: hood DOWN one 2-unit step from where it is (2026-08-28, replacing the old one-press return to base — LB does that now). Never goes below the enable base, which is the floor nothing may drive past' },
       { btn: 'LB', desc: 'Press: hood all the way DOWN to the enable base in one press (2026-08-29). Same closed-loop path as the DPAD steps — it just asks for the floor' },

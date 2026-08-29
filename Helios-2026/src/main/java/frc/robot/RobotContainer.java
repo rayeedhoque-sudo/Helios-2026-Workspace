@@ -66,8 +66,8 @@ public class RobotContainer {
     // shut for KICKER_SPINUP_DELAY_SEC while the flywheels wind up.
     private final Timer kickerSpinupTimer = new Timer();
     // DPAD UP/DOWN step for the RT flywheel target, in motor RPM (team request 2026-08-22;
-    // 200 -> 50 on 2026-08-28 for a finer trim).
-    private static final double kRtSpeedTrimRpm = 50.0;
+    // 200 -> 50 on 2026-08-28, 50 -> 25 on 2026-08-29, each for a finer trim).
+    private static final double kRtSpeedTrimRpm = 25.0;
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
@@ -203,8 +203,9 @@ public class RobotContainer {
         //   Y (hold)    = fixed feed shot (2026-08-29): fixed hood units + fixed flywheel
         //                 RPM, otherwise identical to RT. (No search-align binding is left
         //                 on the match layer -- A used to hold it.)
-        //   DPAD-UP/DOWN       = RT flywheel target +/- 50 motor RPM per press (2026-08-22;
-        //                        200 -> 50 on 2026-08-28). Does NOT affect RB's auto-aim speed.
+        //   DPAD-UP/DOWN       = RT flywheel target +/- 25 motor RPM per press (2026-08-22;
+        //                        200 -> 50 -> 25 by 2026-08-29). Does NOT affect RB's auto-aim
+        //                        speed.
         //   DPAD-LEFT/RIGHT    = step the hood DOWN / UP HOOD_UP_STEP_UNITS per press, on the
         //                        position loop (2026-08-27/28; replaced the held voltage jog,
         //                        which replaced the +-90 deg heading snaps)
