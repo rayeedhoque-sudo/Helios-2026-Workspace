@@ -457,8 +457,10 @@ public class RobotContainer {
                 .whileTrue(hopperSS.kickerTestCommand());
 
         //SHOOTER (manual/fixed setpoints only -- no vision, no auto-aim)
-            // Y (hold) = manual test-fire: the SAME fixed hood angle + flywheel speed as the
-            // match RB binding, belts always, kicker gated on at-speed. Actually launches a
+            // Y (hold) = manual test-fire: feedAngleShotCommand's fixed hood angle + flywheel
+            // speed (RB_FEED_ANGLE / RB_FEED_SURFACE_SPEED -- named for the binding RB used to
+            // hold; RB is the auto-aim shot since 2026-08-29 and no longer shares this).
+            // Belts always, kicker gated on at-speed. Actually launches a
             // ball (not just a flywheel spin), so it verifies the whole feed path end to end.
             joystick2.y().and(RobotModeTriggers.test())
                 .whileTrue(shooterSS.feedAngleShotCommand()
