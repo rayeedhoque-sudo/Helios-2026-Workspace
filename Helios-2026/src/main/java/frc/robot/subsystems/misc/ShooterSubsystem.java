@@ -155,6 +155,7 @@ public class ShooterSubsystem extends SubsystemBase{
             // behaviour -- which is how a 2 deg geometry error stayed invisible for a session.
             private final GenericEntry autoAimTagEntry;
             private final GenericEntry autoAimBearingEntry;
+            private final GenericEntry autoAimViewAngleEntry;
 
     //Tracker Variables
        private boolean enableSubsystem;
@@ -208,6 +209,7 @@ public class ShooterSubsystem extends SubsystemBase{
        private boolean autoAimServoSeeded = false;   // false = adopt the next target outright
        private int autoAimTagId = -1;                // which tag auto-aim actually chose
        private double autoAimBearingDeg = 0.0;       // how far it wants to turn, + = right
+       private double autoAimViewAngleDeg = 0.0;     // how far off the face's normal we are
        private boolean aimHeadingValid = false;
        // Tag-flicker ride-through: remember the last non-NONE classification so a momentary
        // dropout (< TARGET_HOLD_SEC) rides on the drivetrain's fused pose instead of
@@ -321,6 +323,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 rtSpeedRpmEntry = ShooterSubsystemTab.add("RT Target (motor RPM)", 0.0).getEntry();
                 autoAimTagEntry = ShooterSubsystemTab.add("Auto-Aim Tag", -1.0).getEntry();
                 autoAimBearingEntry = ShooterSubsystemTab.add("Auto-Aim Bearing (deg, + = hub right of crosshair)", 0.0).getEntry();
+                autoAimViewAngleEntry = ShooterSubsystemTab.add("Auto-Aim View Angle (deg)", 0.0).getEntry();
        }
 
     //Utility Methods
@@ -515,6 +518,39 @@ public class ShooterSubsystem extends SubsystemBase{
         }
         static double fiducialCamZ(double txncDeg, double groundRange){
             return groundRange * Math.cos(Math.toRadians(txncDeg));
+        }
+
+        // The hub centre in camera GROUND coordinates (x right, z forward), stepping off the
+        // tag by its across-face offset and the fixed face-to-centre depth -- with both steps
+        // rotated by phi, the angle the tag is being VIEWED at.
+        //
+        // phi = 0 reduces exactly to (camX + lateral, camZ + depth), which is what the code did
+        // before and what is correct when square to the face. It is wrong off to one side,
+        // because the depth step belongs along the TAG'S normal, not along the camera's axis:
+        // the error is depth*sin(phi) across the aim line, 0.21 m at 20 deg.
+        // Returns { x, z }. Package-private + static for AutoAimTest.
+        static double[] hubPointInCameraFrame(double camXTag, double camZTag, double lateral,
+                double phiDeg){
+            double phi = Math.toRadians(phiDeg);
+            double depth = FieldConstants.TAG_FACE_TO_HUB_DEPTH_METERS;
+            return new double[] {
+                camXTag + lateral * Math.cos(phi) + depth * Math.sin(phi),
+                camZTag + depth * Math.cos(phi) - lateral * Math.sin(phi),
+            };
+        }
+
+        // The angle the tag is being viewed at, or 0 when it cannot be trusted. Only the
+        // Limelight's PRIMARY target publishes an orientation (targetpose_cameraspace describes
+        // whichever tag the camera itself picked), so if auto-aim chose a different tag there is
+        // no viewing angle for it and the square-on assumption stands -- correct at small angles,
+        // and the tag-in-view clamp bounds it either way.
+        // Package-private + static for AutoAimTest.
+        static double autoAimViewAngleDegrees(int pickedTagId, int primaryTagId, double tagYawDeg){
+            if (!ShooterSubsystemConstants.AUTOAIM_VIEW_ANGLE_COMP_ENABLED
+                    || pickedTagId != primaryTagId) {
+                return 0;
+            }
+            return tagYawDeg * ShooterSubsystemConstants.AUTOAIM_VIEW_ANGLE_SIGN;
         }
 
         // Clamp the commanded turn so the tag CANNOT leave the frame. After turning by the
@@ -1346,7 +1382,13 @@ public class ShooterSubsystem extends SubsystemBase{
             double camX = fiducialCamX(picked.txnc, groundRange);
             double camZ = fiducialCamZ(picked.txnc, groundRange);
             double lateral = FieldConstants.tagLateralOffsetMeters(picked.id);
-            double distance = autoAimDistanceMeters(camX, camZ, lateral);
+            // Rotation of the tag in camera space about the VERTICAL axis = how far off to one
+            // side we are looking at it from. Camera space is x right / y DOWN / z forward, so
+            // the vertical axis is y and Rotation3d.getY() is the angle wanted.
+            autoAimViewAngleDeg = autoAimViewAngleDegrees(picked.id, visibleTagId,
+                Math.toDegrees(tagCameraPose.getRotation().getY()));
+            double[] hub = hubPointInCameraFrame(camX, camZ, lateral, autoAimViewAngleDeg);
+            double distance = Math.hypot(hub[0], hub[1]);
             if (!(distance > 0.01)) {   // also catches NaN from a garbage solve
                 target_distance = 0;
                 aimHeadingValid = false;
@@ -1360,7 +1402,7 @@ public class ShooterSubsystem extends SubsystemBase{
             // every loop, so the servo converges as the robot turns; consumed by the RB binding's
             // aim hold and by isAimedAtTarget(), which gates the kicker.
             double bearingDeg = clampTurnToKeepTagInView(
-                autoAimBearingDegrees(camX, camZ, lateral), picked.txnc);
+                Math.toDegrees(Math.atan2(hub[0], hub[1])), picked.txnc);
             autoAimBearingDeg = bearingDeg;
             double headingDeg = drivetrain.getState().Pose.getRotation().getDegrees();
             // TWO headings, deliberately, and they must not be collapsed into one:
@@ -1693,6 +1735,7 @@ public class ShooterSubsystem extends SubsystemBase{
             rtSpeedRpmEntry.setDouble(rtSurfaceSpeed / surfaceSpeedForMotorRpm(1.0));
             autoAimTagEntry.setDouble(autoAimTagId);
             autoAimBearingEntry.setDouble(autoAimBearingDeg);
+            autoAimViewAngleEntry.setDouble(autoAimViewAngleDeg);
             // Desired Velocity/Angle double as INPUTS in live-data mode (enableComp reads
             // them back above) -- only echo the real setpoints when NOT in that mode, so a
             // dashboard edit is never stomped mid-tune.

@@ -313,6 +313,49 @@ class AutoAimTest {
     }
 
     /**
+     * VIEWING-ANGLE COMPENSATION. The hub centre is 0.6035 m behind the tag along the TAG'S
+     * normal; stepping back along the CAMERA's axis instead is only the same thing when square
+     * to the face. phi = 0 must reproduce the old maths exactly, and a nonzero phi must move
+     * the aim point across the line by depth*sin(phi).
+     */
+    @Test
+    void viewAngleShiftsTheAimPointAcrossTheLine() {
+        double camX = 0.1, camZ = 2.4;
+        double lateral = FieldConstants.tagLateralOffsetMeters(10);   // centred tag, 0
+        // Square on: identical to the uncompensated helpers, to the last bit.
+        double[] square = ShooterSubsystem.hubPointInCameraFrame(camX, camZ, lateral, 0.0);
+        assertEquals(camX + lateral, square[0], 1e-12);
+        assertEquals(camZ + FieldConstants.TAG_FACE_TO_HUB_DEPTH_METERS, square[1], 1e-12);
+        assertEquals(ShooterSubsystem.autoAimDistanceMeters(camX, camZ, lateral),
+            Math.hypot(square[0], square[1]), 1e-12, "phi=0 must not change the distance either");
+
+        // Viewed from one side: the aim point steps across by depth*sin(phi).
+        double phi = 20.7;   // a real reading off this robot on the bench
+        double[] angled = ShooterSubsystem.hubPointInCameraFrame(camX, camZ, lateral, phi);
+        double expectedShift = FieldConstants.TAG_FACE_TO_HUB_DEPTH_METERS
+            * Math.sin(Math.toRadians(phi));
+        assertEquals(square[0] + expectedShift, angled[0], 1e-9);
+        assertTrue(Math.abs(expectedShift) > 0.2, "20.7 deg is worth >0.2 m, not a rounding error");
+        // Mirrored view mirrors the shift.
+        assertEquals(square[0] - expectedShift,
+            ShooterSubsystem.hubPointInCameraFrame(camX, camZ, lateral, -phi)[0], 1e-9);
+    }
+
+    /** The compensation is OFF by default, and never applies to a non-primary tag. */
+    @Test
+    void viewAngleIsGatedOffAndOnlyEverUsesThePrimaryTag() {
+        // Default off: whatever the camera reports, the answer is 0.
+        assertEquals(0.0, ShooterSubsystem.autoAimViewAngleDegrees(10, 10, 25.0), 1e-12,
+            "AUTOAIM_VIEW_ANGLE_COMP_ENABLED is false until verified on the robot");
+        assertFalse(ShooterSubsystemConstants.AUTOAIM_VIEW_ANGLE_COMP_ENABLED,
+            "if this is enabled, the sign must have been checked on the robot first");
+        // And even enabled, a tag that is not the camera's primary has no orientation to use:
+        // targetpose_cameraspace always describes the primary tag, so using it for another tag
+        // would silently mix two different tags.
+        assertEquals(0.0, ShooterSubsystem.autoAimViewAngleDegrees(10, 26, 25.0), 1e-12);
+    }
+
+    /**
      * THE OSCILLATION BUG (found on the robot 2026-08-29, "the hood keeps going up and down").
      * The hood lands 25-55 raw units past what was asked -- one powered 20 ms loop of travel --
      * and the arrival latch in periodic() re-seeds the SETPOINT to that landing spot. So if

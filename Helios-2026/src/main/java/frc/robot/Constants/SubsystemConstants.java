@@ -711,7 +711,13 @@ public class SubsystemConstants {
                 //
                 // It also encodes the team's spec directly: the crosshair should sit NEAR the
                 // tag, a little to one side depending on which side it is being viewed from.
-                public static double AUTOAIM_MAX_TAG_OFFSET_DEG = 8.0;
+                // 8 -> 20 on 2026-08-29. 8 was chosen when the only correction was a few
+                // degrees; a legitimate correction from far off to one side is bigger than that
+                // (a side tag viewed at 35 deg wants ~14 deg), so 8 would have clipped the very
+                // case the viewing-angle compensation exists to fix. 20 still leaves the tag
+                // well inside the frame while letting the real correction through -- it is a
+                // runaway guard, not the aim policy.
+                public static double AUTOAIM_MAX_TAG_OFFSET_DEG = 20.0;
 
                 // Only refresh the aim target while the robot is turning SLOWER than this
                 // (deg/s). Vision is a few frames behind, so a bearing measured mid-turn belongs
@@ -721,6 +727,29 @@ public class SubsystemConstants {
                 // fast the target is HELD; once the robot slows, the measurement is trustworthy
                 // again and the target is refined. TODO tune on robot.
                 public static double AUTOAIM_AIM_UPDATE_MAX_DEG_PER_SEC = 30.0;
+
+                // VIEWING-ANGLE COMPENSATION (team question 2026-08-29: does the correction
+                // account for seeing the tag from far off to one side?). It did not.
+                //
+                // The hub centre sits 0.6035 m BEHIND the tag face along the tag's own normal.
+                // The uncompensated maths steps back along the CAMERA's axis instead, which is
+                // the same thing ONLY when the robot is square to the face. Off to one side by
+                // an angle phi, the two differ by 0.6035*sin(phi) ACROSS the aim line: 0.10 m at
+                // 10 deg, 0.21 m at 20 deg, 0.35 m at 35 deg -- 2.2, 4.5 and 7.3 deg of aim
+                // error at 2.7 m. The camera reports phi (the tag's rotation in camera space),
+                // and it read 20.7 deg in a casual bench position, so this is not a corner case.
+                //
+                // *** DEFAULT OFF, AND THE SIGN IS UNVERIFIED. *** Turning is working correctly
+                // on the robot right now and this changes the aim, so it does not get switched
+                // on by a guess -- especially after the rotation-direction inversion of the same
+                // day. "Auto-Aim View Angle (deg)" and "Auto-Aim Bearing" are published so the
+                // effect can be watched before it is trusted. TO VERIFY: park well off to ONE
+                // side of the tag, hold RB, and note where it aims. Set this true, redeploy, and
+                // repeat from the same spot -- the aim must move TOWARD the hub centre, i.e.
+                // further from the tag in the direction the hub actually lies. If it moves the
+                // wrong way, flip AUTOAIM_VIEW_ANGLE_SIGN rather than switching this back off.
+                public static boolean AUTOAIM_VIEW_ANGLE_COMP_ENABLED = false;
+                public static double AUTOAIM_VIEW_ANGLE_SIGN = 1.0;
                 // TAG-LOSS HOLD (s). Team report 2026-08-29: with RB held the hood "keeps
                 // going up and down". A Limelight fiducial drops out for a frame or two
                 // routinely, and every dropout used to refuse the shot instantly, so the hood
