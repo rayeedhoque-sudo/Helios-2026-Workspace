@@ -275,9 +275,9 @@ public class SubsystemConstants {
             //    kP; if presses become sluggish or the hood stops short, lower it.
             // Every value is live-tunable from the Shooter tab (see the tune* entries) and
             // reverts to these on redeploy.
-                public static double SHOOTER_ANGLE_kP = 0.18;
+                public static double SHOOTER_ANGLE_kP = 0.6;
                 public static double SHOOTER_ANGLE_kI = 0.0;
-                public static double SHOOTER_ANGLE_kD = 0.004;
+                public static double SHOOTER_ANGLE_kD = 0.000;
             //PID - Speed
                 public static double SHOOTER_SPEED_kP = 0.2;
                 public static double SHOOTER_SPEED_kI = 0.0;
