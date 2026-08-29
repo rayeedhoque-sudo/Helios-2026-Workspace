@@ -176,11 +176,11 @@ public class SubsystemConstants {
             //SPEED CONSTANTS
                 // Roller duty cycles (driver-tuned 2026-07-10: 35% intake was too fast;
                 // outtake halved 2026-07-14 per team request). Worst-case steady supply draw
-                // = duty x stator limit (40 A, set in IntakeSubsystem): intake 0.2875 x 40 =
-                // 11.5 A, outtake 0.345 x 40 = 13.8 A, both well under the 25 A supply limit.
+                // = duty x stator limit (40 A, set in IntakeSubsystem): intake 0.254 x 40 =
+                // 10.2 A, outtake 0.360 x 40 = 14.4 A, both well under the 25 A supply limit.
                 // Inrush softened by the duty-cycle ramp.
-                public static final double INTAKE_SPEED = 0.2875;   // +15% team request 2026-08-24
-                public static final double OUTTAKE_SPEED = 0.345;   // +15% team request 2026-08-24
+                public static final double INTAKE_SPEED = 0.254;    // driver-tuned on robot 2026-08-28
+                public static final double OUTTAKE_SPEED = 0.360;   // driver-tuned on robot 2026-08-28
 
         }
 
