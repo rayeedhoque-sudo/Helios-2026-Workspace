@@ -671,28 +671,36 @@ function drawFieldImage(): void {
   ctx.restore();
 }
 
-// AprilTag markers: a dot at each tag with its ID, so the drive team can name the
-// tag they're looking at. Labels are nudged toward field center so wall tags stay on
-// screen, and drawn upright in both orientations.
+// AprilTag markers: a dot at each tag with its ID. Hub tags get their number pushed
+// radially OUTSIDE the hub (so you read which face it's on at a glance); every other
+// tag is nudged toward field center so wall tags stay on screen. Labels draw upright
+// in both orientations.
+const TAG_LABEL_HUB_R_M = 1.25; // label ring radius from hub center — outside the hub box
 function drawTags(): void {
   if (!ctx || !showTags) return;
   ctx.font = '700 9px "Bahnschrift", sans-serif';
   ctx.textAlign = 'center';
   for (const [id, xM, yM] of TAG_XY) {
     const c = fieldToCanvasAt(layout, xM, yM);
-    const inX = xM + (xM < FIELD_W_M / 2 ? 0.45 : -0.45);
-    const inY = yM + (yM < FIELD_H_M / 2 ? 0.45 : -0.45);
-    const lab = fieldToCanvasAt(layout, inX, inY);
+    const hub = xM < FIELD_W_M / 2 ? HUB_BLUE : HUB_RED;
+    const dx = xM - hub.x;
+    const dy = yM - hub.y;
+    const r = Math.hypot(dx, dy);
+    let labX: number;
+    let labY: number;
+    if (r < 1.2) {
+      // Hub face tag: push the number straight out past the hub along its own radial.
+      labX = hub.x + (dx / r) * TAG_LABEL_HUB_R_M;
+      labY = hub.y + (dy / r) * TAG_LABEL_HUB_R_M;
+    } else {
+      labX = xM + (xM < FIELD_W_M / 2 ? 0.45 : -0.45);
+      labY = yM + (yM < FIELD_H_M / 2 ? 0.45 : -0.45);
+    }
+    const lab = fieldToCanvasAt(layout, labX, labY);
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
     ctx.beginPath();
     ctx.arc(c.x, c.y, 2.5, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.55)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(c.x, c.y);
-    ctx.lineTo(lab.x, lab.y);
-    ctx.stroke();
     ctx.fillStyle = 'rgba(12,9,20,0.75)';
     const w = ctx.measureText(String(id)).width + 7;
     ctx.beginPath();
