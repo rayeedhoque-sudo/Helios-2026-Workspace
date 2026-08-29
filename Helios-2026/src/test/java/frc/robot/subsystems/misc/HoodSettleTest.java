@@ -35,8 +35,10 @@ public class HoodSettleTest {
             ShooterSubsystemConstants.SHOOTER_ANGLE_kP * step
                 + ShooterSubsystem.hoodLiftFeedforward(step), step, false);
         assertTrue(drive >= 7.4, "one step must ask for at least the ~7.5 V breakaway, got " + drive);
-        assertTrue(step > ShooterSubsystemConstants.ANGLE_TOLERANCE,
-            "a step smaller than the settle band would arrive already-satisfied and do nothing");
+        // NOT "step > ANGLE_TOLERANCE": the arrival latch is DIRECTION-based (hoodMoveReached),
+        // not band-based, so a step inside the settle band still commands a real stroke. The
+        // band only zeroes the feedforward, which the breakaway floor then supplies anyway.
+        assertTrue(step > 0, "a press must ask for actual travel");
         // NOT an assertion on the raw sum: kP is live-tuned on the robot (0.6 as of
         // 2026-08-28), so one step can ask for more than the cap. What must hold is that the
         // CLAMPED command is legal -- the clamp, not the gain, is the safety limit.
