@@ -328,15 +328,17 @@ public class RobotContainer {
                 .whileTrue(intakeSS.intakeCommand().andThen(hopperSS.intakeFeedCommand())
                     .finallyDo(intakeSS::stopRollers))
                 .onFalse(intakeSS.stowCommand());
-            // A (hold) = outtake: same choreography, rollers out. (Was Y until 2026-08-29.)
-            joystick2.a().and(RobotModeTriggers.teleop())
+            // Y (hold) = outtake: same choreography, rollers out. (Moved to A earlier on
+            // 2026-08-29, then straight back to Y the same day -- team request.)
+            joystick2.y().and(RobotModeTriggers.teleop())
                 .whileTrue(intakeSS.outtakeCommand().andThen(hopperSS.intakeFeedCommand())
                     .finallyDo(intakeSS::stopRollers))
                 .onFalse(intakeSS.stowCommand());
             // X = manual stow: stop rollers immediately, then retract slider until stall.
             joystick2.x().and(RobotModeTriggers.teleop()).onTrue(intakeSS.stowCommand());
-            // B (hold) = MANUAL hopper run: belts ONLY, kicker stays OFF (team spec 2026-08-22).
-            joystick2.b().and(RobotModeTriggers.teleop()).whileTrue(hopperSS.manualRunCommand());
+            // A (hold) = MANUAL hopper run: belts ONLY, kicker stays OFF (team spec 2026-08-22).
+            // Moved off B 2026-08-29 to give B the feed shot.
+            joystick2.a().and(RobotModeTriggers.teleop()).whileTrue(hopperSS.manualRunCommand());
             // VIEW (hold) = UNJAM: reverse belts + kicker at low duty to back a stuck ball out.
             // (Direction-test diagnostics removed 2026-07-18 after the fix was confirmed: the
             // belts were fighting from opposite flashed inversion; both motors now same-sign.)
@@ -376,13 +378,13 @@ public class RobotContainer {
                         lockDriveAndIntake())
                     .beforeStarting(kickerSpinupTimer::restart)
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));
-            // Y (hold) = FIXED FEED SHOT (team request 2026-08-29, taking over the button
-            // outtake used to hold): hood to FEED_SHOT_HOOD_UNITS above this enable's floor,
+            // B (hold) = FIXED FEED SHOT (team request 2026-08-29; it briefly sat on Y the
+            // same day): hood to FEED_SHOT_HOOD_UNITS above this enable's floor,
             // flywheels to FEED_SHOT_MOTOR_RPM. Everything else is RT's behaviour, reusing RT's
             // parts: belts always, kicker only after KICKER_SPINUP_DELAY_SEC, same drive+intake
             // lockout, same kCancelIncoming hold. The hood is commanded ONCE at the press (see
             // feedShotCommand) and is NOT returned on release.
-            joystick2.y().and(RobotModeTriggers.teleop())
+            joystick2.b().and(RobotModeTriggers.teleop())
                 .whileTrue(shooterSS.feedShotCommand()
                     .alongWith(
                         hopperSS.feedShooterCommand(() -> true,

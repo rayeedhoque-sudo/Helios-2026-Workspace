@@ -557,6 +557,10 @@ function renderChooserStatus(): void {
 // Test-mode DPAD <- / -> is the same per-press closed-loop step as teleop; the held voltage
 // jog it used to describe was deleted 2026-08-28. Same day: OUTTAKE moved from Y to A (no
 // search-align binding is left on the match layer) and Y became a FIXED FEED SHOT.
+// REBOUND AGAIN 2026-08-29 (team request, three-way rotation of the face buttons): Y is
+// BACK to outtake, B is the FIXED FEED SHOT, and A is the MANUAL HOPPER RUN that used to
+// be on B. Nothing about what those three commands DO changed -- only which button holds
+// them.
 // TEST MODE bindings added 2026-07-21 (RobotContainer.configureTestBindings): the SAME
 // physical controller carries a second, mode-gated binding set active ONLY in Driver
 // Station Test mode (RobotModeTriggers.test() — mutually exclusive with the match set's
@@ -579,7 +583,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     group: 'Intake — slider + rollers (hold-to-run; slider stows on release)',
     rows: [
       { btn: 'LT', desc: 'Hold: intake — slider out to stall, THEN rollers in + belts (kicker stays OFF; feed only while rolling, never while sliding); release = rollers/belts stop, then slider retracts to stall' },
-      { btn: 'A', desc: 'Hold: outtake — same choreography, rollers out (moved from Y 2026-08-29)' },
+      { btn: 'Y', desc: 'Hold: outtake — same choreography, rollers out (briefly on A earlier on 2026-08-29, moved back the same day)' },
       { btn: 'X', desc: 'Manual stow: rollers stop immediately, then retract to stall' },
     ],
   },
@@ -590,15 +594,15 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
       { btn: 'DPAD →', desc: 'Press: hood UP one 2-unit step, measured from where the hood is at the press (2026-08-28; every press steps again). EXPECT MORE THAN 2: the hood cannot move below ~7.5 V and one 20 ms loop at that voltage already carries it 25–55 units ≈ 3–7 physical degrees, so below ~60 units the step sets the DIRECTION of a press, not its distance. ~6–12 presses reach the ceiling guard' },
       { btn: 'DPAD ←', desc: 'Press: hood DOWN one 2-unit step from where it is (2026-08-28, replacing the old one-press return to base — LB does that now). Never goes below the enable base, which is the floor nothing may drive past' },
       { btn: 'LB', desc: 'Press: hood all the way DOWN to the enable base in one press (2026-08-29). Same closed-loop path as the DPAD steps — it just asks for the floor' },
-      { btn: 'Y', desc: 'Hold: FIXED feed shot (2026-08-29, took over the button outtake used to hold) — hood to a fixed 298 raw units above this enable’s floor, flywheels to a fixed 935 motor RPM. Otherwise identical to RT: belts always, kicker 2 s after the press, drive + intake locked. The hood is commanded ONCE at the press and is NOT returned on release' },
+      { btn: 'B', desc: 'Hold: FIXED feed shot (2026-08-29; it briefly sat on Y the same day) — hood to a fixed 298 raw units above this enable’s floor, flywheels to a fixed 935 motor RPM. Otherwise identical to RT: belts always, kicker 2 s after the press, drive + intake locked. The hood is commanded ONCE at the press and is NOT returned on release' },
       { btn: 'RT', desc: 'Hold: flywheels-only shot (2026-08-22) — fixed flywheel speed, belts always, kicker opens 2 s after the press (spin-up delay, NOT an at-speed check). NO vision, NO auto-aim, and the HOOD IS NOT COMMANDED: it stays at the DPAD-set angle, on press AND on release. Drive + intake locked for the hold, so aim BEFORE pressing' },
-      { btn: 'RB', desc: 'Hold: AUTO-AIM shot (2026-08-29) — CONSTANT flywheel speed (~1000 motor RPM); the only thing that changes with distance is the HOOD ANGLE, looked up from the AprilTag distance. Belts always, kicker 2 s after the press, drive + intake locked. NO auto-rotate: point the robot yourself (A search-aligns). No tag in view = no shot. THE HOOD MOVES BY ITSELF on this binding — the one place it does. TESTING: tag 17 is aliased to a scoring tag, and the distance→hood table is still PLACEHOLDER values, so shots will not land until it is tuned' },
+      { btn: 'RB', desc: 'Hold: AUTO-AIM shot (2026-08-29) — CONSTANT flywheel speed (~1000 motor RPM); the only thing that changes with distance is the HOOD ANGLE, looked up from the AprilTag distance. Belts always, kicker 2 s after the press, drive + intake locked. NO auto-rotate: point the robot yourself (search-align is not bound to anything). No tag in view = no shot. THE HOOD MOVES BY ITSELF on this binding — the one place it does. TESTING: tag 17 is aliased to a scoring tag, and the distance→hood table is still PLACEHOLDER values, so shots will not land until it is tuned' },
     ],
   },
   {
     group: 'Hopper',
     rows: [
-      { btn: 'B', desc: 'Hold: MANUAL hopper — belts ONLY, kicker stays OFF (2026-08-22); release = stop' },
+      { btn: 'A', desc: 'Hold: MANUAL hopper — belts ONLY, kicker stays OFF (2026-08-22; moved off B 2026-08-29 to free B for the feed shot); release = stop' },
       { btn: 'VIEW', desc: 'Hold: UNJAM — reverse belts + kicker at low duty; release = stop' },
     ],
   },
@@ -639,7 +643,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
       { btn: 'RT', desc: 'Precision vision shot (auto-aim + shot model)', off: 'removed 2026-08-22 — RT is now flywheels-only, hood set by hand' },
       { btn: 'DPAD ← / →', desc: 'Rotate ±90°', off: 'removed 2026-08-22 — DPAD ← / → now move the hood' },
       { btn: 'DPAD ← / →', desc: 'Hood setpoint −2° / +2° per click', off: 'replaced 2026-08-27 — DPAD ← / → now step the hood down / up 2 raw units per press' },
-      { btn: 'A', desc: 'Hold: search-align to our scoring tag', off: 'removed 2026-08-29 — A now holds the outtake. The drivetrain command and the shooter gates it used are all still in the code if it comes back' },
+      { btn: 'A', desc: 'Hold: search-align to our scoring tag', off: 'removed 2026-08-29 — A now holds the manual hopper run. The drivetrain command and the shooter gates it used are all still in the code if it comes back' },
       { btn: 'RB', desc: 'Fixed 25° feed shot', off: 'disabled 2026-08-22 (a fixed physical degree means nothing against the relative hood), replaced 2026-08-29 by the RB auto-aim shot above' },
     ],
   },

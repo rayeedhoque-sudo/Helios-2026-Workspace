@@ -493,11 +493,12 @@ public class SubsystemConstants {
                 // companion readout, so they are RAW: the hood target is this many RAW ENCODER
                 // UNITS ABOVE the enable-time floor (the same scale the DPAD steps use), and the
                 // speed is MOTOR RPM, converted to surface speed by surfaceSpeedForMotorRpm.
-                // 298 sits just under the HOOD_TRAVEL_WINDOW_DEG ceiling (309.6), so
+                // 288 sits under the HOOD_TRAVEL_WINDOW_DEG ceiling (309.6), so
                 // clampDesiredAngle leaves it alone from a normal resting enable and clips it
                 // only if the robot was enabled with the hood already raised.
-                // TODO tune both on robot -- neither has been shot yet.
-                public static double FEED_SHOT_HOOD_UNITS = 298.0;   // raw units above the enable floor
+                // Dropped 298 -> 288 on 2026-08-29 from on-robot tuning (team direction: "10
+                // encoder units less"); that is ~1.3 physical degrees flatter.
+                public static double FEED_SHOT_HOOD_UNITS = 288.0;   // raw units above the enable floor
                 public static double FEED_SHOT_MOTOR_RPM = 935.0;    // motor RPM
                 // Time-of-flight linear fits (s) for moving-shot compensation, refit AT 38 DEG
                 // (refit_38.py 2026-07-21, residual <= 0.011 s): score 0.188 + 0.115*d,
@@ -667,6 +668,23 @@ public class SubsystemConstants {
                 // TODO tune on robot: if every shot is short at every distance, raise this
                 // FIRST, then re-tune the table below (the table is only valid for one speed).
                 public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1000.0;
+                // TAG-LOSS HOLD (s). Team report 2026-08-29: with RB held the hood "keeps
+                // going up and down". A Limelight fiducial drops out for a frame or two
+                // routinely, and every dropout used to refuse the shot instantly, so the hood
+                // was re-commanded from a fresh distance the moment the tag came back -- and one
+                // powered hood loop travels 25-55 raw units, so every one of those re-commands
+                // is a visible lurch. Within this long after the last good frame, auto-aim
+                // FREEZES instead: the hood setpoint is left exactly where it is and the
+                // flywheel target is untouched. Past it, the shot refuses as before.
+                // This is the SAME ride-through runVisionTargeting uses (TARGET_HOLD_SEC), with
+                // its own number because it is doing a different job: that one keeps a distance
+                // estimate alive on odometry, this one just stops a flickering tag from
+                // re-driving the hood. SAFETY: the kicker keeps feeding for up to this long
+                // without a tag in view -- keep it short. The flywheel speed does not depend on
+                // the tag at all (it is constant), so only the hood angle goes stale.
+                // TODO tune on robot: raise if the hood still lurches, lower if a shot keeps
+                // feeding too long after the tag is genuinely gone.
+                public static double AUTOAIM_TAG_HOLD_SEC = 1.0;
                 // TEST-ONLY TAG ALIAS (team request 2026-08-29: "we only have AprilTag 17, make
                 // it act like 10"). Tag 17 is normally a FEED tag; with this true it classifies
                 // as a SCORE tag so auto-aim will range on it. Tags 10 and 17 are both CENTERED

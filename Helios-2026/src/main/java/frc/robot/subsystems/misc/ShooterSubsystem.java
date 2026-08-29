@@ -202,6 +202,11 @@ public class ShooterSubsystem extends SubsystemBase{
        // restarting the flywheels. Initial acquisition still requires a real tag.
        private TargetClass heldClass = TargetClass.NONE;
        private final Timer targetHoldTimer = new Timer();
+       // RB auto-aim tag-loss ride-through (team request 2026-08-29). Its own clock, not
+       // targetHoldTimer's: that one is restarted by periodic() on ANY class of tag, while
+       // this must only count from the last frame auto-aim actually used.
+       private final Timer autoAimTagTimer = new Timer();
+       private boolean autoAimHadTag = false;
 
        // Vision targeting now lives entirely inside visionShotCommand() -- the old enableVision
        // constructor flag is gone. INTEGRATOR NOTE: construct with just the drivetrain and
@@ -413,6 +418,15 @@ public class ShooterSubsystem extends SubsystemBase{
         static double autoAimDistanceMeters(double camX, double camZ, double lateralOffsetMeters){
             return Math.hypot(camX + lateralOffsetMeters,
                 camZ + FieldConstants.TAG_FACE_TO_HUB_DEPTH_METERS);
+        }
+
+        // Is auto-aim inside its tag-loss hold? True while a tag HAS been seen this hold and
+        // the dropout is still shorter than AUTOAIM_TAG_HOLD_SEC -- in which case the whole
+        // targeting pass is skipped, so the hood setpoint and the flywheel target keep their
+        // last values instead of being refused and then re-commanded on reacquire.
+        // Package-private + static for AutoAimTest.
+        static boolean autoAimHoldingThroughDropout(boolean hadTag, double secSinceLastTag){
+            return hadTag && secSinceLastTag < ShooterSubsystemConstants.AUTOAIM_TAG_HOLD_SEC;
         }
 
         // Should auto-aim WRITE a new hood setpoint this loop? Only when the distance-derived
@@ -1142,24 +1156,42 @@ public class ShooterSubsystem extends SubsystemBase{
                     runAutoAimTargeting();
                 },
                 () -> {
+                    autoAimHadTag = false;
                     hasShotTarget = false;
                     target_distance = 0;
                     setDesiredFlywheelVelocity(0);
-                });
+                })
+                // Clear the ride-through before the first loop too: pressing RB with no tag in
+                // view must do nothing, even if one was seen moments before the press.
+                .beforeStarting(() -> autoAimHadTag = false);
         }
 
         // One pass per loop while autoAimShotCommand() is scheduled. periodic() has already
         // refreshed targetClass and tagCameraPose this loop (the scheduler runs subsystem
         // periodic() before command execute()).
         private void runAutoAimTargeting(){
-            // No OWN scoring tag in view (the test alias makes 17 count) -> refuse: velocity 0,
-            // so the at-speed gate never opens and the kicker never feeds. The hood is left
-            // wherever it is, deliberately -- losing the tag must not yank it.
+            // No OWN scoring tag in view (the test alias makes 17 count).
             if (targetClass != TargetClass.SCORE) {
+                // RIDE-THROUGH first (team request 2026-08-29, "some delay before going down if
+                // a tag isn't seen"): for AUTOAIM_TAG_HOLD_SEC after the last good frame, do
+                // NOTHING AT ALL -- returning here leaves the hood setpoint, the flywheel target
+                // and hasShotTarget exactly as the last good frame left them. That is what stops
+                // a one-frame flicker from turning into a hood move, since it is the RE-COMMAND
+                // on reacquire that lurches, not the dropout itself.
+                if (autoAimHoldingThroughDropout(autoAimHadTag, autoAimTagTimer.get())) {
+                    return;
+                }
+                // Hold expired: refuse -- velocity 0, so the at-speed gate never opens and the
+                // kicker never feeds. The hood is left wherever it is, deliberately -- losing
+                // the tag must not yank it down.
+                autoAimHadTag = false;
                 target_distance = 0;
                 refuseShot();
                 return;
             }
+            // A good frame: this is what the hold counts from.
+            autoAimHadTag = true;
+            autoAimTagTimer.restart();
             double distance = autoAimDistanceMeters(tagCameraPose.getX(), tagCameraPose.getZ(),
                 FieldConstants.tagLateralOffsetMeters(visibleTagId));
             if (!(distance > 0.01)) {   // also catches NaN from a garbage tag pose
