@@ -193,10 +193,10 @@ public class RobotContainer {
         //   RT (hold)   = flywheels-only shot (2026-08-22): fixed flywheel speed, belts always,
         //                 kicker opens 2 s after the press, HOOD NOT COMMANDED (DPAD L/R).
         //                 Full drive + intake lockout; no vision, no auto-aim.
-        //   RB (hold)   = AUTO-AIM SHOT (2026-08-29): constant flywheel speed (~1000 motor
-        //                 RPM), hood angle looked up from the AprilTag distance, belts always,
-        //                 kicker after the same 2 s spin-up delay. Same drive + intake lockout
-        //                 as RT. No auto-rotate -- the driver still aims the robot.
+        //   RB (hold)   = AUTO-AIM SHOT (2026-08-29): constant flywheel speed, hood angle
+        //                 looked up from the AprilTag distance, AND the robot turns itself to
+        //                 face the hub CENTRE (not the tag). Belts always; the kicker waits for
+        //                 the spin-up delay AND the aim. Sticks locked out for the hold.
         //   (Kicker at-speed gate added 2026-07-18 by team request.)
         //   B (hold)    = manual hopper belts only (kicker OFF)
         //   VIEW (hold) = hopper unjam: reverse belts + kicker (added 2026-07-18)
@@ -395,27 +395,47 @@ public class RobotContainer {
                         lockDriveAndIntake())
                     .beforeStarting(kickerSpinupTimer::restart)
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));
-            // RB (hold) = AUTO-AIM SHOT (team request 2026-08-29). Same shape as RT -- constant
-            // flywheel speed (AUTOAIM_FLYWHEEL_MOTOR_RPM, ~1000 RPM), belts always, kicker after
-            // the same 2 s spin-up delay, full drive + intake lockout -- with ONE difference:
-            // the HOOD IS COMMANDED from the measured AprilTag distance
-            // (ShooterSubsystem.runAutoAimTargeting -> AUTOAIM_HOOD_TABLE). No auto-rotate: the
-            // driver still points the robot by hand (search-align is no longer bound). No tag
-            // in view = velocity 0, so
-            // the kicker never opens.
+            // RB (hold) = AUTO-AIM SHOT (team request 2026-08-29). Constant flywheel speed
+            // (AUTOAIM_FLYWHEEL_MOTOR_RPM), belts always, hood commanded from the measured
+            // AprilTag distance, and -- unlike every other shot -- THE ROBOT TURNS ITSELF to put
+            // the shooter on the hub CENTRE (team request 2026-08-29).
+            //
+            // The rotation is why this does NOT use lockDriveAndIntake(): that freezes the
+            // drivetrain with an Idle request, which is the opposite of what a self-aiming shot
+            // needs. Instead the drivetrain runs the SAME heading servo the other align commands
+            // use (aimUntilAligned), with () -> false so it never ends -- it holds aim for the
+            // whole press. It still REQUIRES the drivetrain, so the driver's sticks are locked
+            // out exactly as before; the robot simply turns instead of standing still.
+            // Translation is zero throughout, so the robot pivots in place and the distance the
+            // hood was set from does not change underneath it.
+            //
+            // It aims at the HUB CENTRE, not the tag. The tags sit off to one side of the hub
+            // face (0.3556 m on tags 9/25, dead centre on 10/26 -- FieldConstants), which at 3 m
+            // is ~6.8 deg, more than 3x the 2 deg aim tolerance. Aiming at the tag would clip
+            // the rim on the offset faces.
+            //
+            // THE KICKER NOW ALSO WAITS FOR THE AIM (isAimedAtTarget): spin-up delay AND pointed
+            // at the hub. A shot that is still turning no longer feeds. If the kicker never
+            // opens on the robot, the heading servo not converging is the first suspect --
+            // watch "Aimed At Target" on the Shooter dashboard tab.
+            //
             // The hood moving on its own here is a deliberate, team-approved exception to the
             // 2026-08-26 no-automatic-hood-motion rule -- see autoAimShotCommand.
-            // Shares kickerSpinupTimer with RT: both groups require drivetrain + intake and run
+            // Shares kickerSpinupTimer with RT: both groups require the drivetrain and run
             // kCancelIncoming, so only one of them can ever own the timer at a time.
-            // (This replaces the fixed-25-deg feed shot disabled on 2026-08-22.)
             joystick2.rightBumper().and(RobotModeTriggers.teleop())
                 .whileTrue(shooterSS.autoAimShotCommand()
                     .alongWith(
                         hopperSS.feedShooterCommand(() -> true,
                             () -> kickerSpinupTimer.hasElapsed(
-                                HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC),
+                                    HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC)
+                                && shooterSS.isAimedAtTarget(),
                             () -> false),
-                        lockDriveAndIntake())
+                        // Turn to face the hub centre, and keep the intake locked out. Never
+                        // ends -- the hold is what cancels it.
+                        drivetrain.aimUntilAligned(
+                            shooterSS::getAutoAimFieldHeadingDegrees, () -> false),
+                        intakeSS.run(intakeSS::stopRollers))
                     .beforeStarting(kickerSpinupTimer::restart)
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));
     }

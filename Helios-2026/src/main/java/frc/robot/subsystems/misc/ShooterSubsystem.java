@@ -434,6 +434,18 @@ public class ShooterSubsystem extends SubsystemBase{
             return hadTag && secSinceLastTag < ShooterSubsystemConstants.AUTOAIM_TAG_HOLD_SEC;
         }
 
+        // Bearing (deg, POSITIVE = the hub centre is to the camera's RIGHT) from the camera-space
+        // tag pose, corrected to the HUB CENTRE rather than the tag itself: the lateral term
+        // steps across the hub face, the depth term steps back to the centre. Both come from the
+        // real 2026 tag layout (FieldConstants) -- the tags sit off to one side of the face, so
+        // aiming at the tag aims off-centre by up to 0.3556 m -- 6.8 deg at 3 m from the hub
+        // centre, still 4.1 deg at 5 m. That is more than twice HEADING_TOLERANCE_DEG at any
+        // legal scoring range, so it is the difference between centred and clipping the rim. Package-private + static for AutoAimTest.
+        static double autoAimBearingDegrees(double camX, double camZ, double lateralOffsetMeters){
+            return Math.toDegrees(Math.atan2(camX + lateralOffsetMeters,
+                camZ + FieldConstants.TAG_FACE_TO_HUB_DEPTH_METERS));
+        }
+
         // Should auto-aim WRITE a new hood setpoint this loop? Only when the distance-derived
         // target has moved AUTOAIM_RETARGET_DEADBAND_UNITS from THE TARGET AUTO-AIM LAST ASKED
         // FOR. THIS GUARD IS LOAD-BEARING: setDesired_Angle clears hoodHolding (the park latch),
@@ -785,6 +797,14 @@ public class ShooterSubsystem extends SubsystemBase{
         // the drivetrain's aim-lock drive layer, re-sampled every loop.
         public OptionalDouble getAimHeadingDegrees(){
             return aimHeadingValid ? OptionalDouble.of(aimHeadingDeg) : OptionalDouble.empty();
+        }
+
+        // The field heading the RB aim hold servos to. With no live aim solution this returns
+        // the CURRENT heading, so a lost tag makes the drivetrain hold still rather than chase a
+        // stale bearing. Live value -- bind it as a method reference, never as a snapshot.
+        public double getAutoAimFieldHeadingDegrees(){
+            return aimHeadingValid ? aimHeadingDeg
+                                   : drivetrain.getState().Pose.getRotation().getDegrees();
         }
 
         // Aim gate: robot heading within HEADING_TOLERANCE_DEG of the firing bearing.
@@ -1176,6 +1196,7 @@ public class ShooterSubsystem extends SubsystemBase{
                     autoAimHasCommanded = false;
                     hasShotTarget = false;
                     target_distance = 0;
+                    aimHeadingValid = false;
                     setDesiredFlywheelVelocity(0);
                 })
                 // Clear the ride-through before the first loop too: pressing RB with no tag in
@@ -1214,14 +1235,23 @@ public class ShooterSubsystem extends SubsystemBase{
             // A good frame: this is what the hold counts from.
             autoAimHadTag = true;
             autoAimTagTimer.restart();
-            double distance = autoAimDistanceMeters(tagCameraPose.getX(), tagCameraPose.getZ(),
-                FieldConstants.tagLateralOffsetMeters(visibleTagId));
+            double lateral = FieldConstants.tagLateralOffsetMeters(visibleTagId);
+            double distance = autoAimDistanceMeters(tagCameraPose.getX(), tagCameraPose.getZ(), lateral);
             if (!(distance > 0.01)) {   // also catches NaN from a garbage tag pose
                 target_distance = 0;
+                aimHeadingValid = false;
                 refuseShot();
                 return;
             }
             target_distance = distance;
+            // AUTO-ROTATE (team request 2026-08-29): the blue-origin field heading that puts the
+            // SHOOTER on the hub CENTRE. Camera x is RIGHT-positive while field heading is
+            // CCW-positive, so the bearing is SUBTRACTED from the current heading. Re-sampled
+            // every loop, so the servo converges as the robot turns; consumed by the RB binding's
+            // aim hold and by isAimedAtTarget(), which gates the kicker.
+            double bearingDeg = autoAimBearingDegrees(tagCameraPose.getX(), tagCameraPose.getZ(), lateral);
+            aimHeadingDeg = drivetrain.getState().Pose.getRotation().getDegrees() - bearingDeg;
+            aimHeadingValid = true;
             // Table value is raw units ABOVE THE ENABLE DATUM, so anchor it to the datum.
             // getHoodFloorAngle() IS that datum (and the floor clampDesiredAngle enforces).
             // INHERITED ASSUMPTION: the datum is only the hood's rest position if the robot was
