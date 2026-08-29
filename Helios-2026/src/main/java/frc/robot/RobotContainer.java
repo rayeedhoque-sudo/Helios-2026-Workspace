@@ -66,8 +66,9 @@ public class RobotContainer {
     // Spin-up clock for the RT shot's kicker: restarted on every press, so the kicker stays
     // shut for KICKER_SPINUP_DELAY_SEC while the flywheels wind up.
     private final Timer kickerSpinupTimer = new Timer();
-    // DPAD UP/DOWN step for the RT flywheel target, in motor RPM (team request 2026-08-22).
-    private static final double kRtSpeedTrimRpm = 200.0;
+    // DPAD UP/DOWN step for the RT flywheel target, in motor RPM (team request 2026-08-22;
+    // 200 -> 50 on 2026-08-28 for a finer trim).
+    private static final double kRtSpeedTrimRpm = 50.0;
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
