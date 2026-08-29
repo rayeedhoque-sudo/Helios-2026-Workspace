@@ -100,7 +100,7 @@ class AutoAimTest {
      */
     @Test
     void retargetOnlyOutsideTheSettleBand() {
-        double band = ShooterSubsystemConstants.ANGLE_TOLERANCE;
+        double band = ShooterSubsystemConstants.AUTOAIM_RETARGET_DEADBAND_UNITS;
         assertFalse(ShooterSubsystem.autoAimShouldRetarget(100.0, 100.0), "no change, no write");
         assertFalse(ShooterSubsystem.autoAimShouldRetarget(100.0 + band / 2, 100.0),
             "inside the band, no write");
@@ -110,5 +110,26 @@ class AutoAimTest {
             "a real move writes");
         assertTrue(ShooterSubsystem.autoAimShouldRetarget(100.0 - band * 2, 100.0),
             "a real move downward writes");
+    }
+
+    /**
+     * THE OSCILLATION BUG (found on the robot 2026-08-29, "the hood keeps going up and down").
+     * The hood lands 25-55 raw units past what was asked -- one powered 20 ms loop of travel --
+     * and the arrival latch in periodic() re-seeds the SETPOINT to that landing spot. So if
+     * auto-aim compares its table target against the setpoint, a perfectly stable distance
+     * looks like a 25-55 unit disagreement every loop and it drives the hood back and forth
+     * forever. The deadband must be at least one landing overshoot wide, and the comparison
+     * must be against the last COMMANDED target (which the subsystem never rewrites).
+     */
+    @Test
+    void aLandingOvershootDoesNotRetarget() {
+        double target = 100.0;
+        // Compared against the last commanded target: a stable distance never re-commands.
+        assertFalse(ShooterSubsystem.autoAimShouldRetarget(target, target),
+            "a stable distance must command the hood exactly once");
+        // And the band is wide enough that a landing overshoot could not trigger one either,
+        // which is what makes the fix robust rather than merely correct.
+        assertTrue(ShooterSubsystemConstants.AUTOAIM_RETARGET_DEADBAND_UNITS >= 25.0,
+            "the deadband must be at least one 25-unit minimum hood stroke wide");
     }
 }

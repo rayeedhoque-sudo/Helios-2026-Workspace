@@ -207,6 +207,11 @@ public class ShooterSubsystem extends SubsystemBase{
        // this must only count from the last frame auto-aim actually used.
        private final Timer autoAimTagTimer = new Timer();
        private boolean autoAimHadTag = false;
+       // The hood target auto-aim last COMMANDED, and whether it has commanded one this hold.
+       // NOT the same thing as desired_Angle -- see autoAimShouldRetarget for why reading the
+       // setpoint back is what made the hood oscillate.
+       private double autoAimLastTarget = 0;
+       private boolean autoAimHasCommanded = false;
 
        // Vision targeting now lives entirely inside visionShotCommand() -- the old enableVision
        // constructor flag is gone. INTEGRATOR NOTE: construct with just the drivetrain and
@@ -430,14 +435,25 @@ public class ShooterSubsystem extends SubsystemBase{
         }
 
         // Should auto-aim WRITE a new hood setpoint this loop? Only when the distance-derived
-        // target has moved further than the settle band. THIS GUARD IS LOAD-BEARING:
-        // setDesired_Angle clears hoodHolding (the park latch), and an unparked hood below its
-        // target is driven at the ~7.5 V breakaway floor -- so writing the setpoint every 20 ms
-        // loop would re-start the drive every loop and reproduce exactly the up/down limit
-        // cycle that hoodHolding was added to kill, on a NEO 550 at a 20 A limit.
+        // target has moved AUTOAIM_RETARGET_DEADBAND_UNITS from THE TARGET AUTO-AIM LAST ASKED
+        // FOR. THIS GUARD IS LOAD-BEARING: setDesired_Angle clears hoodHolding (the park latch),
+        // and an unparked hood below its target is driven at the ~7.5 V breakaway floor -- so
+        // writing the setpoint every 20 ms loop re-starts the drive every loop.
+        //
+        // COMPARE AGAINST THE LAST COMMANDED TARGET, NEVER getDesiredAngle() (bug found on the
+        // robot 2026-08-29 -- "the hood keeps going up and down"). desired_Angle does not stay
+        // where auto-aim put it: when the hood ARRIVES, the latch in periodic() calls
+        // setDesired_Angle(currentHoodAngle), re-seeding the setpoint to where the hood actually
+        // LANDED -- and a landing is 25-55 units past what was asked, because that is one
+        // powered loop of travel. So the next pass saw a 25-55 unit disagreement against a
+        // perfectly stable distance, drove the hood back down to the table value, overshot
+        // downward, got re-seeded low by the same latch, and drove back up. Forever, with the
+        // tag sitting still. Remembering what WE asked for closes the loop: a stable distance
+        // commands the hood exactly once.
         // Package-private + static for AutoAimTest.
-        static boolean autoAimShouldRetarget(double newTarget, double currentTarget){
-            return Math.abs(newTarget - currentTarget) > ShooterSubsystemConstants.ANGLE_TOLERANCE;
+        static boolean autoAimShouldRetarget(double newTarget, double lastCommandedTarget){
+            return Math.abs(newTarget - lastCommandedTarget)
+                > ShooterSubsystemConstants.AUTOAIM_RETARGET_DEADBAND_UNITS;
         }
 
         // Surface speed (m/s) equivalent to a motor speed in RPM. Same geometry the velocity
@@ -1157,13 +1173,19 @@ public class ShooterSubsystem extends SubsystemBase{
                 },
                 () -> {
                     autoAimHadTag = false;
+                    autoAimHasCommanded = false;
                     hasShotTarget = false;
                     target_distance = 0;
                     setDesiredFlywheelVelocity(0);
                 })
                 // Clear the ride-through before the first loop too: pressing RB with no tag in
                 // view must do nothing, even if one was seen moments before the press.
-                .beforeStarting(() -> autoAimHadTag = false);
+                .beforeStarting(() -> {
+                    autoAimHadTag = false;
+                    // Every press starts fresh, so the first good frame always commands the
+                    // hood -- the hood may have been moved by the DPAD since the last hold.
+                    autoAimHasCommanded = false;
+                });
         }
 
         // One pass per loop while autoAimShotCommand() is scheduled. periodic() has already
@@ -1206,8 +1228,11 @@ public class ShooterSubsystem extends SubsystemBase{
             // enabled with the hood resting down -- see captureHoodDatum. Enable with the hood
             // already raised and every angle here is biased by the same amount.
             double hoodTarget = getHoodFloorAngle() + autoAimHoodTable.get(distance);
-            if (autoAimShouldRetarget(hoodTarget, getDesiredAngle())) {
+            // First command of the hold always goes through; after that only a real change does.
+            if (!autoAimHasCommanded || autoAimShouldRetarget(hoodTarget, autoAimLastTarget)) {
                 setDesired_Angle(hoodTarget);
+                autoAimLastTarget = hoodTarget;
+                autoAimHasCommanded = true;
             }
             setDesiredFlywheelVelocity(
                 surfaceSpeedForMotorRpm(ShooterSubsystemConstants.AUTOAIM_FLYWHEEL_MOTOR_RPM));
