@@ -85,8 +85,8 @@ public class RobotContainer {
     // Set false to kill the teleop bindings outright; the test-mode bindings are separate.
     private static final boolean HOOD_DPAD_MOVES_ENABLED = true;
 
-    // Hood: DPAD LEFT/RIGHT are PRESSED to send the hood to the base / one HOOD_UP_STEP_UNITS
-    // step above where it currently sits -- in teleop AND in test mode, the same closed-loop
+    // Hood: DPAD LEFT/RIGHT are PRESSED to step the hood one HOOD_UP_STEP_UNITS DOWN / UP from
+    // where it currently sits -- in teleop AND in test mode, the same closed-loop
     // move in both (ShooterSubsystem.moveHoodToCommand). Since 2026-08-28 there is no hood
     // voltage binding of any kind: the position loop is the only thing that drives it.
 
@@ -273,7 +273,10 @@ public class RobotContainer {
             // direction 2026-08-27). The target is read off the hood itself at the moment of
             // the press -- current + step -- not off a stored setpoint, so presses keep working
             // from wherever the hood actually ended up (see ShooterSubsystem.getHoodAngle).
-            // DPAD-LEFT returns the hood to this enable's base in one press.
+            // DPAD-LEFT is the mirror: one step DOWN from wherever the hood is (team request
+            // 2026-08-28, replacing the old "return to this enable's base in one press"). Both
+            // read the live angle, so a press always steps from reality; clampDesiredAngle still
+            // stops LEFT at the enable-time floor and RIGHT at the ceiling.
             //
             // CLOSED LOOP since 2026-08-27 (team direction: "make the DPAD use PID"). A press
             // writes a setpoint and nothing else; the position loop in periodic() drives it,
@@ -282,7 +285,9 @@ public class RobotContainer {
             // (>= ~0.17) to break the hood away at all, and there is no move timeout any more.
                 if (HOOD_DPAD_MOVES_ENABLED) {
                     joystick2.povLeft().and(RobotModeTriggers.teleop())
-                        .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
+                        .onTrue(shooterSS.moveHoodToCommand(
+                            () -> shooterSS.getHoodAngle()
+                                - ShooterSubsystemConstants.HOOD_UP_STEP_UNITS));
                     joystick2.povRight().and(RobotModeTriggers.teleop())
                         .onTrue(shooterSS.moveHoodToCommand(
                             () -> shooterSS.getHoodAngle()
@@ -416,8 +421,8 @@ public class RobotContainer {
                 .onFalse(shooterSS.stopShooterCommand());
             // DPAD LEFT / RIGHT (PRESS) = the SAME closed-loop hood moves as the match
             // bindings (ShooterSubsystem.moveHoodToCommand): right steps up by
-            // HOOD_UP_STEP_UNITS from wherever the hood is, left returns it to this enable's
-            // base. Flywheels stay off; periodic() still applies the travel guard and the
+            // HOOD_UP_STEP_UNITS from wherever the hood is, left steps down by the same amount.
+            // Flywheels stay off; periodic() still applies the travel guard and the
             // feedback gate.
             //
             // The held OPEN-LOOP jog that used to live here is GONE (2026-08-28, team
@@ -426,7 +431,8 @@ public class RobotContainer {
             // clamped to [enable datum, datum + travel] -- so the encoder-anchor calibration
             // (handoff on-robot verify item 2) has to be done by moving the hood by hand.
             joystick2.povLeft().and(RobotModeTriggers.test())
-                .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
+                .onTrue(shooterSS.moveHoodToCommand(
+                    () -> shooterSS.getHoodAngle() - ShooterSubsystemConstants.HOOD_UP_STEP_UNITS));
             joystick2.povRight().and(RobotModeTriggers.test())
                 .onTrue(shooterSS.moveHoodToCommand(
                     () -> shooterSS.getHoodAngle() + ShooterSubsystemConstants.HOOD_UP_STEP_UNITS));

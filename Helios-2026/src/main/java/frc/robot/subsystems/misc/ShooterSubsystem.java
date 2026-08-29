@@ -452,7 +452,9 @@ public class ShooterSubsystem extends SubsystemBase{
             return rising ? currentDeg >= targetDeg : currentDeg <= targetDeg;
         }
 
-        // The floor this enable: what DPAD-LEFT drives back down to. See hoodFloorAngle.
+        // The floor this enable. No longer a binding target (DPAD-LEFT steps by
+        // HOOD_UP_STEP_UNITS since 2026-08-28); kept as the dashboard/telemetry read of where
+        // clampDesiredAngle will stop a descent. See hoodFloorAngle.
         public double getHoodFloorAngle(){
             return hoodFloorAngle(hoodBaseAngleDeg, hoodDatumValid);
         }
