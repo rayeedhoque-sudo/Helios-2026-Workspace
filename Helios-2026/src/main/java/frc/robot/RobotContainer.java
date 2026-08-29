@@ -196,8 +196,8 @@ public class RobotContainer {
         //   RB (hold)   = AUTO-AIM SHOT (2026-08-29): constant flywheel speed, hood angle
         //                 looked up from the AprilTag distance, AND the robot turns itself to
         //                 face the hub CENTRE (not the tag). Belts always; the kicker runs
-        //                 BACKWARD until the flywheels are at speed, then feeds once the
-        //                 spin-up delay has passed AND the aim is made. Sticks locked out.
+        //                 BACKWARD until the flywheels are at speed (spin-up delay as the
+        //                 backstop), then feeds. Sticks locked out for the hold.
         //   (Kicker at-speed gate added 2026-07-18 by team request.)
         //   B (hold)    = manual hopper belts only (kicker OFF)
         //   VIEW (hold) = hopper unjam: reverse belts + kicker (added 2026-07-18)
@@ -415,9 +415,10 @@ public class RobotContainer {
             // is ~6.8 deg, more than 3x the 2 deg aim tolerance. Aiming at the tag would clip
             // the rim on the offset faces.
             //
-            // THE KICKER NOW ALSO WAITS FOR THE AIM (isAimedAtTarget): spin-up delay AND pointed
-            // at the hub. A shot that is still turning no longer feeds. Before that it runs
-            // BACKWARD, holding fuel off the spinning-up flywheels (see the reverse gate below). If the kicker never
+            // THE KICKER RUNS BACKWARD until the flywheels are at speed (or the spin-up delay
+            // expires), then feeds -- never idle in between. The aim veto that briefly gated the
+            // feed here was REMOVED 2026-08-29 after it stalled the shot on the robot; see the
+            // gates below. If the kicker never
             // opens on the robot, the heading servo not converging is the first suspect --
             // watch "Aimed At Target" on the Shooter dashboard tab.
             //
@@ -428,22 +429,30 @@ public class RobotContainer {
             joystick2.rightBumper().and(RobotModeTriggers.teleop())
                 .whileTrue(shooterSS.autoAimShotCommand()
                     .alongWith(
+                        // THE KICKER IS NEVER IDLE DURING A SHOT: it is either backing fuel
+                        // off the winding-up wheels, or feeding. The two gates below are exact
+                        // complements, so there is no window where it just sits there.
+                        //
+                        // That window is the bug the team reported on 2026-08-29 ("the kicker
+                        // stops running after the flywheels are at speed"). The forward gate
+                        // used to be `timer AND isAimedAtTarget()`, so once the reverse ended
+                        // the kicker sat STOPPED until the heading servo came within 2 deg --
+                        // and if the servo never converged, forever. The aim veto is gone: with
+                        // the servo unproven on the robot, a gate that can block the shot
+                        // indefinitely is worse than a shot taken slightly off-aim. The robot
+                        // still rotates; the aim just no longer vetoes the feed. Restore the
+                        // `&& shooterSS.isAimedAtTarget()` once the servo is confirmed to
+                        // converge -- "Aimed At Target" on the Shooter tab is the check.
                         hopperSS.feedShooterCommand(() -> true,
-                            () -> kickerSpinupTimer.hasElapsed(
-                                    HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC)
-                                && shooterSS.isAimedAtTarget(),
-                            // REVERSE THE KICKER UNTIL THE FLYWHEELS ARE UP TO SPEED (team
-                            // request 2026-08-29), holding fuel off the winding-up wheels.
-                            // reverseKicker WINS over the forward gate in feedShooterCommand,
-                            // so this is the whole behaviour: back the fuel off, then feed.
-                            //
-                            // BOUNDED BY THE SPIN-UP TIMER AS WELL, deliberately. The velocity
-                            // loop is untuned and isFlywheelAtSpeed has never reliably latched
-                            // on this robot -- that is exactly why RT was moved off it onto a
-                            // timer in the first place. On at-speed alone, a wheel that never
-                            // reads up to speed would reverse the kicker FOREVER and the shot
-                            // would never fire. With the timer as a backstop the reverse always
-                            // ends, and the behaviour degrades to what RB did before this.
+                            // FEED once the wheels are up -- or once the spin-up delay has run
+                            // out, the backstop for the untuned velocity loop (isFlywheelAtSpeed
+                            // has never reliably latched on this robot, which is why RT runs off
+                            // a timer at all).
+                            () -> shooterSS.isFlywheelAtSpeed()
+                                || kickerSpinupTimer.hasElapsed(
+                                    HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC),
+                            // REVERSE until then (team request 2026-08-29), holding fuel off the
+                            // winding-up wheels. Exactly the complement of the gate above.
                             () -> !shooterSS.isFlywheelAtSpeed()
                                 && !kickerSpinupTimer.hasElapsed(
                                     HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC)),
