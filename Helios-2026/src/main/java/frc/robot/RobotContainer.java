@@ -153,6 +153,9 @@ public class RobotContainer {
         // as a PathPlanner file so it's selectable even if the .auto/.path files fail to load, and
         // needs no AutoBuilder config -- it's pure odometry + swerve requests.
         autoChooser.addOption("Drive Forward 3 m @ 1 m/s", drivetrain.driveForwardAuto(3.0, 1.0));
+        // Same building blocks, run back to back: forward leg then a left (+Y) strafe leg.
+        autoChooser.addOption("Forward 3 m then Left 3 m @ 1 m/s",
+                drivetrain.driveForwardAuto(3.0, 1.0).andThen(drivetrain.driveLeftAuto(3.0, 1.0)));
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         configureBindings();

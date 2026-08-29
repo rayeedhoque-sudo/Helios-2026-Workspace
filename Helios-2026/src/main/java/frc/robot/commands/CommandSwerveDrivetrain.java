@@ -623,6 +623,24 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param metersPerSecond forward speed (m/s), closed-loop velocity
      */
     public Command driveForwardAuto(double meters, double metersPerSecond) {
+        return driveStraightAuto(meters, metersPerSecond, 1.0, 0.0);
+    }
+
+    /**
+     * Same as {@link #driveForwardAuto} but ROBOT-relative LEFT (+Y) instead of forward.
+     *
+     * @param meters          distance to strafe left (m)
+     * @param metersPerSecond strafe speed (m/s), closed-loop velocity
+     */
+    public Command driveLeftAuto(double meters, double metersPerSecond) {
+        return driveStraightAuto(meters, metersPerSecond, 0.0, 1.0);
+    }
+
+    /**
+     * Straight robot-relative leg along the unit direction (dirX forward, dirY left). Ends on
+     * distance traveled or a debounced drive/steer stall, then X-locks once.
+     */
+    private Command driveStraightAuto(double meters, double metersPerSecond, double dirX, double dirY) {
         return Commands.defer(() -> {
             Translation2d start = this.getState().Pose.getTranslation();
             Debouncer stallDebounce = new Debouncer(kAutoStallDebounceSec, Debouncer.DebounceType.kRising);
@@ -630,8 +648,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 .withDriveRequestType(DriveRequestType.Velocity); // closed-loop velocity
             var lock = new SwerveRequest.SwerveDriveBrake();
             return this.applyRequest(() -> driveForward
-                        .withVelocityX(metersPerSecond)
-                        .withVelocityY(0)
+                        .withVelocityX(metersPerSecond * dirX)
+                        .withVelocityY(metersPerSecond * dirY)
                         .withRotationalRate(0))
                     .until(() ->
                         start.getDistance(this.getState().Pose.getTranslation()) >= meters
