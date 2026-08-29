@@ -23,6 +23,7 @@ import csv
 import datetime
 import math
 import os
+import statistics
 import sys
 import time
 
@@ -54,7 +55,9 @@ COLUMNS = [
     "ll_ta",                 # target area (% of image)
     "ll_cam_x_m",            # camera space: +x right
     "ll_cam_z_m",            # camera space: +z forward (depth)
-    "ll_tag_dist_m",         # hypot(x, z) -- camera to the TAG FACE
+    "ll_tag_dist_m",         # hypot(x, z) -- camera to the TAG FACE, mean over the sample window
+    "ll_tag_dist_sd_m",      # spread of that distance while standing still = the camera's own noise
+    "ll_samples",            # how many frames went into the mean
     "ll_hub_dist_m",         # + face-to-hub depth (what the robot's auto-aim uses)
     "notes",
 ]
@@ -70,7 +73,7 @@ def parse_distance_m(text):
     return float(t)   # bare number = meters
 
 
-def read_robot(server, settle_sec=1.5):
+def read_robot(server, settle_sec=1.0, sample_sec=2.0):
     """One snapshot of everything the robot and the Limelight are publishing."""
     import ntcore
 
@@ -103,14 +106,32 @@ def read_robot(server, settle_sec=1.5):
         sys.exit(f"No NetworkTables connection to {server}. Is the robot on and this PC on its network?")
     time.sleep(settle_sec)   # let the retained values land
 
+    # SAMPLE the camera distance rather than snapshotting it. A single frame cannot tell
+    # you whether the number is trustworthy; the spread over a couple of seconds with the
+    # robot standing still IS the camera's own noise, and that noise is what decides how
+    # finely the table can be indexed. A row whose sd is larger than the gap between two
+    # table rows means those rows cannot be told apart on the field.
+    xs, zs, dists = [], [], []
+    end = time.time() + sample_sec
+    while time.time() < end:
+        pose = list(pose_sub.get())
+        if len(pose) >= 3 and (pose[0] or pose[2]):
+            xs.append(pose[0])
+            zs.append(pose[2])
+            dists.append(math.hypot(pose[0], pose[2]))
+        time.sleep(0.05)
+
     out = {k: s.get() for k, s in subs.items()}
-    pose = list(pose_sub.get())
-    if len(pose) >= 3:
-        out["ll_cam_x_m"], out["ll_cam_z_m"] = pose[0], pose[2]
-        out["ll_tag_dist_m"] = math.hypot(pose[0], pose[2])
-        out["ll_hub_dist_m"] = math.hypot(pose[0], pose[2] + TAG_FACE_TO_HUB_DEPTH_M)
+    if dists:
+        out["ll_cam_x_m"] = statistics.mean(xs)
+        out["ll_cam_z_m"] = statistics.mean(zs)
+        out["ll_tag_dist_m"] = statistics.mean(dists)
+        out["ll_tag_dist_sd_m"] = statistics.pstdev(dists) if len(dists) > 1 else 0.0
+        out["ll_samples"] = float(len(dists))
+        out["ll_hub_dist_m"] = math.hypot(out["ll_cam_x_m"], out["ll_cam_z_m"] + TAG_FACE_TO_HUB_DEPTH_M)
     else:
-        for k in ("ll_cam_x_m", "ll_cam_z_m", "ll_tag_dist_m", "ll_hub_dist_m"):
+        for k in ("ll_cam_x_m", "ll_cam_z_m", "ll_tag_dist_m", "ll_tag_dist_sd_m",
+                  "ll_samples", "ll_hub_dist_m"):
             out[k] = float("nan")
     return out
 
