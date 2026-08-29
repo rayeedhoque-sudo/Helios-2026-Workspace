@@ -668,14 +668,27 @@ public class SubsystemConstants {
                 // from the hood angle. Converted to surface speed by
                 // ShooterSubsystem.surfaceSpeedForMotorRpm.
                 //
-                // 985, NOT the "around 1000" first specified (team correction 2026-08-29): every
-                // scoring shot in docs/shot-log.csv was taken at 985, and THE HOOD TABLE IS ONLY
-                // VALID AT THE SPEED IT WAS TUNED AT. Running auto-aim 15 RPM faster than the
-                // data would put every tabled angle slightly long, for no reason -- the two
-                // constants are a matched pair.
-                // TODO if every shot is short at every distance, raise this FIRST and then
-                // RE-TUNE the whole table; changing it alone silently invalidates every row.
-                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 985.0;
+                // 1100 (team direction 2026-08-29), raised from the 985 every logged shot was
+                // taken at. THE HOOD TABLE IS ONLY VALID AT THE SPEED IT WAS TUNED AT, so this
+                // and AUTOAIM_HOOD_TABLE are a matched pair: at 1100 the tabled angles are for a
+                // slower shot and will run LONG until the table is re-taken at 1100. The table
+                // is still placeholder values, so nothing real is being invalidated yet -- but
+                // take the tuning passes AT 1100 now, not 985.
+                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1100.0;
+
+                // How much of the computed heading correction to apply per loop, 1.0 = all of
+                // it. 0.5 (team direction 2026-08-29: "the rotation correction is too much,
+                // make it 50% less") -- the robot was turning too hard toward the hub.
+                //
+                // THIS DOES NOT MIS-AIM THE ROBOT, which is why it is a safe knob. The target
+                // heading is recomputed every loop as (current heading + scale * correction),
+                // and the correction shrinks to zero as the robot comes round; the loop can only
+                // settle where the correction IS zero, i.e. pointed at the hub centre. Scaling
+                // changes how hard it drives toward that point, not where the point is -- it is
+                // damping, not a smaller target.
+                // TODO tune on robot: lower if it still overshoots or hunts, raise toward 1.0 if
+                // it is now too slow to come round before the spin-up ends.
+                public static double AUTOAIM_ROTATION_SCALE = 0.5;
                 // TAG-LOSS HOLD (s). Team report 2026-08-29: with RB held the hood "keeps
                 // going up and down". A Limelight fiducial drops out for a frame or two
                 // routinely, and every dropout used to refuse the shot instantly, so the hood

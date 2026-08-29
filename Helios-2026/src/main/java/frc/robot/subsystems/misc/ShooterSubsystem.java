@@ -196,6 +196,10 @@ public class ShooterSubsystem extends SubsystemBase{
        // face to take the current shot. Valid only while runVisionTargeting has a target;
        // consumed by the drivetrain's aim-lock drive layer and the isAimedAtTarget() gate.
        private double aimHeadingDeg = 0.0;
+       // The DAMPED heading the RB rotation servo chases (see AUTOAIM_ROTATION_SCALE). Separate
+       // from aimHeadingDeg, which stays the true bearing so the kicker's aim gate is not
+       // widened by the damping.
+       private double autoAimServoHeadingDeg = 0.0;
        private boolean aimHeadingValid = false;
        // Tag-flicker ride-through: remember the last non-NONE classification so a momentary
        // dropout (< TARGET_HOLD_SEC) rides on the drivetrain's fused pose instead of
@@ -803,7 +807,7 @@ public class ShooterSubsystem extends SubsystemBase{
         // the CURRENT heading, so a lost tag makes the drivetrain hold still rather than chase a
         // stale bearing. Live value -- bind it as a method reference, never as a snapshot.
         public double getAutoAimFieldHeadingDegrees(){
-            return aimHeadingValid ? aimHeadingDeg
+            return aimHeadingValid ? autoAimServoHeadingDeg
                                    : drivetrain.getState().Pose.getRotation().getDegrees();
         }
 
@@ -1250,7 +1254,18 @@ public class ShooterSubsystem extends SubsystemBase{
             // every loop, so the servo converges as the robot turns; consumed by the RB binding's
             // aim hold and by isAimedAtTarget(), which gates the kicker.
             double bearingDeg = autoAimBearingDegrees(tagCameraPose.getX(), tagCameraPose.getZ(), lateral);
-            aimHeadingDeg = drivetrain.getState().Pose.getRotation().getDegrees() - bearingDeg;
+            double headingDeg = drivetrain.getState().Pose.getRotation().getDegrees();
+            // TWO headings, deliberately, and they must not be collapsed into one:
+            //  - aimHeadingDeg is the TRUE bearing to the hub centre. isAimedAtTarget() measures
+            //    against it, so it is what gates the kicker. Scaling this would widen the aim
+            //    gate by 1/scale -- at 0.5 the kicker would open at 4 deg of error, not 2 -- and
+            //    the shot would fire while still visibly off target.
+            //  - autoAimServoHeadingDeg is what the drivetrain servo chases, damped by
+            //    AUTOAIM_ROTATION_SCALE so the robot turns less hard. It still settles pointed
+            //    at the hub, because the bearing it is built from only reaches zero there.
+            aimHeadingDeg = headingDeg - bearingDeg;
+            autoAimServoHeadingDeg =
+                headingDeg - bearingDeg * ShooterSubsystemConstants.AUTOAIM_ROTATION_SCALE;
             aimHeadingValid = true;
             // Table value is raw units ABOVE THE ENABLE DATUM, so anchor it to the datum.
             // getHoodFloorAngle() IS that datum (and the floor clampDesiredAngle enforces).

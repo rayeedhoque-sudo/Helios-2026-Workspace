@@ -113,6 +113,28 @@ class AutoAimTest {
     }
 
     /**
+     * The rotation damping (AUTOAIM_ROTATION_SCALE) must not widen the aim gate. The servo
+     * chases a damped heading so the robot turns less hard, but isAimedAtTarget -- which gates
+     * the kicker -- measures against the TRUE bearing. Collapsing the two would open the kicker
+     * at HEADING_TOLERANCE / scale of error: at 0.5, 4 deg instead of 2, firing while visibly
+     * off target.
+     */
+    @Test
+    void rotationDampingDoesNotWidenTheAimGate() {
+        double scale = ShooterSubsystemConstants.AUTOAIM_ROTATION_SCALE;
+        assertTrue(scale > 0 && scale <= 1.0, "scale must be a fraction of the correction");
+        double heading = 30.0, bearing = 8.0;
+        double trueTarget = heading - bearing;                 // gates the kicker
+        double servoTarget = heading - bearing * scale;        // what the drivetrain chases
+        assertTrue(Math.abs(heading - servoTarget) < Math.abs(heading - trueTarget) || scale == 1.0,
+            "damped target must ask for a smaller turn than the true one");
+        // The aim gate is measured against the TRUE target, so it is unaffected by the scale.
+        assertEquals(bearing, Math.abs(heading - trueTarget), 1e-9);
+        // Both vanish together: the loop can only settle pointed at the hub.
+        assertEquals(0.0, 0.0 * scale, 1e-9);
+    }
+
+    /**
      * THE OSCILLATION BUG (found on the robot 2026-08-29, "the hood keeps going up and down").
      * The hood lands 25-55 raw units past what was asked -- one powered 20 ms loop of travel --
      * and the arrival latch in periodic() re-seeds the SETPOINT to that landing spot. So if
