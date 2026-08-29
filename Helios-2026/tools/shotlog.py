@@ -159,13 +159,24 @@ def main():
     ap.add_argument("--miss", action="store_true", help="the shot did not go in")
     ap.add_argument("-n", "--notes", default="")
     ap.add_argument("--server", default=ROBOT)
+    # Logging a shot AFTER the hood or speed has already been changed: pass the numbers
+    # that were actually on the robot for the shot. They override the live read.
+    ap.add_argument("--hood", type=float, help="hood units above base, overriding the live read")
+    ap.add_argument("--rpm", type=float, help="RT flywheel RPM, overriding the live read")
+    # No robot on the network (or the tag was not visible): log what we have, leave the
+    # rest blank. A row with a distance and a hood number is still a table row.
+    ap.add_argument("--no-robot", action="store_true", help="skip NetworkTables entirely")
     args = ap.parse_args()
 
     if args.action == "selftest":
         selftest()
         return
 
-    row = read_robot(args.server)
+    row = {k: float("nan") for k in COLUMNS} if args.no_robot else read_robot(args.server)
+    if args.hood is not None:
+        row["hood_units_above_base"] = args.hood
+    if args.rpm is not None:
+        row["rt_rpm"] = args.rpm
     row["when"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     row["notes"] = args.notes
 
@@ -182,7 +193,7 @@ def main():
     row["dist_m"] = parse_distance_m(args.distance)
     row["dist_in"] = row["dist_m"] / 0.0254
     row["scored"] = "yes" if args.scored else "no"
-    if row["ll_tv"] != 1.0:
+    if row.get("ll_tv") != 1.0:
         print("WARNING: the Limelight had NO target at capture -- the ll_* columns are empty.")
     path = append_row(row)
     print(f"logged to {path}:")
