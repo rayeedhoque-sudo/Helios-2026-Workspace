@@ -1,3 +1,4 @@
 when,dist_m,dist_in,scored,rt_rpm,flywheel_rpm,hood_units_above_base,hood_base,hood_current,hood_raw_enc,ll_tv,ll_tag_id,ll_tx_deg,ll_ty_deg,ll_ta,ll_cam_x_m,ll_cam_z_m,ll_tag_dist_m,ll_tag_dist_sd_m,ll_samples,ll_hub_dist_m,notes
 2026-08-29 12:36:20,0.9957,39.2,yes,985.1,0,175.5,193.8,369.3,9.149,1,17,1.633,-40.27,0.8982,0.06214,1.203,1.205,0.0008825,40,1.808,test redone and scored; hood read live off the robot (team had reported 176.5 -- agrees within 1 unit)
 2026-08-29 11:12:54,2.305,90.75,yes,985,0,191,76.19,267.2,267.3,1,17,4.565,-18.58,0.2175,0.2535,2.527,2.539,,,3.14,"LL view captured live at this position (tag 17 standing in for tag 10, red hub)"
+2026-08-29 12:44:51,2.286,90,yes,985.1,0,192.8,198.4,391.2,31.23,1,17,-0.553,-19.99,0.2332,0.02022,2.461,2.461,0.02037,40,3.065,second sample near 90 in (first was 90.75 in / 191.0 units) -- both scored
