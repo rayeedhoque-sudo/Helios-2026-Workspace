@@ -341,18 +341,22 @@ class AutoAimTest {
             ShooterSubsystem.hubPointInCameraFrame(camX, camZ, lateral, -phi)[0], 1e-9);
     }
 
-    /** The compensation is OFF by default, and never applies to a non-primary tag. */
+    /** The compensation never applies to a tag that is not the camera's primary. */
     @Test
-    void viewAngleIsGatedOffAndOnlyEverUsesThePrimaryTag() {
-        // Default off: whatever the camera reports, the answer is 0.
-        assertEquals(0.0, ShooterSubsystem.autoAimViewAngleDegrees(10, 10, 25.0), 1e-12,
-            "AUTOAIM_VIEW_ANGLE_COMP_ENABLED is false until verified on the robot");
-        assertFalse(ShooterSubsystemConstants.AUTOAIM_VIEW_ANGLE_COMP_ENABLED,
-            "if this is enabled, the sign must have been checked on the robot first");
-        // And even enabled, a tag that is not the camera's primary has no orientation to use:
-        // targetpose_cameraspace always describes the primary tag, so using it for another tag
-        // would silently mix two different tags.
+    void viewAngleOnlyEverUsesThePrimaryTag() {
+        // targetpose_cameraspace always describes the PRIMARY tag, so reading it for a tag
+        // auto-aim picked separately would silently mix two different tags. No orientation for
+        // that tag means fall back to the square-on assumption, which is 0.
         assertEquals(0.0, ShooterSubsystem.autoAimViewAngleDegrees(10, 26, 25.0), 1e-12);
+        // Enabled and looking at the primary: the reported angle comes through, signed.
+        double v = ShooterSubsystem.autoAimViewAngleDegrees(10, 10, 25.0);
+        assertEquals(25.0 * ShooterSubsystemConstants.AUTOAIM_VIEW_ANGLE_SIGN, v, 1e-12);
+        assertTrue(ShooterSubsystemConstants.AUTOAIM_VIEW_ANGLE_COMP_ENABLED,
+            "enabled 2026-08-29 by team direction");
+        // The gate is the enable flag, so switching it off restores square-on behaviour whole.
+        assertEquals(-ShooterSubsystem.autoAimViewAngleDegrees(10, 10, 25.0),
+            ShooterSubsystem.autoAimViewAngleDegrees(10, 10, -25.0), 1e-12,
+            "mirrored view mirrors the compensation");
     }
 
     /**

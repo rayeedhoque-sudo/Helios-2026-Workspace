@@ -739,16 +739,18 @@ public class SubsystemConstants {
                 // error at 2.7 m. The camera reports phi (the tag's rotation in camera space),
                 // and it read 20.7 deg in a casual bench position, so this is not a corner case.
                 //
-                // *** DEFAULT OFF, AND THE SIGN IS UNVERIFIED. *** Turning is working correctly
-                // on the robot right now and this changes the aim, so it does not get switched
-                // on by a guess -- especially after the rotation-direction inversion of the same
-                // day. "Auto-Aim View Angle (deg)" and "Auto-Aim Bearing" are published so the
-                // effect can be watched before it is trusted. TO VERIFY: park well off to ONE
-                // side of the tag, hold RB, and note where it aims. Set this true, redeploy, and
-                // repeat from the same spot -- the aim must move TOWARD the hub centre, i.e.
-                // further from the tag in the direction the hub actually lies. If it moves the
-                // wrong way, flip AUTOAIM_VIEW_ANGLE_SIGN rather than switching this back off.
-                public static boolean AUTOAIM_VIEW_ANGLE_COMP_ENABLED = false;
+                // ENABLED 2026-08-29 on team direction. *** THE SIGN IS STILL UNVERIFIED ON THE
+                // ROBOT. *** "Auto-Aim View Angle (deg)" and "Auto-Aim Bearing" are published so
+                // the effect can be watched. TO CHECK: park well off to ONE side of the tag and
+                // hold RB. The aim must move TOWARD the hub centre -- further from the tag, in
+                // the direction the hub actually lies -- compared with where it aimed before
+                // this was on. If it moves the WRONG way, set AUTOAIM_VIEW_ANGLE_SIGN to -1.0
+                // rather than switching the compensation back off: the correction is real
+                // either way, only its direction is in question.
+                // The tag-in-view clamp (AUTOAIM_MAX_TAG_OFFSET_DEG) bounds the damage if the
+                // sign is wrong -- the robot cannot sweep off the tag, it will just aim to the
+                // wrong side of it.
+                public static boolean AUTOAIM_VIEW_ANGLE_COMP_ENABLED = true;
                 public static double AUTOAIM_VIEW_ANGLE_SIGN = 1.0;
                 // TAG-LOSS HOLD (s). Team report 2026-08-29: with RB held the hood "keeps
                 // going up and down". A Limelight fiducial drops out for a frame or two
