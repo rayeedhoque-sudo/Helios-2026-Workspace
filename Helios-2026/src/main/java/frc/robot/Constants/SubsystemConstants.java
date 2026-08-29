@@ -496,11 +496,12 @@ public class SubsystemConstants {
                 // 288 sits under the HOOD_TRAVEL_WINDOW_DEG ceiling (309.6), so
                 // clampDesiredAngle leaves it alone from a normal resting enable and clips it
                 // only if the robot was enabled with the hood already raised.
-                // Dropped 298 -> 288 -> 278 on 2026-08-29 from on-robot tuning (team direction,
-                // twice: "10 encoder units less"); 278 is ~2.7 physical degrees flatter than the
-                // original 298. Speed was raised in the same pass (935 -> 1200 motor RPM), so the
-                // two go together: flatter hood, faster wheel.
-                public static double FEED_SHOT_HOOD_UNITS = 278.0;   // raw units above the enable floor
+                // Dropped 298 -> 288 -> 278 -> 258 on 2026-08-29 from on-robot tuning (team
+                // direction, three times: "10", "10", then "20 encoder units less"); 258 is
+                // ~5.4 physical degrees flatter than the original 298. Speed was raised in the
+                // same pass (935 -> 1200 motor RPM), so the two go together: flatter hood,
+                // faster wheel.
+                public static double FEED_SHOT_HOOD_UNITS = 258.0;   // raw units above the enable floor
                 public static double FEED_SHOT_MOTOR_RPM = 1200.0;   // motor RPM (935 -> 1200, on-robot 2026-08-29)
                 // Time-of-flight linear fits (s) for moving-shot compensation, refit AT 38 DEG
                 // (refit_38.py 2026-07-21, residual <= 0.011 s): score 0.188 + 0.115*d,
