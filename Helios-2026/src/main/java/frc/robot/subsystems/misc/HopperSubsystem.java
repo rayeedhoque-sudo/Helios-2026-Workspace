@@ -125,19 +125,20 @@ public class HopperSubsystem extends SubsystemBase{
     }
 
     /**
-     * KILL SWITCH for the whole hopper (team request 2026-08-29). false = NO hopper motor is
-     * ever driven: belts and kicker are commanded 0 no matter which command is running, in
-     * teleop, in test mode and in autonomous alike. The bindings all still exist and the
-     * commands all still schedule -- they simply move nothing -- so this is one word to undo
-     * and cannot leave a mechanism half-wired.
+     * KILL SWITCH for the whole hopper (added 2026-08-29). false = NO hopper motor is ever
+     * driven: belts and kicker are commanded 0 no matter which command is running, in teleop,
+     * in test mode and in autonomous alike. The bindings all still exist and the commands all
+     * still schedule -- they simply move nothing -- so this is one word either way and cannot
+     * leave a mechanism half-wired.
      *
-     * WHAT IT COSTS, so it is not a surprise on the field: nothing feeds the shooter. Every
+     * CURRENTLY TRUE: the hopper runs normally (disabled briefly on 2026-08-29, re-enabled the
+     * same day by team request).
+     *
+     * What false costs, so it is not a surprise on the field: nothing feeds the shooter. Every
      * shot binding still spins its flywheels and opens its kicker gate, and no fuel arrives.
      * The intake still collects, but nothing indexes it. Unjam does nothing either.
-     *
-     * Set true to restore the hopper exactly as it was.
      */
-    private static final boolean HOPPER_ENABLED = false;
+    private static final boolean HOPPER_ENABLED = true;
 
     /** Drive both belt motors, or 0 when the hopper is disabled. Every belt write goes here. */
     private void setBelts(double duty){
