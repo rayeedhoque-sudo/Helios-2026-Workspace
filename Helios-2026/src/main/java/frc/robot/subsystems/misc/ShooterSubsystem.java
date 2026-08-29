@@ -320,7 +320,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 rtSpeedEntry = ShooterSubsystemTab.add("RT Target (m/s)", 0.0).getEntry();
                 rtSpeedRpmEntry = ShooterSubsystemTab.add("RT Target (motor RPM)", 0.0).getEntry();
                 autoAimTagEntry = ShooterSubsystemTab.add("Auto-Aim Tag", -1.0).getEntry();
-                autoAimBearingEntry = ShooterSubsystemTab.add("Auto-Aim Turn (deg, + = right)", 0.0).getEntry();
+                autoAimBearingEntry = ShooterSubsystemTab.add("Auto-Aim Bearing (deg, + = hub right of crosshair)", 0.0).getEntry();
        }
 
     //Utility Methods
@@ -1378,7 +1378,24 @@ public class ShooterSubsystem extends SubsystemBase{
             // is a positive feedback loop, and it overshoots however small the gain is. Filtering
             // toward a target that stands still in the field frame removes the feedback entirely
             // -- the hub is not moving, so neither should the target be.
-            aimHeadingDeg = headingDeg - bearingDeg;
+            // SIGN: PLUS, determined ON THE ROBOT (team observation 2026-08-29: "when the robot
+            // needs to correct more to the right it goes left, and vice versa"). Minus is what
+            // the conventions on paper say -- camera +x is right, WPILib field heading is
+            // CCW-positive, so facing a target to the right should mean a SMALLER heading -- and
+            // that is what this was. It turned the wrong way on the real robot, which also
+            // explains the runaway: turning away from the target makes the bearing GROW, so it
+            // drove round until the tag left frame. The hardware wins over the paper convention.
+            //
+            // WHAT IS ACTUALLY INVERTED IS NOT ESTABLISHED -- candidates are the Pigeon's yaw
+            // sense against WPILib's CCW-positive convention, or the camera's x axis. Worth
+            // finding, because whatever it is affects more than this line:
+            //   - ShooterSubsystem.degreesToAlignToTarget carries the SAME latent sign
+            //     (atan2(-camX, camZ), callers ADD it), so searchAndAlignCommand will turn the
+            //     wrong way too if it is ever re-bound. It is currently unbound, so it is not
+            //     wrong today -- but do not restore it without re-checking this.
+            //   - if it is the gyro, FIELD-CENTRIC DRIVING is mirrored as well. Worth a check:
+            //     push the stick left and see whether the robot goes left.
+            aimHeadingDeg = headingDeg + bearingDeg;
             // HOLD THE TARGET WHILE TURNING FAST. This is the fix for the robot driving itself
             // round until the tag left frame (2026-08-29). aimHeadingDeg is only a true absolute
             // heading if the bearing and the heading were sampled at the SAME instant -- and they

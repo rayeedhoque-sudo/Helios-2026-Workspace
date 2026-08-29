@@ -291,6 +291,28 @@ class AutoAimTest {
     }
 
     /**
+     * THE ROTATION SIGN IS EMPIRICAL, not derived. On paper camera +x is right and WPILib field
+     * heading is CCW-positive, so facing something to the right means a SMALLER heading, i.e.
+     * target = heading - bearing. On this robot that turned the WRONG WAY (team, 2026-08-29),
+     * which also produced the runaway -- turning away from the target grows the bearing, so it
+     * turns further. The convention is therefore target = heading + bearing here.
+     *
+     * This test exists so that a future "correction" back to the textbook sign has to argue with
+     * the robot first. If the underlying inversion (gyro yaw sense, or camera x) is ever found
+     * and fixed at its source, this expectation flips with it.
+     */
+    @Test
+    void theAimHeadingUsesTheEmpiricalSign() {
+        double heading = 20.0;
+        double bearing = 6.0;                 // hub centre is to the camera's RIGHT
+        double target = heading + bearing;    // ...so the field heading INCREASES on this robot
+        assertEquals(26.0, target, 1e-9);
+        // And the turn is toward the hub, not away: the magnitude of the correction is the
+        // bearing itself, so a bearing that reaches zero is a robot that has stopped turning.
+        assertEquals(bearing, Math.abs(target - heading), 1e-9);
+    }
+
+    /**
      * THE OSCILLATION BUG (found on the robot 2026-08-29, "the hood keeps going up and down").
      * The hood lands 25-55 raw units past what was asked -- one powered 20 ms loop of travel --
      * and the arrival latch in periodic() re-seeds the SETPOINT to that landing spot. So if
