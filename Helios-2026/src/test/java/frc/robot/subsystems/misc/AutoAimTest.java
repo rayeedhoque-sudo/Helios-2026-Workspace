@@ -250,6 +250,47 @@ class AutoAimTest {
     }
 
     /**
+     * THE TAG MUST STAY IN VIEW (team requirement 2026-08-29, after the robot turned itself
+     * until the tag left frame). After turning by the commanded bearing b, a tag at txnc sits
+     * at (txnc - b) in the image -- so clamping b to within MAX_TAG_OFFSET of txnc is a hard
+     * guarantee about where the tag ends up, not a hope.
+     */
+    @Test
+    void theCommandedTurnCanNeverSweepPastTheTag() {
+        double max = ShooterSubsystemConstants.AUTOAIM_MAX_TAG_OFFSET_DEG;
+        for (double txnc : new double[] {0.0, 6.0, -6.0, 20.0, -20.0}) {
+            for (double raw : new double[] {0.0, 45.0, -45.0, 200.0, -200.0}) {
+                double b = ShooterSubsystem.clampTurnToKeepTagInView(raw, txnc);
+                assertTrue(Math.abs(txnc - b) <= max + 1e-9,
+                    "tag would end " + (txnc - b) + " deg off the crosshair (max " + max + ")");
+            }
+        }
+        // A sane correction passes through untouched -- the clamp is a guard, not the behaviour.
+        double sane = ShooterSubsystem.autoAimBearingDegrees(
+            ShooterSubsystem.fiducialCamX(6.0, 2.4), ShooterSubsystem.fiducialCamZ(6.0, 2.4),
+            FieldConstants.tagLateralOffsetMeters(10));
+        assertEquals(sane, ShooterSubsystem.clampTurnToKeepTagInView(sane, 6.0), 1e-9,
+            "a centred tag's small correction must not be clipped");
+    }
+
+    /**
+     * The aim target may only be refreshed while the robot is turning slowly. Vision lags a few
+     * frames, so a bearing measured mid-turn belongs to a heading the robot has already left;
+     * subtracting it from a LIVE heading yields a target that advances with the robot, and the
+     * robot chases it round. That is what drove it off the tag.
+     */
+    @Test
+    void theAimTargetIsHeldWhileTurningFast() {
+        double max = ShooterSubsystemConstants.AUTOAIM_AIM_UPDATE_MAX_DEG_PER_SEC;
+        assertTrue(ShooterSubsystem.autoAimTargetIsTrustworthy(0.0), "standing still: trust it");
+        assertTrue(ShooterSubsystem.autoAimTargetIsTrustworthy(max / 2));
+        assertTrue(ShooterSubsystem.autoAimTargetIsTrustworthy(-max / 2), "direction is irrelevant");
+        assertFalse(ShooterSubsystem.autoAimTargetIsTrustworthy(max * 2),
+            "mid-turn the measurement is stale -- hold the target");
+        assertFalse(ShooterSubsystem.autoAimTargetIsTrustworthy(-max * 2));
+    }
+
+    /**
      * THE OSCILLATION BUG (found on the robot 2026-08-29, "the hood keeps going up and down").
      * The hood lands 25-55 raw units past what was asked -- one powered 20 ms loop of travel --
      * and the arrival latch in periodic() re-seeds the SETPOINT to that landing spot. So if
