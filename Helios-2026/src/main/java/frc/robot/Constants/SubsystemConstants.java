@@ -623,8 +623,8 @@ public class SubsystemConstants {
                 // from the raw encoder on every enable -- see captureHoodDatum).
                 //
                 // RAW UNITS, deliberately NOT converted: the team asked for a number on the same
-                // scale as the raw encoder readout, so this is 10 raw units = 1.33 PHYSICAL
-                // degrees. Multiply by HOOD_UNITS_PER_DEG (-> 75) if 10 physical degrees was meant.
+                // scale as the raw encoder readout, so this is 5 raw units = 0.67 PHYSICAL
+                // degrees. Multiply by HOOD_UNITS_PER_DEG (-> 37.5) if 5 physical degrees was meant.
                 //
                 // WHAT ACTUALLY HAPPENS ON THE ROBOT, accepted knowingly by the team (re-confirmed
                 // 2026-08-28): a press moves 25-55 raw units (3-7 physical deg), NOT 10. Closing
@@ -632,9 +632,10 @@ public class SubsystemConstants {
                 // cannot move at all below ~7.5 V, and one 20 ms loop AT that voltage already
                 // carries it further than this step, so the smallest move the hood can make is
                 // several times the step being asked for. kD (see SHOOTER_ANGLE_kD) shortens the
-                // arrival, and the settle band absorbs what is left, but a 10-unit step will
+                // arrival, and the settle band absorbs what is left, but a 5-unit step will
                 // still land long. The step only becomes literal past ~60 units.
-                public static double HOOD_UP_STEP_UNITS = 10.0;
+                // 5 raw units, BOTH directions (team request 2026-08-28, back down from 10).
+                public static double HOOD_UP_STEP_UNITS = 5.0;
                 // HOOD_REENGAGE_DEG (the drift that used to restart the drive) is DELETED
                 // 2026-08-28: re-engaging on droop WAS the up/down limit cycle -- one catch
                 // stroke is 25-55 units against a 3.75-unit band, so it always overshot and
