@@ -235,7 +235,7 @@ public class HopperSubsystem extends SubsystemBase{
     public Command feedShooterCommand(BooleanSupplier beltsOn, BooleanSupplier kickerOn, BooleanSupplier reverseKicker){
         return runEnd(
             () -> {
-                if (beltsOn.getAsBoolean()) { indexFuel(); } else { stopIndex(); }
+                if (beltsOn.getAsBoolean()) { indexFuelForShot(); } else { stopIndex(); }
                 if (reverseKicker.getAsBoolean()) { reverseKickFuel(); }
                 else if (kickerOn.getAsBoolean()) { kickFuel(); }
                 else { stopKickFuel(); }
@@ -280,6 +280,15 @@ public class HopperSubsystem extends SubsystemBase{
 
     public void indexFuel(){
         setBelts(HopperSubsystemConstants.HOPPER_SPEED);
+    }
+
+    /**
+     * Belts at the SHOT duty (HOPPER_SHOT_SPEED) rather than the normal one -- used by
+     * feedShooterCommand only, so B / RT / RB feed faster while the LT intake feed and the
+     * A manual run are untouched (team request 2026-08-29).
+     */
+    public void indexFuelForShot(){
+        setBelts(HopperSubsystemConstants.HOPPER_SHOT_SPEED);
     }
 
     public void kickFuel(){

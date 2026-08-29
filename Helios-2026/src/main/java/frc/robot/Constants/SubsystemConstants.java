@@ -199,6 +199,22 @@ public class SubsystemConstants {
                 // direction test 2026-07-14 confirmed both motors agree, positive = tested
                 // direction. TODO raise toward 0.8 once feed direction + throughput verified.
                 public static final double HOPPER_SPEED = 0.6;   // +20% team request 2026-08-24
+                // Belt duty for a SHOT (B feed shot / RT / RB) -- team request 2026-08-29:
+                // "twice as fast". Doubling 0.6 is 1.2, which is not a thing: 1.0 is full
+                // output, so this lands at 1.0 and the real increase is 1.67x, not 2x. Written
+                // as an explicit min() rather than the literal 1.0 so that if HOPPER_SPEED is
+                // ever lowered, the doubling comes back on its own instead of silently staying
+                // pinned at full.
+                //
+                // ONLY the shot paths use this; the LT intake feed and the A manual hopper run
+                // stay at HOPPER_SPEED, which is what the team asked for.
+                //
+                // WATCH THE CURRENT LIMIT, not the duty: the belts run at
+                // HOPPER_SHOT_CURRENT_LIMIT_A (6 A) during a shot, so under real fuel load the
+                // smart limit -- not this number -- may be what decides the speed. If the belts
+                // do not actually run faster, that limit is the thing to raise, and raising it
+                // is a team decision, not a side effect of this one.
+                public static final double HOPPER_SHOT_SPEED = Math.min(1.0, HOPPER_SPEED * 2.0);
                 // Reverse duty for the unjam button (belts + kicker together, held).
                 public static final double UNJAM_SPEED = 0.3;
                 // Slow duty for the (unbound) kicker-only test (bypasses the at-speed gate).
@@ -675,7 +691,7 @@ public class SubsystemConstants {
                 // slower shot and will run LONG until the table is re-taken at 1100. The table
                 // is still placeholder values, so nothing real is being invalidated yet -- but
                 // take the tuning passes AT 1100 now, not 985.
-                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1100.0;
+                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1000.0;
 
                 // How much of the computed heading correction to apply per loop, 1.0 = all of
                 // it. 0.5 (team direction 2026-08-29: "the rotation correction is too much,
@@ -751,7 +767,7 @@ public class SubsystemConstants {
                 // sign is wrong -- the robot cannot sweep off the tag, it will just aim to the
                 // wrong side of it.
                 public static boolean AUTOAIM_VIEW_ANGLE_COMP_ENABLED = true;
-                public static double AUTOAIM_VIEW_ANGLE_SIGN = 1.0;
+                public static double AUTOAIM_VIEW_ANGLE_SIGN = -1.0;
                 // TAG-LOSS HOLD (s). Team report 2026-08-29: with RB held the hood "keeps
                 // going up and down". A Limelight fiducial drops out for a frame or two
                 // routinely, and every dropout used to refuse the shot instantly, so the hood
@@ -828,7 +844,7 @@ public class SubsystemConstants {
                 // NOTE the floor still wins. clampDesiredAngle will not let a setpoint go below
                 // the enable-time datum, so if a tabled angle is under 10 units above the floor,
                 // subtracting 10 lands ON the floor rather than below it.
-                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 10.0;
+                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 5.0;
 
                 public static double[][] AUTOAIM_HOOD_TABLE = {
                     // { distance m, raw units above the enable datum }
