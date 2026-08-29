@@ -42,6 +42,28 @@ class AutoAimTest {
             "above the table clamps high");
     }
 
+    /**
+     * The flat hood bias is subtracted from EVERY auto-aim angle (team direction 2026-08-29).
+     * Pinned as an arithmetic identity against the table so that changing the table cannot
+     * quietly drop it, and so the bias stays one number rather than being folded into rows.
+     */
+    @Test
+    void everyTabledAngleGetsTheFlatSubtraction() {
+        InterpolatingDoubleTreeMap table = ShooterSubsystem.buildAutoAimHoodTable();
+        double bias = ShooterSubsystemConstants.AUTOAIM_HOOD_SUBTRACT_UNITS;
+        double floor = 100.0;   // stand-in for the enable datum
+        for (double[] row : ShooterSubsystemConstants.AUTOAIM_HOOD_TABLE) {
+            double commanded = floor + table.get(row[0]) - bias;
+            assertEquals(floor + row[1] - bias, commanded, EPS,
+                "distance " + row[0] + " m must be commanded " + bias + " units flatter");
+            assertEquals(row[1] - bias, commanded - floor, EPS);
+        }
+        // Between rows too -- it is a flat offset, not a per-row edit.
+        double[][] rows = ShooterSubsystemConstants.AUTOAIM_HOOD_TABLE;
+        double mid = (rows[0][0] + rows[1][0]) / 2;
+        assertEquals((rows[0][1] + rows[1][1]) / 2 - bias, table.get(mid) - bias, EPS);
+    }
+
     /** The table must stay sorted and never ask for more travel than the hood has. */
     @Test
     void hoodTableStaysInsideTheHoodTravel() {

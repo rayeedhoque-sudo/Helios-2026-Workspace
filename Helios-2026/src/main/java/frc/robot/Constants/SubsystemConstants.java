@@ -814,6 +814,22 @@ public class SubsystemConstants {
                 //   4. Read "Hood Travel Since Datum (deg)" off the Shooter dashboard tab -- that
                 //      number IS the second column. Type it in here.
                 // Rows must stay sorted by distance. Add rows freely; 4 is not special.
+                // A FLAT OFFSET SUBTRACTED FROM EVERY AUTO-AIM HOOD ANGLE (team direction
+                // 2026-08-29: "always subtracted by 10 encoder units every time, no matter
+                // what"). Applied after the table lookup and before the clamp, so it is the
+                // last word on the angle -- there is no distance, tag or state that escapes it.
+                // 10 raw units is ~1.3 physical degrees, i.e. a small flattening bias.
+                //
+                // It is deliberately SEPARATE from the table rather than folded into the rows:
+                // a bias that is wrong is one number to change, while a bias baked into four
+                // rows is four numbers to unpick. Set it to 0 to remove the bias without
+                // touching the table.
+                //
+                // NOTE the floor still wins. clampDesiredAngle will not let a setpoint go below
+                // the enable-time datum, so if a tabled angle is under 10 units above the floor,
+                // subtracting 10 lands ON the floor rather than below it.
+                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 10.0;
+
                 public static double[][] AUTOAIM_HOOD_TABLE = {
                     // { distance m, raw units above the enable datum }
                     { 2.0,  60.0 },   // TODO placeholder

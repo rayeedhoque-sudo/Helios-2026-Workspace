@@ -1464,7 +1464,12 @@ public class ShooterSubsystem extends SubsystemBase{
             // INHERITED ASSUMPTION: the datum is only the hood's rest position if the robot was
             // enabled with the hood resting down -- see captureHoodDatum. Enable with the hood
             // already raised and every angle here is biased by the same amount.
-            double hoodTarget = getHoodFloorAngle() + autoAimHoodTable.get(distance);
+            // Table lookup, then the flat AUTOAIM_HOOD_SUBTRACT_UNITS bias (team direction
+            // 2026-08-29) -- applied to EVERY auto-aim angle, at every distance, on every tag.
+            // setDesired_Angle still clamps to the enable-time floor afterwards, so the bias
+            // can lower the angle but never drive the hood below where this enable started.
+            double hoodTarget = getHoodFloorAngle() + autoAimHoodTable.get(distance)
+                - ShooterSubsystemConstants.AUTOAIM_HOOD_SUBTRACT_UNITS;
             // First command of the hold always goes through; after that only a real change does.
             if (!autoAimHasCommanded || autoAimShouldRetarget(hoodTarget, autoAimLastTarget)) {
                 setDesired_Angle(hoodTarget);
