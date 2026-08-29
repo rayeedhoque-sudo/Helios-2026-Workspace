@@ -348,14 +348,16 @@ public class RobotContainer {
                         // (team request 2026-08-22) instead of on isFlywheelAtSpeed(), which
                         // never opened with the velocity loop untuned. The timer restarts with
                         // the group below, so every press waits the full spin-up.
-                        // Kicker runs REVERSE for the whole spin-up window, then forward
-                        // (team request 2026-08-24) -- it holds fuel off the flywheels
-                        // while they wind up instead of just sitting stopped.
+                        // NO REVERSE (team request 2026-08-28). The kicker used to run
+                        // BACKWARDS for the whole spin-up window (2026-08-24) to hold fuel
+                        // off the flywheels; it now simply sits stopped until the delay
+                        // expires, as it did before that. Passing () -> false rather than
+                        // deleting the parameter keeps feedShooterCommand's shape -- the
+                        // commented-out RB binding below already passes false the same way.
                         hopperSS.feedShooterCommand(() -> true,
                             () -> kickerSpinupTimer.hasElapsed(
                                 HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC),
-                            () -> !kickerSpinupTimer.hasElapsed(
-                                HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC)),
+                            () -> false),
                         lockDriveAndIntake())
                     .beforeStarting(kickerSpinupTimer::restart)
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));

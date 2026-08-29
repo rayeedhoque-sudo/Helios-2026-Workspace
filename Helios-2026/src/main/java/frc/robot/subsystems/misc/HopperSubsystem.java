@@ -261,7 +261,11 @@ public class HopperSubsystem extends SubsystemBase{
         kickerMotor.set(ControlMode.PercentOutput, HopperSubsystemConstants.INDEXER_SPEED);
     }
     
-    /** Kicker backward at the proven unjam duty -- holds fuel back during flywheel spin-up. */
+    /**
+     * Kicker backward at the proven unjam duty. NO LIVE CALLER since 2026-08-28 (team request:
+     * no hopper reversing during the shot) -- kept because feedShooterCommand still takes the
+     * reverseKicker supplier, so restoring the hold-back is a one-word change at the binding.
+     */
     public void reverseKickFuel(){
         kickerMotor.set(ControlMode.PercentOutput, -HopperSubsystemConstants.UNJAM_SPEED);
     }
