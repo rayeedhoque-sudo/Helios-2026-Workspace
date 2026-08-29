@@ -96,6 +96,35 @@ public class HoodSettleTest {
             "kD is the anti-overshoot term; a zero kD is the oscillating tune");
     }
 
+    /**
+     * THE SAG CATCH (2026-08-28, team report: "the hood falls right back down after ascending").
+     * The moment the latch drops at HOOD_REENGAGE_DEG the loop must command enough voltage to
+     * actually lift. P + FF alone give ~2.8 V there -- below the ~7.5 V breakaway -- so the hood
+     * kept sagging a whole step before the loop could catch it. hoodBreakawayFloor is what fixes
+     * that; this fails without it.
+     */
+    @Test
+    void theCatchStrokeClearsBreakaway() {
+        double error = REENGAGE;
+        double raw = ShooterSubsystemConstants.SHOOTER_ANGLE_kP * error
+            + ShooterSubsystem.hoodLiftFeedforward(error);
+        assertTrue(raw < 7.4, "premise: P+FF alone cannot lift at the re-engage error, got " + raw);
+        assertTrue(ShooterSubsystem.hoodBreakawayFloor(raw, error, false) >= 7.4,
+            "a re-engaged UP stroke must be floored at breakaway");
+    }
+
+    /** The floor may not touch a held hood, a descent, or a zero command. */
+    @Test
+    void theBreakawayFloorOnlyAppliesToAnActiveUpStroke() {
+        assertEquals(0.0, ShooterSubsystem.hoodBreakawayFloor(0, REENGAGE, true), 1e-9,
+            "held = 0 V; the floor must never re-energise a parked hood");
+        assertEquals(-3.0, ShooterSubsystem.hoodBreakawayFloor(-3.0, -REENGAGE, false), 1e-9,
+            "lowering is gravity-assisted and must stay gentle");
+        assertTrue(ShooterSubsystemConstants.HOOD_BREAKAWAY_VOLTS
+            <= ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE,
+            "the floor must fit under the up cap, or the clamp would fight it");
+    }
+
     @Test
     void settleBandIsInsideTheReengageBand() {
         assertTrue(TOL < REENGAGE, "hysteresis requires the re-engage threshold to be the wider one");

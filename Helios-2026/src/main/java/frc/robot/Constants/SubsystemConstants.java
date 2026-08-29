@@ -593,6 +593,18 @@ public class SubsystemConstants {
                 // Hood gate, deg: worst contribution 0.078 m at 3 m, shrinking with distance.
                 // RAW UNITS (2026-08-27): the tuned 0.5 physical degree, converted.
                 public static double ANGLE_TOLERANCE = 0.5 * HOOD_UNITS_PER_DEG;   // 3.75 raw units
+
+                // Measured breakaway: the hood does not move UP below ~7.5 V (on-robot
+                // 2026-08-22). P + hoodLiftFeedforward only reaches that at ~10 units of error
+                // -- one whole HOOD_UP_STEP_UNITS -- so between the re-engage threshold and a
+                // full step the loop commands 2-5 V, which energises the motor without moving
+                // the hood. That is the sag: brake idle mode is a DAMPER (shorted terminals,
+                // torque only while moving), not a static brake, so a gravity-loaded hood
+                // creeps down and the loop cannot catch it until it has lost the entire step.
+                // hoodBreakawayFloor lifts an active UP command to this value so the catch
+                // happens at HOOD_REENGAGE_DEG instead. TODO on robot: if the hood still sags,
+                // raise this (never above HOOD_MAX_UP_VOLTAGE); if it snaps up too hard, lower.
+                public static double HOOD_BREAKAWAY_VOLTS = 7.5;
                 
                 // HOOD_JOG_UP_VOLTS / HOOD_JOG_DOWN_VOLTS are DELETED (2026-08-28, team
                 // direction: "voltage throttle should be entirely removed, the only throttle

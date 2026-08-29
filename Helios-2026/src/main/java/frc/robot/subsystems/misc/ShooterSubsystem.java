@@ -368,6 +368,20 @@ public class ShooterSubsystem extends SubsystemBase{
             return fraction * ShooterSubsystemConstants.HOOD_RAISE_FF_VOLTS;
         }
 
+        // A commanded UP voltage below breakaway heats the motor and moves nothing. Once the
+        // loop has decided to drive (not holding) and the hood is BELOW its target, floor the
+        // command at HOOD_BREAKAWAY_VOLTS so the stroke actually happens. Without this the
+        // hood sags a full HOOD_UP_STEP_UNITS after every press before P + FF grow enough to
+        // lift it -- the "it goes up then falls right back down" report of 2026-08-28.
+        // Untouched: holding (0 V), the descent (negative), and the caps/travel guards applied
+        // after this. Package-private + static for HoodSettleTest.
+        static double hoodBreakawayFloor(double volts, double errorDeg, boolean holding){
+            if (holding || errorDeg <= 0 || volts <= 0) {
+                return volts;
+            }
+            return Math.max(volts, ShooterSubsystemConstants.HOOD_BREAKAWAY_VOLTS);
+        }
+
         // Surface speed (m/s) equivalent to a motor speed in RPM. Same geometry the velocity
         // command uses in reverse: rev/s at the motor -> rev/s at the wheel -> rim speed.
         // Package-private + static for ShooterSpeedTrimTest.
@@ -1166,7 +1180,9 @@ public class ShooterSubsystem extends SubsystemBase{
                     // stroke (HOOD_MAX_DOWN_VOLTAGE). A symmetric 6 V could not lift the hood at all
                     // (it sat fully down during the feed shot). Positive output raises the hood, so it
                     // is capped at +UP; negative lowers, capped at -DOWN.
-                    hoodVolts = MathUtil.clamp(anglePID + liftFF, -ShooterSubsystemConstants.HOOD_MAX_DOWN_VOLTAGE, ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE);
+                    hoodVolts = MathUtil.clamp(
+                        hoodBreakawayFloor(anglePID + liftFF, hoodTarget - currentHoodAngle, hoodHolding),
+                        -ShooterSubsystemConstants.HOOD_MAX_DOWN_VOLTAGE, ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE);
                 }
                 // HARD travel guard (team request 2026-07-18: "by no means exceed the max angle"
                 // -- the hood was over-extending and skipping the belt). Positive volts raise the
