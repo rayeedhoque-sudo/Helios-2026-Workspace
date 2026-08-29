@@ -32,8 +32,6 @@ public class HoodHoldTest {
         double hood = staleSetpoint + POWERED_LOOP_TRAVEL;          // where it actually landed
         double error = staleSetpoint - hood;                        // ~ -40
 
-        assertFalse(ShooterSubsystem.hoodShouldHold(error, false),
-            "a stale setpoint leaves an error way past the band, so the loop drives");
         assertTrue(ShooterSubsystem.hoodLiftFeedforward(error) < 0,
             "and the feedforward it fires is a LOWERING one -- the hood sinks after every press");
     }
@@ -52,8 +50,6 @@ public class HoodHoldTest {
             "the hood is past what was asked for, so the latch must fire");
         double setpoint = hood;                                     // what the latch re-seeds
 
-        assertTrue(ShooterSubsystem.hoodShouldHold(setpoint - hood, false),
-            "zero error must latch the settle band -- 0 V, brake holds");
         assertEquals(0, ShooterSubsystem.hoodLiftFeedforward(setpoint - hood), 1e-9,
             "and no feedforward may be applied at the target, in either direction");
     }
@@ -79,9 +75,25 @@ public class HoodHoldTest {
     @Test
     void aSmallOvershootAlsoHoldsRatherThanCorrecting() {
         double drift = 0.9 * ShooterSubsystemConstants.ANGLE_TOLERANCE;
-        assertTrue(ShooterSubsystem.hoodShouldHold(-drift, false),
-            "a landing inside the tolerance holds immediately");
-        assertTrue(ShooterSubsystem.hoodShouldHold(-drift, true),
-            "and stays held once latched");
+        assertEquals(0, ShooterSubsystem.hoodLiftFeedforward(-drift), 1e-9,
+            "a landing inside the tolerance commands nothing -- no snap-back");
+    }
+
+    /**
+     * THE PARK IS PERMANENT (2026-08-28, team report: "it goes up and down and doesn't stop").
+     * Droop after a press must NOT restart the drive: a catch stroke is 25-55 units against a
+     * 3.75-unit band, so every catch overshoots and the hood limit-cycles. The only thing that
+     * un-parks the hood is a new setpoint. hoodBreakawayFloor is the gate that proves it -- once
+     * parked, no error magnitude produces a command.
+     */
+    @Test
+    void droopAfterAPressDoesNotRestartTheDrive() {
+        for (double droop : new double[] { 1, 5, 10, 40 }) {
+            double wouldBeDrive = ShooterSubsystemConstants.SHOOTER_ANGLE_kP * droop
+                + ShooterSubsystem.hoodLiftFeedforward(droop);
+            assertEquals(0, ShooterSubsystem.hoodBreakawayFloor(0, droop, true), 1e-9,
+                "parked at droop " + droop + ": the hood must stay parked, not chase (the loop"
+                    + " would otherwise fire " + wouldBeDrive + " V and overshoot again)");
+        }
     }
 }

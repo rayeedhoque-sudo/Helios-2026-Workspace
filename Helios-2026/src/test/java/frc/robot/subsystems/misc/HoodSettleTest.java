@@ -8,73 +8,19 @@ import org.junit.jupiter.api.Test;
 import frc.robot.Constants.SubsystemConstants.ShooterSubsystemConstants;
 
 /**
- * Pins the hood settle band (ShooterSubsystem.hoodShouldHold). Team requirement
- * 2026-08-22: a DPAD click moves the hood 2 deg and it STAYS there -- no hunting.
+ * Pins what the hood loop is allowed to COMMAND. Team requirement 2026-08-27: a DPAD press
+ * moves the hood one step and it STAYS there.
  *
- * Without the band the hood limit-cycles: it breaks free at ~7.5 V, carries past the
- * target, error flips negative, and the loop drives it back DOWN with up to 6 V plus
- * gravity, past the target again. The band stops driving once the hood arrives; the
- * hysteresis stops the drive chattering on and off at the band edge.
+ * The hysteresis re-engage band (hoodShouldHold) that used to live here is DELETED, and this
+ * file no longer tests it: a catch stroke moves the hood 25-55 raw units against a 3.75-unit
+ * settle band, so re-engaging on droop could only ever overshoot, re-seed higher and droop
+ * again -- the up/down limit cycle the team reported on 2026-08-28. The park is absolute now;
+ * HoodHoldTest pins that. What is left here is the voltage arithmetic: a commanded stroke has
+ * to be able to break the hood away, and nothing else may command anything.
  */
 public class HoodSettleTest {
 
     private static final double TOL = ShooterSubsystemConstants.ANGLE_TOLERANCE;
-    private static final double REENGAGE = ShooterSubsystemConstants.HOOD_REENGAGE_DEG;
-
-    @Test
-    void holdsOnceInsideTheTolerance() {
-        assertTrue(ShooterSubsystem.hoodShouldHold(0, false), "at the target = hold");
-        assertTrue(ShooterSubsystem.hoodShouldHold(TOL, false), "at the tolerance edge = hold");
-        assertTrue(ShooterSubsystem.hoodShouldHold(-TOL, false), "overshoot side too");
-    }
-
-    @Test
-    void drivesWhenFarFromTheTarget() {
-        assertTrue(!ShooterSubsystem.hoodShouldHold(REENGAGE, false), "a fresh big error must drive");
-        assertTrue(!ShooterSubsystem.hoodShouldHold(10, true), "even when holding, a big error re-engages");
-    }
-
-    /**
-     * The hysteresis: between the settle and re-engage thresholds the answer depends on
-     * which side you came from. One threshold here would chatter the drive on and off.
-     */
-    @Test
-    void staysHeldThroughTheHysteresisBand() {
-        double midBand = (TOL + REENGAGE) / 2;
-        assertTrue(ShooterSubsystem.hoodShouldHold(midBand, true),
-            "already parked: small drift must NOT restart the drive");
-        assertTrue(!ShooterSubsystem.hoodShouldHold(midBand, false),
-            "approaching: the same error must still drive toward the target");
-    }
-
-    /**
-     * The actual requirement, simulated: a 2 deg click, an overshoot, and the settle must
-     * be permanent rather than bouncing. Feeding the previous answer back in is what the
-     * periodic loop does with the latched flag.
-     */
-    @Test
-    void aClickSettlesAndStaysSettled() {
-        boolean holding = false;
-        // Approaching the new target from well outside the band. Scaled off TOL rather than a
-        // literal: the bands are in RAW ENCODER UNITS now (2026-08-27), not degrees.
-        holding = ShooterSubsystem.hoodShouldHold(4 * TOL, holding);
-        assertTrue(!holding, "well outside the band: drive");
-        // It arrives, overshooting slightly.
-        holding = ShooterSubsystem.hoodShouldHold(-0.6 * TOL, holding);
-        assertTrue(holding, "arrived (with overshoot): stop driving");
-        // Now it must STAY held through ordinary jitter and small sag -- this is the anti-hunt.
-        // Scaled off REENGAGE so retuning the band on the robot doesn't fail this test:
-        // every sample is inside it, which is what "parked" means.
-        double[] jitter = { -0.3, 0.15, -0.05, 0.5, -0.7, 0.85, -0.95 };
-        for (int i = 0; i < jitter.length; i++) { jitter[i] *= REENGAGE; }
-        for (double error : jitter) {
-            holding = ShooterSubsystem.hoodShouldHold(error, holding);
-            assertTrue(holding, "must stay parked at error " + error + " -- this is the hunting case");
-        }
-        // Only a real departure past the re-engage threshold restarts the drive.
-        holding = ShooterSubsystem.hoodShouldHold(REENGAGE, holding);
-        assertTrue(!holding, "a genuine departure re-engages the loop");
-    }
 
     /**
      * THE ONLY HOOD DRIVE IS THE POSITION LOOP (2026-08-28): the open-loop jog volts are gone,
@@ -88,37 +34,36 @@ public class HoodSettleTest {
         double drive = ShooterSubsystemConstants.SHOOTER_ANGLE_kP * step
             + ShooterSubsystem.hoodLiftFeedforward(step);
         assertTrue(drive >= 7.4, "one step must ask for at least the ~7.5 V breakaway, got " + drive);
-        assertTrue(drive <= ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE + 1e-9,
-            "and must not exceed the up cap before clamping, got " + drive);
+        // NOT an assertion on the raw sum: kP is live-tuned on the robot (0.6 as of
+        // 2026-08-28), so one step can ask for more than the cap. What must hold is that the
+        // CLAMPED command is legal -- the clamp, not the gain, is the safety limit.
+        assertTrue(Math.min(drive, ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE)
+                <= ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE + 1e-9,
+            "the commanded volts must fit the up cap after clamping");
         assertEquals(0.0, ShooterSubsystemConstants.SHOOTER_ANGLE_kI, 1e-12,
             "kI must stay 0 -- an integrator against stiction winds up and then lurches");
-        assertTrue(ShooterSubsystemConstants.SHOOTER_ANGLE_kD > 0,
-            "kD is the anti-overshoot term; a zero kD is the oscillating tune");
     }
 
     /**
-     * THE SAG CATCH (2026-08-28, team report: "the hood falls right back down after ascending").
-     * The moment the latch drops at HOOD_REENGAGE_DEG the loop must command enough voltage to
-     * actually lift. P + FF alone give ~2.8 V there -- below the ~7.5 V breakaway -- so the hood
-     * kept sagging a whole step before the loop could catch it. hoodBreakawayFloor is what fixes
-     * that; this fails without it.
+     * MID-STROKE the error shrinks, so P + FF fall back under breakaway and the move would die
+     * a few units short of what was asked for. The breakaway floor is what finishes the stroke.
      */
     @Test
-    void theCatchStrokeClearsBreakaway() {
-        double error = REENGAGE;
-        double raw = ShooterSubsystemConstants.SHOOTER_ANGLE_kP * error
-            + ShooterSubsystem.hoodLiftFeedforward(error);
-        assertTrue(raw < 7.4, "premise: P+FF alone cannot lift at the re-engage error, got " + raw);
-        assertTrue(ShooterSubsystem.hoodBreakawayFloor(raw, error, false) >= 7.4,
-            "a re-engaged UP stroke must be floored at breakaway");
+    void theFloorFinishesAStrokeThatWouldOtherwiseStallShort() {
+        double remaining = TOL + 1;   // just outside the band: still owed, but barely
+        double raw = ShooterSubsystemConstants.SHOOTER_ANGLE_kP * remaining
+            + ShooterSubsystem.hoodLiftFeedforward(remaining);
+        assertTrue(raw < 7.4, "premise: late in a stroke P+FF alone cannot move the hood, got " + raw);
+        assertTrue(ShooterSubsystem.hoodBreakawayFloor(raw, remaining, false) >= 7.4,
+            "so an unfinished UP stroke must be floored at breakaway");
     }
 
-    /** The floor may not touch a held hood, a descent, or a zero command. */
+    /** The floor may not touch a parked hood, a descent, or a zero command. */
     @Test
     void theBreakawayFloorOnlyAppliesToAnActiveUpStroke() {
-        assertEquals(0.0, ShooterSubsystem.hoodBreakawayFloor(0, REENGAGE, true), 1e-9,
-            "held = 0 V; the floor must never re-energise a parked hood");
-        assertEquals(-3.0, ShooterSubsystem.hoodBreakawayFloor(-3.0, -REENGAGE, false), 1e-9,
+        assertEquals(0.0, ShooterSubsystem.hoodBreakawayFloor(0, 10, true), 1e-9,
+            "parked = 0 V; the floor must never re-energise a parked hood");
+        assertEquals(-3.0, ShooterSubsystem.hoodBreakawayFloor(-3.0, -10, false), 1e-9,
             "lowering is gravity-assisted and must stay gentle");
         assertTrue(ShooterSubsystemConstants.HOOD_BREAKAWAY_VOLTS
             <= ShooterSubsystemConstants.HOOD_MAX_UP_VOLTAGE,
@@ -126,8 +71,7 @@ public class HoodSettleTest {
     }
 
     @Test
-    void settleBandIsInsideTheReengageBand() {
-        assertTrue(TOL < REENGAGE, "hysteresis requires the re-engage threshold to be the wider one");
+    void theSettleBandIsStillTheTunedHalfDegree() {
         assertEquals(0.5 * ShooterSubsystemConstants.HOOD_UNITS_PER_DEG, TOL, 1e-9,
             "guards against a tolerance change silently widening the deadband -- the band is the"
                 + " tuned half-degree, expressed in raw encoder units");

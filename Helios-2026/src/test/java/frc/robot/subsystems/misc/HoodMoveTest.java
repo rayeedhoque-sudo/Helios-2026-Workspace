@@ -70,15 +70,13 @@ public class HoodMoveTest {
     void anOvershootIsLatched_notChasedBack() {
         double landed = TARGET + 40;   // one powered loop past the request
 
-        assertFalse(ShooterSubsystem.hoodShouldHold(TARGET - landed, false),
-            "the raw error alone is way outside the band -- unlatched, the loop would drive DOWN");
         assertTrue(ShooterSubsystem.hoodLiftFeedforward(TARGET - landed) < 0,
             "and the feedforward it would fire is a LOWERING one: the hood sinks after every press");
 
         assertTrue(ShooterSubsystem.hoodMoveReached(landed, TARGET, true),
             "but the move has ARRIVED, so the latch fires first");
-        assertTrue(ShooterSubsystem.hoodShouldHold(0, false),
-            "and after the re-seed the error is 0, which latches the band and parks the brake");
+        assertEquals(0, ShooterSubsystem.hoodLiftFeedforward(landed - landed), 1e-9,
+            "and after the re-seed the error is 0, so nothing is commanded and the hood parks");
         assertEquals(landed, ShooterSubsystem.clampDesiredAngle(landed, FLOOR, true), 1e-9,
             "the re-seeded angle must survive the clamp, or the hood is dragged off it again");
     }

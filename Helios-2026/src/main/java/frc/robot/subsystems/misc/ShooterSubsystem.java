@@ -161,8 +161,9 @@ public class ShooterSubsystem extends SubsystemBase{
        // Live RT flywheel target (m/s surface), trimmed by the DPAD UP/DOWN bindings. Seeded
        // from the constant and NOT persisted -- a reboot or redeploy returns it to the constant.
        private double rtSurfaceSpeed = ShooterSubsystemConstants.RT_FLYWHEEL_SURFACE_SPEED;
-       // True while the hood is parked inside its settle band and held at 0 V by the brake idle
-       // mode. Latches, so the loop cannot chatter at the band edge -- see hoodShouldHold().
+       // True while the hood is parked at the angle a move left it at, held at 0 V. The latch
+       // is ABSOLUTE (2026-08-28): set on arrival, cleared ONLY by setDesired_Angle. Nothing
+       // the hood does on its own can restart the drive, so it cannot hunt.
        private boolean hoodHolding;
        private double hoodBaseAngleDeg;   // absolute angle at the datum
        private double hoodRelativeDeg;    // signed degrees travelled since the datum
@@ -329,19 +330,14 @@ public class ShooterSubsystem extends SubsystemBase{
             return raw != 0.0;
         }
 
-        // Should the hood be HELD at 0 V (brake idle holding position) rather than driven?
-        // True once inside ANGLE_TOLERANCE of the target, and it STAYS true until the hood has
-        // drifted past the wider HOOD_REENGAGE_DEG -- hysteresis, so the loop cannot chatter on
-        // and off at a single threshold. This is what stops the hood hunting after a DPAD click:
-        // it arrives, the drive stops, and the brake holds it there.
-        // Package-private + static for HoodSettleTest.
-        static boolean hoodShouldHold(double errorDeg, boolean wasHolding){
-            double magnitude = Math.abs(errorDeg);
-            if (magnitude <= ShooterSubsystemConstants.ANGLE_TOLERANCE) {
-                return true;
-            }
-            return wasHolding && magnitude < ShooterSubsystemConstants.HOOD_REENGAGE_DEG;
-        }
+        // (hoodShouldHold DELETED 2026-08-28. It re-engaged the loop whenever the hood drifted
+        // past HOOD_REENGAGE_DEG, and that re-engagement WAS the oscillation the team saw: a
+        // catch stroke is 25-55 raw units against a 3.75-unit settle band, so every catch
+        // overshot, the arrival latch re-seeded higher, the hood drooped again, and it caught
+        // again -- forever. No gain fixes that; the smallest move the mechanism makes is 3-5x
+        // the band it is meant to settle in. The latch is now ABSOLUTE: it is set on arrival
+        // and cleared ONLY by a setpoint write, i.e. a driver press or a shot command. See
+        // hoodHolding and setDesired_Angle.)
 
         // Gravity LIFT feedforward (volts) for a given angle error, target minus current.
         // RAMPS from 0 V at ANGLE_TOLERANCE to HOOD_RAISE_FF_VOLTS at ANGLE_TOLERANCE +
@@ -677,6 +673,10 @@ public class ShooterSubsystem extends SubsystemBase{
             // Every setpoint write goes through here, so the arrival latch in periodic() always
             // has a fresh direction -- see hoodMoveReached.
             hoodMoveRising = desired_Angle > getShooterAngleDegrees();
+            // A new setpoint is the ONLY thing that un-parks the hood (2026-08-28). The arrival
+            // latch in periodic() calls this and re-latches immediately afterwards, in the same
+            // loop, so the re-seed does not restart the drive.
+            hoodHolding = false;
         }
         public double  getDesiredAngle(){
             return desired_Angle;
@@ -1141,8 +1141,8 @@ public class ShooterSubsystem extends SubsystemBase{
                     // with 0 V and the brake idle mode holds it; without this it HUNTS -- it
                     // breaks free at ~7.5 V, carries past the target, and the loop drives it
                     // back down with up to 6 V plus gravity, a limit cycle around the setpoint.
-                    // Latching with a wider re-engage threshold (hysteresis) so the loop cannot
-                    // chatter on and off at the band edge -- see hoodShouldHold().
+                    // The hysteresis band that used to re-engage this drive is GONE: it turned
+                    // an unavoidable droop into a permanent up/down limit cycle.
                     // ARRIVAL LATCH: the move is over the moment the hood is at or past what
                     // was asked for, whatever the remaining error says. Re-seed the setpoint to
                     // where it actually landed so the overshoot is never chased back down.
@@ -1153,7 +1153,8 @@ public class ShooterSubsystem extends SubsystemBase{
                         shooterAnglePID.reset();
                         hoodHolding = true;
                     }
-                    hoodHolding = hoodShouldHold(hoodTarget - currentHoodAngle, hoodHolding);
+                    // NO re-evaluation here any more. Once parked, only a new setpoint
+                    // (setDesired_Angle) can un-park the hood -- see the deleted hoodShouldHold.
                     // RESET WHILE HELD (2026-08-28, needed now that kD is non-zero): the
                     // controller is not called at all inside the band, so its stored previous
                     // error goes stale. Without this reset the first loop after a press would
@@ -1220,7 +1221,9 @@ public class ShooterSubsystem extends SubsystemBase{
             // would stomp the shot commands (visionShotCommand/feedAngleShotCommand) every loop.
                 if(enableComp){
                     desired_Velocity = desiredVelEntry.getDouble(0);
-                    desired_Angle = desiredAngleEntry.getDouble(0);
+                    // Through the SETTER, not the field: the field write alone cannot clear
+                    // hoodHolding, so a live-data hood move would be silently ignored.
+                    setDesired_Angle(desiredAngleEntry.getDouble(0));
                 }
 
             //PID + FF Tuning -- gains come from the driver-companion PID panel over NT (frc.robot.util.Tunable).

@@ -601,8 +601,8 @@ public class SubsystemConstants {
                 // the hood. That is the sag: brake idle mode is a DAMPER (shorted terminals,
                 // torque only while moving), not a static brake, so a gravity-loaded hood
                 // creeps down and the loop cannot catch it until it has lost the entire step.
-                // hoodBreakawayFloor lifts an active UP command to this value so the catch
-                // happens at HOOD_REENGAGE_DEG instead. TODO on robot: if the hood still sags,
+                // hoodBreakawayFloor lifts an active UP command to this value so a commanded
+                // stroke finishes instead of dying short. TODO on robot: if a press stalls short,
                 // raise this (never above HOOD_MAX_UP_VOLTAGE); if it snaps up too hard, lower.
                 public static double HOOD_BREAKAWAY_VOLTS = 7.5;
                 
@@ -635,9 +635,12 @@ public class SubsystemConstants {
                 // arrival, and the settle band absorbs what is left, but a 10-unit step will
                 // still land long. The step only becomes literal past ~60 units.
                 public static double HOOD_UP_STEP_UNITS = 10.0;
-                // HOOD_REENGAGE_DEG is the degree at which the hood needs to readjust hold
+                // HOOD_REENGAGE_DEG (the drift that used to restart the drive) is DELETED
+                // 2026-08-28: re-engaging on droop WAS the up/down limit cycle -- one catch
+                // stroke is 25-55 units against a 3.75-unit band, so it always overshot and
+                // re-seeded higher. The hood now parks on arrival and only a new setpoint moves
+                // it. See ShooterSubsystem.hoodHolding.
                 // RAW UNITS (2026-08-27): the tuned 0.75 physical degree, converted.
-                public static double HOOD_REENGAGE_DEG = 0.75 * HOOD_UNITS_PER_DEG;   // 5.63 raw units
                 // HOOD_LOWER_FF_VOLTS is self explanatory, based off raise volts
                 public static double HOOD_LOWER_FF_VOLTS = 6.0;
         }
