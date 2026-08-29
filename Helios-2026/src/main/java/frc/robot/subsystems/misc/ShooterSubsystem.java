@@ -517,6 +517,24 @@ public class ShooterSubsystem extends SubsystemBase{
             return groundRange * Math.cos(Math.toRadians(txncDeg));
         }
 
+        // Clamp the commanded turn so the tag CANNOT leave the frame. After turning by the
+        // returned bearing, a tag at txnc sits at (txnc - bearing) in the image, so bounding the
+        // bearing to within AUTOAIM_MAX_TAG_OFFSET_DEG of txnc bounds where the tag ends up.
+        // Package-private + static for AutoAimTest.
+        static double clampTurnToKeepTagInView(double bearingDeg, double txncDeg){
+            return MathUtil.clamp(bearingDeg,
+                txncDeg - ShooterSubsystemConstants.AUTOAIM_MAX_TAG_OFFSET_DEG,
+                txncDeg + ShooterSubsystemConstants.AUTOAIM_MAX_TAG_OFFSET_DEG);
+        }
+
+        // May the aim target be refreshed this loop? Only while the robot is turning slowly:
+        // vision lags a few frames, so a bearing measured mid-turn belongs to a heading the
+        // robot has already left. Package-private + static for AutoAimTest.
+        static boolean autoAimTargetIsTrustworthy(double omegaDegPerSec){
+            return Math.abs(omegaDegPerSec)
+                <= ShooterSubsystemConstants.AUTOAIM_AIM_UPDATE_MAX_DEG_PER_SEC;
+        }
+
         // Should auto-aim WRITE a new hood setpoint this loop? Only when the distance-derived
         // target has moved AUTOAIM_RETARGET_DEADBAND_UNITS from THE TARGET AUTO-AIM LAST ASKED
         // FOR. THIS GUARD IS LOAD-BEARING: setDesired_Angle clears hoodHolding (the park latch),
@@ -1341,7 +1359,8 @@ public class ShooterSubsystem extends SubsystemBase{
             // CCW-positive, so the bearing is SUBTRACTED from the current heading. Re-sampled
             // every loop, so the servo converges as the robot turns; consumed by the RB binding's
             // aim hold and by isAimedAtTarget(), which gates the kicker.
-            double bearingDeg = autoAimBearingDegrees(camX, camZ, lateral);
+            double bearingDeg = clampTurnToKeepTagInView(
+                autoAimBearingDegrees(camX, camZ, lateral), picked.txnc);
             autoAimBearingDeg = bearingDeg;
             double headingDeg = drivetrain.getState().Pose.getRotation().getDegrees();
             // TWO headings, deliberately, and they must not be collapsed into one:
@@ -1360,10 +1379,20 @@ public class ShooterSubsystem extends SubsystemBase{
             // toward a target that stands still in the field frame removes the feedback entirely
             // -- the hub is not moving, so neither should the target be.
             aimHeadingDeg = headingDeg - bearingDeg;
+            // HOLD THE TARGET WHILE TURNING FAST. This is the fix for the robot driving itself
+            // round until the tag left frame (2026-08-29). aimHeadingDeg is only a true absolute
+            // heading if the bearing and the heading were sampled at the SAME instant -- and they
+            // are not: the heading is live while the camera is a few frames behind. Mid-turn,
+            // subtracting a stale bearing from a fresh heading produces a target that advances
+            // WITH the robot, so the robot chases it round. Refreshing only while nearly still
+            // breaks that loop; the target is then a fixed field heading, which is what the hub
+            // actually is.
+            double omegaDegPerSec =
+                Math.toDegrees(drivetrain.getState().Speeds.omegaRadiansPerSecond);
             if (!autoAimServoSeeded) {
                 autoAimServoHeadingDeg = aimHeadingDeg;
                 autoAimServoSeeded = true;
-            } else {
+            } else if (autoAimTargetIsTrustworthy(omegaDegPerSec)) {
                 // Wrapped error, so a target either side of +-180 takes the short way round.
                 double err = MathUtil.inputModulus(aimHeadingDeg - autoAimServoHeadingDeg, -180, 180);
                 autoAimServoHeadingDeg = MathUtil.inputModulus(

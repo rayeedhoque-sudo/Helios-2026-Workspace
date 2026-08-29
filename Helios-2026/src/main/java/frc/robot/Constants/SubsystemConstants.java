@@ -695,6 +695,31 @@ public class SubsystemConstants {
                 // TODO tune on robot: lower if it still overshoots or hunts, raise toward 1.0 if
                 // it is now too slow to come round before the spin-up ends.
                 public static double AUTOAIM_ROTATION_SCALE = 0.25;
+
+                // THE TAG MUST STAY IN VIEW (team requirement 2026-08-29: "the AprilTag should be
+                // in view at all times"). This is a HARD BOUND on the commanded turn, expressed
+                // as the most the tag is allowed to end up off the crosshair.
+                //
+                // After turning by the commanded bearing b, a tag currently at txnc sits at
+                // (txnc - b) in the image. Clamping b to within this many degrees of txnc
+                // therefore guarantees the tag ends no further than this off the crosshair --
+                // the turn can never sweep past it. With correct geometry the clamp does not
+                // bind at all (the hub-centre correction is only a few degrees from the tag);
+                // it exists so that a bad measurement, a lagging frame, or a future bug cannot
+                // spin the robot off the target the way it did on 2026-08-29.
+                //
+                // It also encodes the team's spec directly: the crosshair should sit NEAR the
+                // tag, a little to one side depending on which side it is being viewed from.
+                public static double AUTOAIM_MAX_TAG_OFFSET_DEG = 8.0;
+
+                // Only refresh the aim target while the robot is turning SLOWER than this
+                // (deg/s). Vision is a few frames behind, so a bearing measured mid-turn belongs
+                // to a heading the robot has already left -- recomputing the "absolute" target
+                // from a stale bearing plus a live heading makes the target run away from the
+                // robot, which is what drove it round until the tag left frame. While turning
+                // fast the target is HELD; once the robot slows, the measurement is trustworthy
+                // again and the target is refined. TODO tune on robot.
+                public static double AUTOAIM_AIM_UPDATE_MAX_DEG_PER_SEC = 30.0;
                 // TAG-LOSS HOLD (s). Team report 2026-08-29: with RB held the hood "keeps
                 // going up and down". A Limelight fiducial drops out for a frame or two
                 // routinely, and every dropout used to refuse the shot instantly, so the hood
