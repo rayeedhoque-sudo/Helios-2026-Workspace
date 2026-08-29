@@ -5,8 +5,17 @@ Usage (robot on, tethered or on the robot's wifi):
     python tools/shotlog.py add 10ft --scored     # log a shot that went in
     python tools/shotlog.py add 3.2m --miss -n "short, hit the rim"
 
-You supply the ONE thing the robot cannot know -- the measured distance from the
-FRONT OF THE DRIVETRAIN to the hub along x -- and whether it scored. Everything
+You supply the ONE thing the robot cannot know -- the measured distance -- and
+whether it scored.
+
+MEASUREMENT CONVENTION (team, 2026-08-29), do not change it mid-table: tape
+measure, horizontal, from the FRONT OF THE DRIVETRAIN (shooter side) to the hub,
+taken LOW on the hub. Low on the hub is the outer wall, which is also the plane
+the AprilTag is mounted on -- the hub footprint is 47 in square, so its wall sits
+~23.5 in from centre and the tag plane sits 23.8 in (0.6035 m) from centre. Those
+agree, which is why this tape reading and the camera's tag distance differ only
+by fixed camera geometry (setback behind the bumper, plus mounting height) rather
+than by anything range-dependent and messy. Everything
 else (RT flywheel RPM, hood position, what the Limelight sees) is read from
 NetworkTables at the moment you run it, so the numbers in the log are the numbers
 that were actually on the robot for that shot. Take the shot, then run this before
@@ -39,7 +48,7 @@ CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs"
 
 COLUMNS = [
     "when",                  # local timestamp
-    "dist_m",                # MEASURED: front of drivetrain -> hub, along x
+    "dist_m",                # MEASURED: tape, horizontal, front of drivetrain -> hub wall (low)
     "dist_in",               # same, inches (convenience)
     "scored",                # yes / no
     "rt_rpm",                # RT flywheel TARGET, motor RPM (what the DPAD trims)
@@ -58,7 +67,12 @@ COLUMNS = [
     "ll_tag_dist_m",         # hypot(x, z) -- camera to the TAG FACE, mean over the sample window
     "ll_tag_dist_sd_m",      # spread of that distance while standing still = the camera's own noise
     "ll_samples",            # how many frames went into the mean
-    "ll_hub_dist_m",         # + face-to-hub depth (what the robot's auto-aim uses)
+    # + face-to-hub depth. THIS IS THE COLUMN TO INDEX THE TABLE ON: it is exactly what
+    # ShooterSubsystem.autoAimDistanceMeters computes, so a table keyed on it needs no
+    # conversion and carries no bias -- the same number is used to tune and to look up.
+    # NOTE it is only valid for THIS tag setup. The 0.6035 m term assumes the tag sits on
+    # a real hub face; move the tag to a different mounting and every key here shifts.
+    "ll_hub_dist_m",
     "notes",
 ]
 
