@@ -589,6 +589,23 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             Set.of(this));
     }
 
+    /** Reset odometry to the alliance auto start pose (X, Y AND heading). Start of auto only. */
+    public Command resetToAutoStartPose() {
+        return this.runOnce(() -> this.resetPose(FieldConstants.autoStartPose()));
+    }
+
+    /**
+     * Reset only the odometry X/Y back to the auto start pose, KEEPING the live heading.
+     * End-of-auto use: a heading reset here would leave teleop auto-aim -- which reads its
+     * blue-origin bearing off the pose -- wrong for the rest of the match, since MegaTag2
+     * fuses X/Y only and the MT1 boot-seed is latched off at the first enable.
+     */
+    public Command resetAutoEndTranslation() {
+        return this.runOnce(() -> this.resetPose(new Pose2d(
+            FieldConstants.autoStartPose().getTranslation(),
+            this.getState().Pose.getRotation())));
+    }
+
     // ---- Simple drive-forward autonomous with stall abort ----
     // Stall = a wheel or the whole robot jammed against something. We watch every drive AND steer
     // motor's MEASURED stator current (getStatorCurrent, not commanded output) and abort the whole

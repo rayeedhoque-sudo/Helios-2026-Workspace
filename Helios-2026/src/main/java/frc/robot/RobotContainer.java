@@ -152,10 +152,19 @@ public class RobotContainer {
         // Basic drive-forward auto (aborts on any drive/steer motor stall). Added here rather than
         // as a PathPlanner file so it's selectable even if the .auto/.path files fail to load, and
         // needs no AutoBuilder config -- it's pure odometry + swerve requests.
-        autoChooser.addOption("Drive Forward 3 m @ 1 m/s", drivetrain.driveForwardAuto(3.0, 1.0));
+        // Both autos are bracketed by a pose reset (team request 2026-08-29): full reset to the
+        // alliance start pose first, then X/Y-only back to it at the end -- the end reset keeps
+        // the live heading on purpose, see resetAutoEndTranslation.
+        autoChooser.addOption("Drive Forward 3 m @ 1 m/s",
+                drivetrain.resetToAutoStartPose()
+                        .andThen(drivetrain.driveForwardAuto(3.0, 1.0))
+                        .andThen(drivetrain.resetAutoEndTranslation()));
         // Same building blocks, run back to back: forward leg then a left (+Y) strafe leg.
         autoChooser.addOption("Forward 3 m then Left 3 m @ 1 m/s",
-                drivetrain.driveForwardAuto(3.0, 1.0).andThen(drivetrain.driveLeftAuto(3.0, 1.0)));
+                drivetrain.resetToAutoStartPose()
+                        .andThen(drivetrain.driveForwardAuto(3.0, 1.0))
+                        .andThen(drivetrain.driveLeftAuto(3.0, 1.0))
+                        .andThen(drivetrain.resetAutoEndTranslation()));
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         configureBindings();
