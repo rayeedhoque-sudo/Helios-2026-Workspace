@@ -195,6 +195,25 @@ public class SubsystemConstants {
             
             //SPEED CONSTANTS
                 public static final double INDEXER_SPEED = 0.75;
+                // Kicker duty for a SHOT (B feed shot / RT / RB) -- team request 2026-08-29,
+                // asked as "is it safe, and if so do it". 0.75 doubled is 1.5, so this pins at
+                // full output: the real increase is 1.33x, not 2x.
+                //
+                // WHY IT IS ACCEPTABLE, written down because the kicker is the one motor on this
+                // robot with NO current sensing at all (CIM on a Victor SPX, breaker size still
+                // unverified -- data sheet sec.11). A CIM's locked-rotor current is ~131 A at
+                // 12 V and scales with duty, so a JAM already pulls ~98 A at 0.75 -- far above
+                // any plausible breaker. Full output makes that existing failure arrive sooner
+                // and hotter; it does not introduce a new one, and no software protection is
+                // lost because there was never any to lose. The run is bounded by the trigger
+                // hold, and configOpenloopRamp(0.25) limits the inrush.
+                //
+                // WHAT DOES GET WORSE: the reverse-to-forward transition during spin-up, which
+                // becomes -0.3 -> +1.0 instead of -0.3 -> +0.75. That is why UNJAM_SPEED (the
+                // reverse) is deliberately NOT doubled -- a faster reverse would both fight the
+                // now-full-speed belts harder and make that plugging step more severe.
+                // ON-ROBOT WATCH ITEM: the breaker at the reverse-to-forward flip.
+                public static final double KICKER_SHOT_SPEED = Math.min(1.0, INDEXER_SPEED * 2.0);
                 //                                                                                                                                                                          Belt duty. Conservative start (old code ran 0.8, never verified on robot);
                 // direction test 2026-07-14 confirmed both motors agree, positive = tested
                 // direction. TODO raise toward 0.8 once feed direction + throughput verified.

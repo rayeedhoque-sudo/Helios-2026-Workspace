@@ -237,7 +237,7 @@ public class HopperSubsystem extends SubsystemBase{
             () -> {
                 if (beltsOn.getAsBoolean()) { indexFuelForShot(); } else { stopIndex(); }
                 if (reverseKicker.getAsBoolean()) { reverseKickFuel(); }
-                else if (kickerOn.getAsBoolean()) { kickFuel(); }
+                else if (kickerOn.getAsBoolean()) { kickFuelForShot(); }
                 else { stopKickFuel(); }
             },
             () -> {
@@ -293,6 +293,16 @@ public class HopperSubsystem extends SubsystemBase{
 
     public void kickFuel(){
         setKicker(HopperSubsystemConstants.INDEXER_SPEED);
+    }
+
+    /**
+     * Kicker at the SHOT duty (KICKER_SHOT_SPEED) -- used by feedShooterCommand only, so
+     * B / RT / RB kick faster while the unjam and the kicker bench test keep their own duties
+     * (team request 2026-08-29). The REVERSE stays at UNJAM_SPEED, deliberately: see
+     * KICKER_SHOT_SPEED for why a faster reverse is the one change not worth making.
+     */
+    public void kickFuelForShot(){
+        setKicker(HopperSubsystemConstants.KICKER_SHOT_SPEED);
     }
     
     /**

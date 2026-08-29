@@ -28,6 +28,29 @@ class HopperShotSpeedTest {
         }
     }
 
+    /** The kicker's shot duty is doubled and clamped the same way the belts are. */
+    @Test
+    void theKickerShotDutyIsDoubledAndClamped() {
+        double normal = HopperSubsystemConstants.INDEXER_SPEED;
+        double shot = HopperSubsystemConstants.KICKER_SHOT_SPEED;
+        assertEquals(Math.min(1.0, normal * 2.0), shot, 1e-12);
+        assertTrue(shot <= 1.0, "a duty above full output is not a thing");
+        assertTrue(shot > normal, "the shot paths must actually kick faster");
+    }
+
+    /**
+     * The REVERSE is deliberately not doubled. It would fight the now-full-speed belts harder
+     * and make the reverse-to-forward plugging step worse on a CIM with no current sensing --
+     * the one part of this change that was not worth making.
+     */
+    @Test
+    void theKickerReverseIsNotDoubled() {
+        assertEquals(0.3, HopperSubsystemConstants.UNJAM_SPEED, 1e-12);
+        assertTrue(HopperSubsystemConstants.UNJAM_SPEED
+            < HopperSubsystemConstants.KICKER_SHOT_SPEED / 2,
+            "the reverse must stay well below the forward shot duty");
+    }
+
     /** The normal duty is untouched: LT intake and the A manual hopper run must not speed up. */
     @Test
     void theNormalDutyIsUnchanged() {
