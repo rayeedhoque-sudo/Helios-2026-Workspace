@@ -165,6 +165,20 @@ public class RobotContainer {
                         .andThen(drivetrain.driveForwardAuto(3.0, 1.0))
                         .andThen(drivetrain.driveLeftAuto(3.0, 1.0))
                         .andThen(drivetrain.resetAutoEndTranslation()));
+        // Same as above, but the LEFT leg runs the intake -- exactly what holding LT does in
+        // teleop (team request 2026-08-29). The left leg is the DEADLINE: when it ends the
+        // intake group is cancelled, its finallyDo stops the rollers, and stowCommand then
+        // retracts the slider until stall. Same group and same release order as the LT binding
+        // at configureBindings, reused rather than rebuilt.
+        autoChooser.addOption("Forward 3 m then Left 3 m intaking @ 1 m/s",
+                drivetrain.resetToAutoStartPose()
+                        .andThen(drivetrain.driveForwardAuto(3.0, 1.0))
+                        .andThen(drivetrain.driveLeftAuto(3.0, 1.0)
+                                .deadlineFor(intakeSS.intakeCommand()
+                                        .andThen(hopperSS.intakeFeedCommand())
+                                        .finallyDo(intakeSS::stopRollers)))
+                        .andThen(intakeSS.stowCommand())
+                        .andThen(drivetrain.resetAutoEndTranslation()));
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         configureBindings();
