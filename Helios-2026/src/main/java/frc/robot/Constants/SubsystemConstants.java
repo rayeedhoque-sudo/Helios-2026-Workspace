@@ -488,6 +488,17 @@ public class SubsystemConstants {
                 // now comes from the manual hood angle, not from the model).
                 // Cut 20% (19.8 -> 15.84) 2026-08-22 by team request.
                 public static double RT_FLYWHEEL_SURFACE_SPEED = 15.84;  // m/s surface
+                // Y FEED SHOT (team request 2026-08-29): a fixed, hand-set feed lob -- hood all
+                // the way up and a fixed flywheel speed. Both numbers came from the driver
+                // companion readout, so they are RAW: the hood target is this many RAW ENCODER
+                // UNITS ABOVE the enable-time floor (the same scale the DPAD steps use), and the
+                // speed is MOTOR RPM, converted to surface speed by surfaceSpeedForMotorRpm.
+                // 298 sits just under the HOOD_TRAVEL_WINDOW_DEG ceiling (309.6), so
+                // clampDesiredAngle leaves it alone from a normal resting enable and clips it
+                // only if the robot was enabled with the hood already raised.
+                // TODO tune both on robot -- neither has been shot yet.
+                public static double FEED_SHOT_HOOD_UNITS = 298.0;   // raw units above the enable floor
+                public static double FEED_SHOT_MOTOR_RPM = 935.0;    // motor RPM
                 // Time-of-flight linear fits (s) for moving-shot compensation, refit AT 38 DEG
                 // (refit_38.py 2026-07-21, residual <= 0.011 s): score 0.188 + 0.115*d,
                 // feed 0.583 + 0.081*d. (The stale 44.5-deg fits over-read ToF ~14% at range,
@@ -646,5 +657,51 @@ public class SubsystemConstants {
                 // RAW UNITS (2026-08-27): the tuned 0.75 physical degree, converted.
                 // HOOD_LOWER_FF_VOLTS is self explanatory, based off raise volts
                 public static double HOOD_LOWER_FF_VOLTS = 6.0;
+
+            //RB AUTO-AIM (team request 2026-08-29). CONSTANT flywheel speed, hood angle from
+            // the measured tag distance. Deliberately independent of the RT constants: RT is
+            // the manual mode and its DPAD trim must not move this.
+                // Flywheel target, MOTOR RPM (team-specified "around 1000"). Constant with
+                // distance -- range comes entirely from the hood angle. Converted to surface
+                // speed by ShooterSubsystem.surfaceSpeedForMotorRpm.
+                // TODO tune on robot: if every shot is short at every distance, raise this
+                // FIRST, then re-tune the table below (the table is only valid for one speed).
+                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1000.0;
+                // TEST-ONLY TAG ALIAS (team request 2026-08-29: "we only have AprilTag 17, make
+                // it act like 10"). Tag 17 is normally a FEED tag; with this true it classifies
+                // as a SCORE tag so auto-aim will range on it. Tags 10 and 17 are both CENTERED
+                // on their hub face (neither is in LATERALLY_OFFSET_TAGS), so the camera-space
+                // geometry is already identical -- the class is the only difference.
+                // *** SET FALSE BEFORE COMPETITION *** -- while true, a real field tag 17 makes
+                // the robot think it can score, and it also feeds the A-button search-align.
+                public static boolean AUTOAIM_TEST_TAG_ALIAS_ENABLED = true;
+                public static int AUTOAIM_TEST_TAG_ID = 17;
+                // DISTANCE (m, robot -> hub center) -> HOOD POSITION IN RAW ENCODER UNITS ABOVE
+                // THE ENABLE DATUM. Not physical degrees: the hood setpoint has been a raw
+                // encoder reading since 2026-08-27, and the datum is wherever the hood sat at
+                // enable, so this is "how far above the resting hood", 7.5 units = 1 physical
+                // degree. Between points it interpolates linearly; outside the ends it CLAMPS
+                // to the nearest endpoint (never extrapolates off a two-point line).
+                //
+                // *** EVERY VALUE HERE IS A PLACEHOLDER. SHOTS WILL NOT LAND UNTIL IT IS TUNED. ***
+                // Placeholders only encode the shape (farther = higher hood) so the mechanism
+                // can be verified moving in the right direction. TO TUNE, per row:
+                //   1. Enable with the hood RESTING DOWN (the datum assumption everything here
+                //      shares -- see ShooterSubsystem.captureHoodDatum).
+                //   2. Park the robot at the row's distance from the hub center.
+                //   3. Hold RT (constant-speed manual mode) and step the hood on DPAD LEFT/RIGHT
+                //      until the shot goes in. Set RT's speed to AUTOAIM_FLYWHEEL_MOTOR_RPM
+                //      first (DPAD UP/DOWN, watch "RT Target (motor RPM)") or the angle you find
+                //      belongs to a different speed.
+                //   4. Read "Hood Travel Since Datum (deg)" off the Shooter dashboard tab -- that
+                //      number IS the second column. Type it in here.
+                // Rows must stay sorted by distance. Add rows freely; 4 is not special.
+                public static double[][] AUTOAIM_HOOD_TABLE = {
+                    // { distance m, raw units above the enable datum }
+                    { 2.0,  60.0 },   // TODO placeholder
+                    { 3.0, 100.0 },   // TODO placeholder
+                    { 4.0, 140.0 },   // TODO placeholder
+                    { 5.0, 180.0 },   // TODO placeholder
+                };
         }
 }

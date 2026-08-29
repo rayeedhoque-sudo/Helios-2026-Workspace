@@ -192,16 +192,19 @@ public class RobotContainer {
         //   RT (hold)   = flywheels-only shot (2026-08-22): fixed flywheel speed, belts always,
         //                 kicker opens 2 s after the press, HOOD NOT COMMANDED (DPAD L/R).
         //                 Full drive + intake lockout; no vision, no auto-aim.
-        //   RB (hold)   = DISABLED 2026-08-22 (was: fixed 25 deg feed shot). The hood is
-        //                 tracked relative to its enable position now, so a fixed angle means
-        //                 nothing until the hood is re-anchored absolutely.
+        //   RB (hold)   = AUTO-AIM SHOT (2026-08-29): constant flywheel speed (~1000 motor
+        //                 RPM), hood angle looked up from the AprilTag distance, belts always,
+        //                 kicker after the same 2 s spin-up delay. Same drive + intake lockout
+        //                 as RT. No auto-rotate -- the driver still aims the robot.
         //   (Kicker at-speed gate added 2026-07-18 by team request.)
         //   B (hold)    = manual hopper belts only (kicker OFF)
         //   VIEW (hold) = hopper unjam: reverse belts + kicker (added 2026-07-18)
         //   A (hold)    = search-align to our alliance's scoring tag
-        //   DPAD-UP/DOWN       = RT flywheel target +/- 200 motor RPM per press (2026-08-22)
-        //   DPAD-LEFT/RIGHT    = jog the hood DOWN / UP, 5 deg/sec (2026-08-22; replaced the
-        //                        +-90 deg heading snaps)
+        //   DPAD-UP/DOWN       = RT flywheel target +/- 50 motor RPM per press (2026-08-22;
+        //                        200 -> 50 on 2026-08-28). Does NOT affect RB's auto-aim speed.
+        //   DPAD-LEFT/RIGHT    = step the hood DOWN / UP HOOD_UP_STEP_UNITS per press, on the
+        //                        position loop (2026-08-27/28; replaced the held voltage jog,
+        //                        which replaced the +-90 deg heading snaps)
         //   MENU        = manual heading re-zero -- the ONLY in-match re-center (2026-07-21:
         //                 AprilTag auto-seed now stops at the first enable after boot)
         // REMOVED 2026-07-16: DPAD hood jog, RT test shot. (MENU re-zero re-added 2026-07-17.)
@@ -253,12 +256,10 @@ public class RobotContainer {
             // a match (collision skew, gyro drift, camera down -- all of it lands here).
                 joystick2.start().and(RobotModeTriggers.teleop()).onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-            // A (hold) = search-align: rotate slowly until a SCORING tag of OUR alliance is
-            // seen, then face it (bearing re-sampled every loop).
-                joystick2.a().and(RobotModeTriggers.teleop()).whileTrue(drivetrain.searchAndAlignCommand(
-                    shooterSS::seesScoringTag,
-                    () -> drivetrain.getState().Pose.getRotation().getDegrees()
-                          + shooterSS.getDegreesToAlignToTarget()));
+            // A used to be search-align (rotate until a SCORING tag of our alliance is seen,
+            // then face it). REASSIGNED to outtake 2026-08-29 by team request; there is no
+            // search-align binding left on the match layer. searchAndAlignCommand and
+            // seesScoringTag/getDegreesToAlignToTarget are all still there if it comes back.
             // DPAD-UP / DOWN (press) = trim the RT flywheel target by +/- 200 motor RPM (team
             // request 2026-08-22). ~1.6 m/s of surface speed per press. Takes effect mid-hold:
             // flywheelOnlyShotCommand re-reads the target every loop. Clamped to
@@ -323,8 +324,8 @@ public class RobotContainer {
                 .whileTrue(intakeSS.intakeCommand().andThen(hopperSS.intakeFeedCommand())
                     .finallyDo(intakeSS::stopRollers))
                 .onFalse(intakeSS.stowCommand());
-            // Y (hold) = outtake: same choreography, rollers out.
-            joystick2.y().and(RobotModeTriggers.teleop())
+            // A (hold) = outtake: same choreography, rollers out. (Was Y until 2026-08-29.)
+            joystick2.a().and(RobotModeTriggers.teleop())
                 .whileTrue(intakeSS.outtakeCommand().andThen(hopperSS.intakeFeedCommand())
                     .finallyDo(intakeSS::stopRollers))
                 .onFalse(intakeSS.stowCommand());
@@ -371,17 +372,44 @@ public class RobotContainer {
                         lockDriveAndIntake())
                     .beforeStarting(kickerSpinupTimer::restart)
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));
-            // RB DISABLED 2026-08-22 (team request), alongside the hood going relative: RB
-            // commanded a FIXED 25 deg, which only means anything against absolute anchors. The
-            // hood angle is now measured from wherever it sat at enable, so a fixed number is no
-            // longer a real angle. Restore this only after the hood is re-anchored absolutely.
-            // joystick2.rightBumper().and(RobotModeTriggers.teleop())
-            //     .whileTrue(shooterSS.feedAngleShotCommand()
-            //         .alongWith(
-            //             hopperSS.feedShooterCommand(() -> true, shooterSS::isFlywheelAtSpeed, () -> false),
-            //             lockDriveAndIntake())
-            //         .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming))
-            //     .onFalse(shooterSS.stopShooterCommand());
+            // Y (hold) = FIXED FEED SHOT (team request 2026-08-29, taking over the button
+            // outtake used to hold): hood to FEED_SHOT_HOOD_UNITS above this enable's floor,
+            // flywheels to FEED_SHOT_MOTOR_RPM. Everything else is RT's behaviour, reusing RT's
+            // parts: belts always, kicker only after KICKER_SPINUP_DELAY_SEC, same drive+intake
+            // lockout, same kCancelIncoming hold. The hood is commanded ONCE at the press (see
+            // feedShotCommand) and is NOT returned on release.
+            joystick2.y().and(RobotModeTriggers.teleop())
+                .whileTrue(shooterSS.feedShotCommand()
+                    .alongWith(
+                        hopperSS.feedShooterCommand(() -> true,
+                            () -> kickerSpinupTimer.hasElapsed(
+                                HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC),
+                            () -> false),
+                        lockDriveAndIntake())
+                    .beforeStarting(kickerSpinupTimer::restart)
+                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));
+            // RB (hold) = AUTO-AIM SHOT (team request 2026-08-29). Same shape as RT -- constant
+            // flywheel speed (AUTOAIM_FLYWHEEL_MOTOR_RPM, ~1000 RPM), belts always, kicker after
+            // the same 2 s spin-up delay, full drive + intake lockout -- with ONE difference:
+            // the HOOD IS COMMANDED from the measured AprilTag distance
+            // (ShooterSubsystem.runAutoAimTargeting -> AUTOAIM_HOOD_TABLE). No auto-rotate: the
+            // driver still points the robot (A search-aligns). No tag in view = velocity 0, so
+            // the kicker never opens.
+            // The hood moving on its own here is a deliberate, team-approved exception to the
+            // 2026-08-26 no-automatic-hood-motion rule -- see autoAimShotCommand.
+            // Shares kickerSpinupTimer with RT: both groups require drivetrain + intake and run
+            // kCancelIncoming, so only one of them can ever own the timer at a time.
+            // (This replaces the fixed-25-deg feed shot disabled on 2026-08-22.)
+            joystick2.rightBumper().and(RobotModeTriggers.teleop())
+                .whileTrue(shooterSS.autoAimShotCommand()
+                    .alongWith(
+                        hopperSS.feedShooterCommand(() -> true,
+                            () -> kickerSpinupTimer.hasElapsed(
+                                HopperSubsystemConstants.KICKER_SPINUP_DELAY_SEC),
+                            () -> false),
+                        lockDriveAndIntake())
+                    .beforeStarting(kickerSpinupTimer::restart)
+                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming));
     }
 
     /**

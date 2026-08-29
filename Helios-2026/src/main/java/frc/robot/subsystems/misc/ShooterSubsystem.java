@@ -23,6 +23,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -378,6 +379,53 @@ public class ShooterSubsystem extends SubsystemBase{
             return Math.max(volts, ShooterSubsystemConstants.HOOD_BREAKAWAY_VOLTS);
         }
 
+        // RB AUTO-AIM (team request 2026-08-29): distance (m) -> hood position in RAW UNITS
+        // ABOVE THE ENABLE DATUM, linearly interpolated. InterpolatingDoubleTreeMap CLAMPS
+        // outside the table rather than extrapolating, which is what we want -- an
+        // extrapolated hood angle at an untabled distance is a guess that can reach the top
+        // stop. Package-private + static for AutoAimTest.
+        static InterpolatingDoubleTreeMap buildAutoAimHoodTable(){
+            InterpolatingDoubleTreeMap table = new InterpolatingDoubleTreeMap();
+            for (double[] row : ShooterSubsystemConstants.AUTOAIM_HOOD_TABLE) {
+                table.put(row[0], row[1]);
+            }
+            return table;
+        }
+        private final InterpolatingDoubleTreeMap autoAimHoodTable = buildAutoAimHoodTable();
+
+        // TEST-ONLY tag alias: treat the one tag the team actually has (17) as a scoring tag,
+        // so it behaves like tag 10 (both are CENTERED on their hub face, so the camera-space
+        // geometry already matches -- only the classification differs). Applied inside
+        // classifyTag, i.e. in ONE place, so the pose caching in periodic(), the align bearing
+        // and auto-aim all follow the same path. Package-private + static for AutoAimTest.
+        // TODO set AUTOAIM_TEST_TAG_ALIAS_ENABLED false before competition.
+        static boolean isAliasedScoreTag(int tagId){
+            return ShooterSubsystemConstants.AUTOAIM_TEST_TAG_ALIAS_ENABLED
+                && tagId == ShooterSubsystemConstants.AUTOAIM_TEST_TAG_ID;
+        }
+
+        // Horizontal distance (m) from the camera to the HUB CENTER, from the camera-space tag
+        // pose: camera X = right, Z = forward, plus the fixed tag-face -> hub-center depth.
+        // Deliberately NOT the botpose path that runVisionTargeting prefers: a test tag hung
+        // somewhere other than its real field location yields a confident, badly wrong botpose,
+        // while camera space measures the thing actually in front of the robot.
+        // Package-private + static for AutoAimTest.
+        static double autoAimDistanceMeters(double camX, double camZ, double lateralOffsetMeters){
+            return Math.hypot(camX + lateralOffsetMeters,
+                camZ + FieldConstants.TAG_FACE_TO_HUB_DEPTH_METERS);
+        }
+
+        // Should auto-aim WRITE a new hood setpoint this loop? Only when the distance-derived
+        // target has moved further than the settle band. THIS GUARD IS LOAD-BEARING:
+        // setDesired_Angle clears hoodHolding (the park latch), and an unparked hood below its
+        // target is driven at the ~7.5 V breakaway floor -- so writing the setpoint every 20 ms
+        // loop would re-start the drive every loop and reproduce exactly the up/down limit
+        // cycle that hoodHolding was added to kill, on a NEO 550 at a 20 A limit.
+        // Package-private + static for AutoAimTest.
+        static boolean autoAimShouldRetarget(double newTarget, double currentTarget){
+            return Math.abs(newTarget - currentTarget) > ShooterSubsystemConstants.ANGLE_TOLERANCE;
+        }
+
         // Surface speed (m/s) equivalent to a motor speed in RPM. Same geometry the velocity
         // command uses in reverse: rev/s at the motor -> rev/s at the wheel -> rim speed.
         // Package-private + static for ShooterSpeedTrimTest.
@@ -648,6 +696,8 @@ public class ShooterSubsystem extends SubsystemBase{
         // scoring faces (never the opponent hub), FEED on the neutral-facing feed set (either
         // alliance), anything else = NONE (no flywheels, no belts, no kicker).
         private TargetClass classifyTag(int tagId){
+            // TEST-ONLY alias, checked FIRST so it wins over tag 17's normal FEED class.
+            if (isAliasedScoreTag(tagId)) return TargetClass.SCORE;
             if (FieldConstants.ownScoreTags(ownAlliance()).contains(tagId)) return TargetClass.SCORE;
             if (FieldConstants.FEED_TAGS.contains(tagId)) return TargetClass.FEED;
             return TargetClass.NONE;
@@ -1040,6 +1090,96 @@ public class ShooterSubsystem extends SubsystemBase{
                     hasShotTarget = false;
                     setDesiredFlywheelVelocity(0);
                 });
+        }
+
+        // Y (hold) = FIXED FEED SHOT (team request 2026-08-29): hood all the way up, flywheels
+        // at a fixed RPM. Same principles as RT -- the binding runs the belts always and opens
+        // the kicker only after the spin-up delay -- the only difference is that this one DOES
+        // command the hood, once.
+        //
+        // ONCE, deliberately: the hood setpoint is written in beforeStarting, not in the loop
+        // body. setDesired_Angle clears hoodHolding, so re-writing it every loop would un-park
+        // the hood on every arrival and re-open the up/down limit cycle the arrival latch
+        // exists to close (see periodic). The flywheel target IS re-written every loop, exactly
+        // as flywheelOnlyShotCommand does it.
+        //
+        // The target is read off the hood floor at the press (getHoodFloorAngle = the
+        // enable-time datum), so it means the same thing whatever the raw encoder happened to
+        // read at enable. clampDesiredAngle and the hard travel guard still bound it.
+        // Release: flywheels coast, hood stays where the shot put it (nothing lowers it).
+        public Command feedShotCommand(){
+            return runEnd(
+                () -> {
+                    enableSubsystem();
+                    setDesiredFlywheelVelocity(
+                        surfaceSpeedForMotorRpm(ShooterSubsystemConstants.FEED_SHOT_MOTOR_RPM));
+                },
+                () -> {
+                    hasShotTarget = false;
+                    setDesiredFlywheelVelocity(0);
+                })
+                .beforeStarting(() -> setDesired_Angle(
+                    getHoodFloorAngle() + ShooterSubsystemConstants.FEED_SHOT_HOOD_UNITS));
+        }
+
+        // RB (hold) = AUTO-AIM SHOT (team request 2026-08-29). CONSTANT flywheel speed
+        // (AUTOAIM_FLYWHEEL_MOTOR_RPM); the ONLY thing that varies with distance is the hood
+        // angle, looked up in AUTOAIM_HOOD_TABLE. No auto-rotate -- the driver still aims the
+        // robot (A does search-align), this only sets the hood.
+        //
+        // THE HOOD MOVES WITHOUT A DRIVER PRESS HERE. That is a deliberate exception to the
+        // 2026-08-26 "no automatic hood motion" rule, approved by the team on 2026-08-29 for
+        // this binding only. Everything protecting the hood still applies: the setpoint goes
+        // through setDesired_Angle (so clampDesiredAngle bounds it to [enable datum, datum +
+        // travel]), the travel guards in periodic() still cut the volts at both ends, and the
+        // retarget deadband below stops the loop from re-driving the hood every 20 ms.
+        //
+        // Release: flywheels coast, hood LEFT WHERE IT IS (no auto-stow, 2026-08-26).
+        public Command autoAimShotCommand(){
+            return runEnd(
+                () -> {
+                    enableSubsystem();
+                    runAutoAimTargeting();
+                },
+                () -> {
+                    hasShotTarget = false;
+                    target_distance = 0;
+                    setDesiredFlywheelVelocity(0);
+                });
+        }
+
+        // One pass per loop while autoAimShotCommand() is scheduled. periodic() has already
+        // refreshed targetClass and tagCameraPose this loop (the scheduler runs subsystem
+        // periodic() before command execute()).
+        private void runAutoAimTargeting(){
+            // No OWN scoring tag in view (the test alias makes 17 count) -> refuse: velocity 0,
+            // so the at-speed gate never opens and the kicker never feeds. The hood is left
+            // wherever it is, deliberately -- losing the tag must not yank it.
+            if (targetClass != TargetClass.SCORE) {
+                target_distance = 0;
+                refuseShot();
+                return;
+            }
+            double distance = autoAimDistanceMeters(tagCameraPose.getX(), tagCameraPose.getZ(),
+                FieldConstants.tagLateralOffsetMeters(visibleTagId));
+            if (!(distance > 0.01)) {   // also catches NaN from a garbage tag pose
+                target_distance = 0;
+                refuseShot();
+                return;
+            }
+            target_distance = distance;
+            // Table value is raw units ABOVE THE ENABLE DATUM, so anchor it to the datum.
+            // getHoodFloorAngle() IS that datum (and the floor clampDesiredAngle enforces).
+            // INHERITED ASSUMPTION: the datum is only the hood's rest position if the robot was
+            // enabled with the hood resting down -- see captureHoodDatum. Enable with the hood
+            // already raised and every angle here is biased by the same amount.
+            double hoodTarget = getHoodFloorAngle() + autoAimHoodTable.get(distance);
+            if (autoAimShouldRetarget(hoodTarget, getDesiredAngle())) {
+                setDesired_Angle(hoodTarget);
+            }
+            setDesiredFlywheelVelocity(
+                surfaceSpeedForMotorRpm(ShooterSubsystemConstants.AUTOAIM_FLYWHEEL_MOTOR_RPM));
+            hasShotTarget = true;
         }
 
         // RB (hold) = fixed blind feed: fixed hood angle + fixed tunable feed surface speed.
