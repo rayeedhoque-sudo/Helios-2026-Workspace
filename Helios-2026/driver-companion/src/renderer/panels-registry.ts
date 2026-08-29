@@ -19,6 +19,7 @@ import { mountPowerBars, mountVision, mountMechanisms, mountAutoChooser, mountCo
 import { mountDeploy } from './deploy';
 import { mountMotorRecorder } from './recorder';
 import { mountPidTune } from './pidtune';
+import { mountShooter } from './shooter';
 
 export interface PanelDef {
   /** Stable id — dockview panel id + layout key. FROZEN; never rename. */
@@ -43,6 +44,7 @@ export const PANELS: readonly PanelDef[] = [
   { id: 'controls', title: 'Controls', mount: mountControls },
   { id: 'motor-recorder', title: 'Motor Recorder', mount: mountMotorRecorder }, // starts closed — open via "+ Panels"
   { id: 'pid-tune', title: 'PID Tuning', mount: mountPidTune }, // starts closed — open via "+ Panels"
+  { id: 'shooter', title: 'Shooter', mount: mountShooter }, // starts closed — open via "+ Panels"
 
 ];
 
