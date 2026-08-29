@@ -125,6 +125,32 @@ public class HopperSubsystem extends SubsystemBase{
     }
 
     /**
+     * KILL SWITCH for the whole hopper (team request 2026-08-29). false = NO hopper motor is
+     * ever driven: belts and kicker are commanded 0 no matter which command is running, in
+     * teleop, in test mode and in autonomous alike. The bindings all still exist and the
+     * commands all still schedule -- they simply move nothing -- so this is one word to undo
+     * and cannot leave a mechanism half-wired.
+     *
+     * WHAT IT COSTS, so it is not a surprise on the field: nothing feeds the shooter. Every
+     * shot binding still spins its flywheels and opens its kicker gate, and no fuel arrives.
+     * The intake still collects, but nothing indexes it. Unjam does nothing either.
+     *
+     * Set true to restore the hopper exactly as it was.
+     */
+    private static final boolean HOPPER_ENABLED = false;
+
+    /** Drive both belt motors, or 0 when the hopper is disabled. Every belt write goes here. */
+    private void setBelts(double duty){
+        hopperMotorA.set(HOPPER_ENABLED ? duty : 0);
+        hopperMotorB.set(HOPPER_ENABLED ? duty : 0);
+    }
+
+    /** Drive the kicker, or 0 when the hopper is disabled. Every kicker write goes here. */
+    private void setKicker(double duty){
+        kickerMotor.set(ControlMode.PercentOutput, HOPPER_ENABLED ? duty : 0);
+    }
+
+    /**
      * UNJAM: reverse both belts AND the kicker while held, to back a jammed ball out.
      * (Commands own the motors outright now -- the old periodic state machine and its
      * manualOverride flag are gone, 2026-07-16 team-spec rewrite.)
@@ -132,9 +158,8 @@ public class HopperSubsystem extends SubsystemBase{
     public Command unjamCommand(){
         return runEnd(
             () -> {
-                hopperMotorA.set(-HopperSubsystemConstants.UNJAM_SPEED);
-                hopperMotorB.set(-HopperSubsystemConstants.UNJAM_SPEED);
-                kickerMotor.set(ControlMode.PercentOutput, -HopperSubsystemConstants.UNJAM_SPEED);
+                setBelts(-HopperSubsystemConstants.UNJAM_SPEED);
+                setKicker(-HopperSubsystemConstants.UNJAM_SPEED);
             },
             () -> {
                 stopIndex();
@@ -149,7 +174,7 @@ public class HopperSubsystem extends SubsystemBase{
      */
     public Command kickerTestCommand(){
         return runEnd(
-            () -> kickerMotor.set(ControlMode.PercentOutput, HopperSubsystemConstants.KICKER_TEST_SPEED),
+            () -> setKicker(HopperSubsystemConstants.KICKER_TEST_SPEED),
             () -> stopKickFuel());
     }
 
@@ -165,7 +190,7 @@ public class HopperSubsystem extends SubsystemBase{
     public Command directionTest(boolean motorA){
         SparkMax motor = motorA ? hopperMotorA : hopperMotorB;
         return runEnd(
-            () -> motor.set(HopperSubsystemConstants.DIRECTION_TEST_SPEED),
+            () -> motor.set(HOPPER_ENABLED ? HopperSubsystemConstants.DIRECTION_TEST_SPEED : 0),
             () -> stopIndex());
     }
 
@@ -253,12 +278,11 @@ public class HopperSubsystem extends SubsystemBase{
     }
 
     public void indexFuel(){
-        hopperMotorA.set(HopperSubsystemConstants.HOPPER_SPEED);
-        hopperMotorB.set(HopperSubsystemConstants.HOPPER_SPEED);
+        setBelts(HopperSubsystemConstants.HOPPER_SPEED);
     }
 
     public void kickFuel(){
-        kickerMotor.set(ControlMode.PercentOutput, HopperSubsystemConstants.INDEXER_SPEED);
+        setKicker(HopperSubsystemConstants.INDEXER_SPEED);
     }
     
     /**
@@ -267,16 +291,15 @@ public class HopperSubsystem extends SubsystemBase{
      * reverseKicker supplier, so restoring the hold-back is a one-word change at the binding.
      */
     public void reverseKickFuel(){
-        kickerMotor.set(ControlMode.PercentOutput, -HopperSubsystemConstants.UNJAM_SPEED);
+        setKicker(-HopperSubsystemConstants.UNJAM_SPEED);
     }
 
     public void stopIndex(){
-        hopperMotorA.set(0);
-        hopperMotorB.set(0);
+        setBelts(0);
     }
 
     public void stopKickFuel(){
-        kickerMotor.set(ControlMode.PercentOutput, 0);
+        setKicker(0);
     }
 
     @Override
