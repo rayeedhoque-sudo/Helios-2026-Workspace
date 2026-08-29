@@ -175,12 +175,78 @@ class AutoAimTest {
     /** Raw-fiducial bearing/range round-trips to the camera-space point the aim helpers use. */
     @Test
     void fiducialGeometryRoundTrips() {
-        double tx = 12.0, dist = 2.5;
-        double x = ShooterSubsystem.fiducialCamX(tx, dist);
-        double z = ShooterSubsystem.fiducialCamZ(tx, dist);
-        assertEquals(dist, Math.hypot(x, z), 1e-9, "range preserved");
+        double tx = 12.0, ground = 2.5;
+        double x = ShooterSubsystem.fiducialCamX(tx, ground);
+        double z = ShooterSubsystem.fiducialCamZ(tx, ground);
+        assertEquals(ground, Math.hypot(x, z), 1e-9, "range preserved");
         assertEquals(tx, Math.toDegrees(Math.atan2(x, z)), 1e-9, "bearing preserved");
         assertTrue(x > 0, "a positive tx is to the camera's right");
+    }
+
+    /**
+     * THE VERTICAL DROP MUST COME OUT OF distToCamera (bug found 2026-08-29). It is a 3D range
+     * and the tag sits well below the camera on this robot, so using it as a horizontal depth
+     * overstates the depth -- and an overstated depth makes every aim correction too SMALL.
+     */
+    @Test
+    void groundRangeRemovesTheVerticalDrop() {
+        double dist = 1.25;
+        // Dead level: nothing to remove.
+        assertEquals(dist, ShooterSubsystem.fiducialGroundRange(0.0, dist), 1e-9);
+        // Measured on the robot at 39 in: tync -41.4 deg.
+        double ground = ShooterSubsystem.fiducialGroundRange(-41.4, dist);
+        assertTrue(ground < dist, "the ground range is shorter than the 3D range");
+        assertEquals(dist * Math.cos(Math.toRadians(41.4)), ground, 1e-9);
+        // Sign of tync must not matter -- above or below the camera drops the same amount.
+        assertEquals(ShooterSubsystem.fiducialGroundRange(41.4, dist), ground, 1e-9);
+        // And the consequence: the side-tag correction gets BIGGER once the drop is removed.
+        double lateral = FieldConstants.tagLateralOffsetMeters(9);
+        double wrong = ShooterSubsystem.autoAimBearingDegrees(
+            ShooterSubsystem.fiducialCamX(2.7, dist), ShooterSubsystem.fiducialCamZ(2.7, dist), lateral);
+        double right = ShooterSubsystem.autoAimBearingDegrees(
+            ShooterSubsystem.fiducialCamX(2.7, ground), ShooterSubsystem.fiducialCamZ(2.7, ground), lateral);
+        assertTrue(right > wrong + 1.0,
+            "removing the drop must turn the robot noticeably further right, got "
+                + wrong + " -> " + right);
+    }
+
+    /**
+     * The three tags that matter for the team's aim check: 10, 26 and the 17 standing in for
+     * them are CENTRED, so a tag on the crosshair needs essentially no turn -- only the small
+     * amount the face-to-hub depth contributes when viewed off to one side. 9 and 25 sit on the
+     * left of the face, so they always need a significant turn to the RIGHT.
+     */
+    @Test
+    void centredTagsNeedNoTurnAndSideTagsTurnRight() {
+        double ground = 2.4;
+        for (int id : new int[] {10, 26, 17}) {
+            double lateral = FieldConstants.tagLateralOffsetMeters(id);
+            // Tag exactly on the crosshair -> no turn at all.
+            assertEquals(0.0, ShooterSubsystem.autoAimBearingDegrees(
+                ShooterSubsystem.fiducialCamX(0.0, ground),
+                ShooterSubsystem.fiducialCamZ(0.0, ground), lateral), 1e-9,
+                "tag " + id + " is centred: on the crosshair means aimed");
+            // Seen from the LEFT of the tag (tag appears right, +tx) -> a small turn right.
+            double fromLeft = ShooterSubsystem.autoAimBearingDegrees(
+                ShooterSubsystem.fiducialCamX(6.0, ground),
+                ShooterSubsystem.fiducialCamZ(6.0, ground), lateral);
+            assertTrue(fromLeft > 0 && fromLeft < 6.0,
+                "tag " + id + ": a little right, and LESS than the raw tx, got " + fromLeft);
+            // Mirrored from the right.
+            assertEquals(-fromLeft, ShooterSubsystem.autoAimBearingDegrees(
+                ShooterSubsystem.fiducialCamX(-6.0, ground),
+                ShooterSubsystem.fiducialCamZ(-6.0, ground), lateral), 1e-9);
+        }
+        for (int id : new int[] {9, 25}) {
+            // Tag on the crosshair, but the hub centre is well to its right.
+            double turn = ShooterSubsystem.autoAimBearingDegrees(
+                ShooterSubsystem.fiducialCamX(0.0, ground),
+                ShooterSubsystem.fiducialCamZ(0.0, ground),
+                FieldConstants.tagLateralOffsetMeters(id));
+            assertTrue(turn > 3 * FieldConstants.HEADING_TOLERANCE_DEG,
+                "tag " + id + " sits left of the face, so it needs a significant RIGHT turn, got "
+                    + turn);
+        }
     }
 
     /**

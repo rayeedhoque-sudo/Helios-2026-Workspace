@@ -150,6 +150,11 @@ public class ShooterSubsystem extends SubsystemBase{
             // surface speed, and the driver needs to see what the next press is adjusting.
             private final GenericEntry rtSpeedEntry;
             private final GenericEntry rtSpeedRpmEntry;
+            // AUTO-AIM VISIBILITY (2026-08-29). Without these the only way to tell which tag RB
+            // locked onto, and how far it thinks it must turn, was to infer it from the robot's
+            // behaviour -- which is how a 2 deg geometry error stayed invisible for a session.
+            private final GenericEntry autoAimTagEntry;
+            private final GenericEntry autoAimBearingEntry;
 
     //Tracker Variables
        private boolean enableSubsystem;
@@ -202,6 +207,7 @@ public class ShooterSubsystem extends SubsystemBase{
        private double autoAimServoHeadingDeg = 0.0;
        private boolean autoAimServoSeeded = false;   // false = adopt the next target outright
        private int autoAimTagId = -1;                // which tag auto-aim actually chose
+       private double autoAimBearingDeg = 0.0;       // how far it wants to turn, + = right
        private boolean aimHeadingValid = false;
        // Tag-flicker ride-through: remember the last non-NONE classification so a momentary
        // dropout (< TARGET_HOLD_SEC) rides on the drivetrain's fused pose instead of
@@ -313,6 +319,8 @@ public class ShooterSubsystem extends SubsystemBase{
                 hoodRelativeEntry = ShooterSubsystemTab.add("Hood Travel Since Datum (deg)", 0.0).getEntry();
                 rtSpeedEntry = ShooterSubsystemTab.add("RT Target (m/s)", 0.0).getEntry();
                 rtSpeedRpmEntry = ShooterSubsystemTab.add("RT Target (motor RPM)", 0.0).getEntry();
+                autoAimTagEntry = ShooterSubsystemTab.add("Auto-Aim Tag", -1.0).getEntry();
+                autoAimBearingEntry = ShooterSubsystemTab.add("Auto-Aim Turn (deg, + = right)", 0.0).getEntry();
        }
 
     //Utility Methods
@@ -488,14 +496,25 @@ public class ShooterSubsystem extends SubsystemBase{
             return best;
         }
 
-        // Camera-space point of a raw fiducial: bearing (txnc, degrees, +right) and range
-        // (distToCamera) back to the (x, z) the aim helpers work in. Package-private + static
-        // for AutoAimTest.
-        static double fiducialCamX(double txncDeg, double distToCamera){
-            return distToCamera * Math.sin(Math.toRadians(txncDeg));
+        // Camera-space GROUND point of a raw fiducial: bearing (txnc, +right) and range
+        // (distToCamera) back to the (x, z) the aim helpers work in.
+        //
+        // THE VERTICAL DROP MUST COME OUT FIRST (fix 2026-08-29). distToCamera is a 3D range and
+        // the tag on this robot sits well BELOW the camera -- tync runs -41 deg at 39 in, -19 deg
+        // at 90 in. Feeding the raw 3D range in as if it were horizontal overstated the depth by
+        // 33% up close, and since the bearing is atan2(across, depth), an inflated depth makes
+        // every correction TOO SMALL: a side tag got 12.6 deg of turn where it needed 14.6.
+        // Multiplying by cos(tync) projects onto the ground plane, which is also the plane the
+        // team measures distances in with a tape.
+        // Package-private + static for AutoAimTest.
+        static double fiducialGroundRange(double tyncDeg, double distToCamera){
+            return distToCamera * Math.cos(Math.toRadians(tyncDeg));
         }
-        static double fiducialCamZ(double txncDeg, double distToCamera){
-            return distToCamera * Math.cos(Math.toRadians(txncDeg));
+        static double fiducialCamX(double txncDeg, double groundRange){
+            return groundRange * Math.sin(Math.toRadians(txncDeg));
+        }
+        static double fiducialCamZ(double txncDeg, double groundRange){
+            return groundRange * Math.cos(Math.toRadians(txncDeg));
         }
 
         // Should auto-aim WRITE a new hood setpoint this loop? Only when the distance-derived
@@ -1305,8 +1324,9 @@ public class ShooterSubsystem extends SubsystemBase{
                 return;
             }
             autoAimTagId = picked.id;
-            double camX = fiducialCamX(picked.txnc, picked.distToCamera);
-            double camZ = fiducialCamZ(picked.txnc, picked.distToCamera);
+            double groundRange = fiducialGroundRange(picked.tync, picked.distToCamera);
+            double camX = fiducialCamX(picked.txnc, groundRange);
+            double camZ = fiducialCamZ(picked.txnc, groundRange);
             double lateral = FieldConstants.tagLateralOffsetMeters(picked.id);
             double distance = autoAimDistanceMeters(camX, camZ, lateral);
             if (!(distance > 0.01)) {   // also catches NaN from a garbage solve
@@ -1322,6 +1342,7 @@ public class ShooterSubsystem extends SubsystemBase{
             // every loop, so the servo converges as the robot turns; consumed by the RB binding's
             // aim hold and by isAimedAtTarget(), which gates the kicker.
             double bearingDeg = autoAimBearingDegrees(camX, camZ, lateral);
+            autoAimBearingDeg = bearingDeg;
             double headingDeg = drivetrain.getState().Pose.getRotation().getDegrees();
             // TWO headings, deliberately, and they must not be collapsed into one:
             //  - aimHeadingDeg is the TRUE absolute bearing to the hub centre. isAimedAtTarget()
@@ -1624,6 +1645,8 @@ public class ShooterSubsystem extends SubsystemBase{
             hoodRelativeEntry.setDouble(hoodRelativeDeg);
             rtSpeedEntry.setDouble(rtSurfaceSpeed);
             rtSpeedRpmEntry.setDouble(rtSurfaceSpeed / surfaceSpeedForMotorRpm(1.0));
+            autoAimTagEntry.setDouble(autoAimTagId);
+            autoAimBearingEntry.setDouble(autoAimBearingDeg);
             // Desired Velocity/Angle double as INPUTS in live-data mode (enableComp reads
             // them back above) -- only echo the real setpoints when NOT in that mode, so a
             // dashboard edit is never stomped mid-tune.
