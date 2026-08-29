@@ -563,7 +563,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     rows: [
       { btn: 'L STICK', desc: 'Translate (forward = stick forward on this controller; TODO verify)' },
       { btn: 'R STICK X', desc: 'Rotate' },
-      { btn: 'LB', desc: 'X-lock wheels (toggle)' },
+      { btn: 'LB', desc: 'Hood to base position' },
       { btn: 'MENU', desc: 'Re-zero field heading — the ONLY in-match re-zero (AprilTags seed the pose only before first enable / at boot)' },
       { btn: 'DPAD ← / →', desc: 'Hood DOWN to the enable base / UP one step per press — see the Shooter group (2026-08-22: replaced the ±90° heading snaps)' },
       { btn: 'A', desc: 'Hold: search-align — rotate slowly until OUR scoring tag is seen, then face it (re-aims every loop)' },

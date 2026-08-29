@@ -46,7 +46,6 @@ public class RobotContainer {
             // Deadband is applied to the RAW sticks in shapeAxis() below, so the request's own
             // deadband is left at 0 (applying it twice would eat real low-speed commands).
             .withDriveRequestType(DriveRequestType.Velocity); // Velocity = CLOSED-loop velocity control
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     // Zero-output request used to FREEZE the drivetrain while a shot is held. The drive motors
     // are Brake-neutral (TunerConstants), so Idle coasts to a stop and then holds -- a low-current
     // "disabled" that still plants the robot. Reused every loop by lockDriveAndIntake().
@@ -183,7 +182,7 @@ public class RobotContainer {
         // TEAM SPEC 2026-07-16 (shooter re-enabled by team directive; this is the FULL
         // binding list — no other keybinds may exist):
         //   L stick     = translate (field-centric)      R stick X = rotate  (reverted 2026-07-17)
-        //   LB          = toggle X-lock brake
+        //   LB          = hood all the way DOWN to this enable's base position (2026-08-29)
         //   LT (hold)   = intake (slider out -> rollers + belts; kicker stays OFF); release = stow
         //   Y (hold)    = outtake (same choreography, rollers out); release = stow
         //   X           = manual stow
@@ -226,8 +225,8 @@ public class RobotContainer {
                             .withVelocityY(driveVelY.getAsDouble())
                             .withRotationalRate(driveRot.getAsDouble())
                     )
-                    // Zero the limiters every time the default command (re)starts -- after auto, the
-                    // brake button, or any other command releases the drivetrain. SlewRateLimiter
+                    // Zero the limiters every time the default command (re)starts -- after auto or
+                    // any other command releases the drivetrain. SlewRateLimiter
                     // bounds change by rate*elapsed-since-last-calculate, so after a multi-second gap
                     // the first calculate() would otherwise jump straight to the stick with no limit.
                     .beforeStarting(() -> {
@@ -243,8 +242,6 @@ public class RobotContainer {
                     drivetrain.applyRequest(() -> idle).ignoringDisable(true)
                 );
 
-            // LB = enable/disable X-lock (toggle: press to lock wheels in an X, press to release).
-                joystick2.leftBumper().and(RobotModeTriggers.teleop()).toggleOnTrue(drivetrain.applyRequest(() -> brake));
 
             // MENU = manual heading re-zero (re-added 2026-07-17 by team request): point the
             // SHOOTER SIDE away from the driver, press once. Since 2026-07-21 (team request)
@@ -285,6 +282,16 @@ public class RobotContainer {
             // ShooterSubsystem.moveHoodToCommand before tuning this -- it needs a NON-ZERO kP
             // (>= ~0.17) to break the hood away at all, and there is no move timeout any more.
                 if (HOOD_DPAD_MOVES_ENABLED) {
+                    // LB (press) = send the hood all the way DOWN to this enable's base position
+                    // in one press (team request 2026-08-29), replacing the X-lock brake toggle
+                    // that used to live here. Same closed-loop path as the DPAD steps -- it just
+                    // asks for the floor instead of one step. getHoodFloorAngle IS the
+                    // clampDesiredAngle floor, so the descent stops at the enable-time datum and
+                    // cannot be driven into the bottom stop. Inside the kill switch with the
+                    // DPAD moves, so HOOD_DPAD_MOVES_ENABLED = false still kills every
+                    // driver-station hood move.
+                    joystick2.leftBumper().and(RobotModeTriggers.teleop())
+                        .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
                     joystick2.povLeft().and(RobotModeTriggers.teleop())
                         .onTrue(shooterSS.moveHoodToCommand(
                             () -> shooterSS.getHoodAngle()
