@@ -1,6 +1,7 @@
 package frc.robot.subsystems.misc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -101,6 +102,47 @@ class AutoAimGeometryTest {
         assertEquals(0.0,
             ShooterSubsystem.autoAimBearingDegrees(0.0, camZ, FieldConstants.tagLateralOffsetMeters(10)),
             1e-9);
+    }
+
+    /**
+     * WHICH TAGS AUTO-AIM ACTUALLY ACCEPTS. classifyTag returns SCORE for the test alias
+     * first, then for our OWN alliance's score tags -- so the four tags the team named are
+     * split by alliance and can never all be live at once. That is deliberate (never shoot
+     * into the opponent hub, G407) but it is exactly the kind of thing that looks like a bug
+     * on the field, so it is pinned here.
+     */
+    @Test
+    void theNamedTagsAreAcceptedOnTheRightAlliance() {
+        // 9 and 10 are RED hub faces.
+        assertTrue(FieldConstants.ownScoreTags(Alliance.Red).contains(9));
+        assertTrue(FieldConstants.ownScoreTags(Alliance.Red).contains(10));
+        assertFalse(FieldConstants.ownScoreTags(Alliance.Blue).contains(9),
+            "tag 9 is the opponent hub on blue -- auto-aim must refuse it");
+        assertFalse(FieldConstants.ownScoreTags(Alliance.Blue).contains(10),
+            "tag 10 is the opponent hub on blue -- auto-aim must refuse it");
+        // 25 and 26 are BLUE hub faces.
+        assertTrue(FieldConstants.ownScoreTags(Alliance.Blue).contains(25));
+        assertTrue(FieldConstants.ownScoreTags(Alliance.Blue).contains(26));
+        assertFalse(FieldConstants.ownScoreTags(Alliance.Red).contains(25));
+        assertFalse(FieldConstants.ownScoreTags(Alliance.Red).contains(26));
+    }
+
+    /**
+     * TAG 17 MUST KEEP WORKING (team check 2026-08-29). It is normally a FEED tag and belongs
+     * to neither hub, so it reaches auto-aim ONLY through the test alias -- which classifyTag
+     * checks FIRST, before the alliance partition, so it works on either alliance. Its lateral
+     * offset is 0, the same as the tag 10 it stands in for, so the aim geometry matches too.
+     */
+    @Test
+    void tagSeventeenStillReachesAutoAim() {
+        assertTrue(ShooterSubsystem.isAliasedScoreTag(17),
+            "the alias is what makes 17 usable -- if this is false, RB does nothing on it");
+        assertTrue(FieldConstants.FEED_TAGS.contains(17), "17 is a FEED tag without the alias");
+        assertFalse(FieldConstants.ownScoreTags(Alliance.Red).contains(17));
+        assertFalse(FieldConstants.ownScoreTags(Alliance.Blue).contains(17));
+        assertEquals(FieldConstants.tagLateralOffsetMeters(10),
+            FieldConstants.tagLateralOffsetMeters(17), 1e-9,
+            "17 must aim like the tag 10 it stands in for");
     }
 
     /** Bearing and distance must be built from the SAME corrected point. */
