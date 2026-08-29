@@ -496,10 +496,12 @@ public class SubsystemConstants {
                 // 288 sits under the HOOD_TRAVEL_WINDOW_DEG ceiling (309.6), so
                 // clampDesiredAngle leaves it alone from a normal resting enable and clips it
                 // only if the robot was enabled with the hood already raised.
-                // Dropped 298 -> 288 on 2026-08-29 from on-robot tuning (team direction: "10
-                // encoder units less"); that is ~1.3 physical degrees flatter.
-                public static double FEED_SHOT_HOOD_UNITS = 288.0;   // raw units above the enable floor
-                public static double FEED_SHOT_MOTOR_RPM = 935.0;    // motor RPM
+                // Dropped 298 -> 288 -> 278 on 2026-08-29 from on-robot tuning (team direction,
+                // twice: "10 encoder units less"); 278 is ~2.7 physical degrees flatter than the
+                // original 298. Speed was raised in the same pass (935 -> 1200 motor RPM), so the
+                // two go together: flatter hood, faster wheel.
+                public static double FEED_SHOT_HOOD_UNITS = 278.0;   // raw units above the enable floor
+                public static double FEED_SHOT_MOTOR_RPM = 1200.0;   // motor RPM (935 -> 1200, on-robot 2026-08-29)
                 // Time-of-flight linear fits (s) for moving-shot compensation, refit AT 38 DEG
                 // (refit_38.py 2026-07-21, residual <= 0.011 s): score 0.188 + 0.115*d,
                 // feed 0.583 + 0.081*d. (The stale 44.5-deg fits over-read ToF ~14% at range,
@@ -685,6 +687,22 @@ public class SubsystemConstants {
                 // TODO tune on robot: raise if the hood still lurches, lower if a shot keeps
                 // feeding too long after the tag is genuinely gone.
                 public static double AUTOAIM_TAG_HOLD_SEC = 1.0;
+                // How far the table's hood target must move before auto-aim re-commands the
+                // hood, in RAW UNITS. This used to be ANGLE_TOLERANCE (3.75) and that was far
+                // too tight for two independent reasons:
+                //   1. THE HOOD CANNOT RESOLVE IT. One powered 20 ms loop carries the hood 25-55
+                //      raw units, so asking for anything smaller than ~25 units does not produce
+                //      a smaller move -- it produces the SAME move, in whichever direction the
+                //      error happened to point. A deadband below the minimum stroke is a
+                //      deadband that does nothing.
+                //   2. CAMERA NOISE CROSSES IT. At the table's ~40 units/m, 3.75 units is 0.09 m
+                //      of distance -- inside normal Limelight range jitter, so a parked robot
+                //      re-commanded the hood on noise alone.
+                // 25 units ~= 3.3 physical degrees ~= 0.6 m of distance change at the current
+                // table slope. TODO tune on robot: if auto-aim feels unresponsive to real
+                // movement, lower it toward 25; it should never go below the ~25-unit minimum
+                // stroke, because below that it cannot buy anything.
+                public static double AUTOAIM_RETARGET_DEADBAND_UNITS = 25.0;
                 // TEST-ONLY TAG ALIAS (team request 2026-08-29: "we only have AprilTag 17, make
                 // it act like 10"). Tag 17 is normally a FEED tag; with this true it classifies
                 // as a SCORE tag so auto-aim will range on it. Tags 10 and 17 are both CENTERED
