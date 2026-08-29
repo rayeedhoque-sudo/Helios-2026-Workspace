@@ -2,12 +2,15 @@ package frc.robot.subsystems.misc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import org.junit.jupiter.api.Test;
 
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.utility.LimelightHelpers;
 import frc.robot.Constants.SubsystemConstants.ShooterSubsystemConstants;
 
 /**
@@ -132,6 +135,52 @@ class AutoAimTest {
         assertEquals(bearing, Math.abs(heading - trueTarget), 1e-9);
         // Both vanish together: the loop can only settle pointed at the hub.
         assertEquals(0.0, 0.0 * scale, 1e-9);
+    }
+
+    /**
+     * TAG PRIORITY (team direction 2026-08-29): a CENTRED tag beats a side tag, because a
+     * centred one needs no lateral correction at all. Area breaks ties within a rank, and
+     * anything not a legal score tag is ignored outright.
+     */
+    @Test
+    void centredTagsWinOverSideTags() {
+        java.util.Set<Integer> red = FieldConstants.ownScoreTags(Alliance.Red);
+        // 9 (side) is much larger in frame than 10 (centred) -- 10 still wins.
+        var side = new LimelightHelpers.RawFiducial(9, -12.0, 0, 0.90, 2.0, 2.0, 0.1);
+        var centred = new LimelightHelpers.RawFiducial(10, 3.0, 0, 0.10, 3.0, 3.0, 0.1);
+        assertEquals(10, ShooterSubsystem.pickAutoAimTag(
+            new LimelightHelpers.RawFiducial[] {side, centred}, red).id,
+            "a centred tag needs no lateral correction, so it wins on rank not on size");
+        // Two side tags of equal rank: the BIGGER in frame (nearer, better solve) wins.
+        // side is tag 9 at ta 0.90, side2 is tag 11 at ta 0.40, so 9 takes it.
+        var side2 = new LimelightHelpers.RawFiducial(11, 5.0, 0, 0.40, 2.5, 2.5, 0.1);
+        assertEquals(9, ShooterSubsystem.pickAutoAimTag(
+            new LimelightHelpers.RawFiducial[] {side, side2}, red).id);
+        // ...and the order they arrive in must not change that.
+        assertEquals(9, ShooterSubsystem.pickAutoAimTag(
+            new LimelightHelpers.RawFiducial[] {side2, side}, red).id);
+        // Opponent-hub and non-hub tags are not eligible at all.
+        var blueHub = new LimelightHelpers.RawFiducial(26, 0.0, 0, 0.99, 2.0, 2.0, 0.1);
+        assertNull(ShooterSubsystem.pickAutoAimTag(
+            new LimelightHelpers.RawFiducial[] {blueHub}, red),
+            "tag 26 is the opponent hub on red -- never aim at it");
+        assertNull(ShooterSubsystem.pickAutoAimTag(new LimelightHelpers.RawFiducial[] {}, red));
+        assertNull(ShooterSubsystem.pickAutoAimTag(null, red));
+        // The test alias still gets through, on either alliance.
+        var alias = new LimelightHelpers.RawFiducial(17, 1.0, 0, 0.5, 1.8, 1.8, 0.1);
+        assertEquals(17, ShooterSubsystem.pickAutoAimTag(
+            new LimelightHelpers.RawFiducial[] {alias}, red).id);
+    }
+
+    /** Raw-fiducial bearing/range round-trips to the camera-space point the aim helpers use. */
+    @Test
+    void fiducialGeometryRoundTrips() {
+        double tx = 12.0, dist = 2.5;
+        double x = ShooterSubsystem.fiducialCamX(tx, dist);
+        double z = ShooterSubsystem.fiducialCamZ(tx, dist);
+        assertEquals(dist, Math.hypot(x, z), 1e-9, "range preserved");
+        assertEquals(tx, Math.toDegrees(Math.atan2(x, z)), 1e-9, "bearing preserved");
+        assertTrue(x > 0, "a positive tx is to the camera's right");
     }
 
     /**

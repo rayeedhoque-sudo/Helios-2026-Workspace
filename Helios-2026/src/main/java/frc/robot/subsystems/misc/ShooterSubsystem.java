@@ -200,6 +200,8 @@ public class ShooterSubsystem extends SubsystemBase{
        // from aimHeadingDeg, which stays the true bearing so the kicker's aim gate is not
        // widened by the damping.
        private double autoAimServoHeadingDeg = 0.0;
+       private boolean autoAimServoSeeded = false;   // false = adopt the next target outright
+       private int autoAimTagId = -1;                // which tag auto-aim actually chose
        private boolean aimHeadingValid = false;
        // Tag-flicker ride-through: remember the last non-NONE classification so a momentary
        // dropout (< TARGET_HOLD_SEC) rides on the drivetrain's fused pose instead of
@@ -448,6 +450,52 @@ public class ShooterSubsystem extends SubsystemBase{
         static double autoAimBearingDegrees(double camX, double camZ, double lateralOffsetMeters){
             return Math.toDegrees(Math.atan2(camX + lateralOffsetMeters,
                 camZ + FieldConstants.TAG_FACE_TO_HUB_DEPTH_METERS));
+        }
+
+        // WHICH VISIBLE TAG AUTO-AIM SHOULD USE (team direction 2026-08-29: "10 or 26 should be
+        // prioritised over 25 or 9"). The Limelight's own primary target is whatever is biggest
+        // or nearest the crosshair, which is not what we want: a CENTRED tag (10, 26) sits on the
+        // hub's centreline, so aiming at it needs no lateral correction at all, while a SIDE tag
+        // (9, 25) needs the 0.3556 m across-face step -- and that correction assumes the robot is
+        // square to the face, which it usually is not. Every bit of that assumption is error we
+        // can simply decline to take on when a centred tag is also in frame.
+        //
+        // Order: legal SCORE tags only, centred before offset, then biggest area (nearest /
+        // most reliable solve) as the tie-break. Returns null when nothing qualifies.
+        // Package-private + static for AutoAimTest.
+        static LimelightHelpers.RawFiducial pickAutoAimTag(
+                LimelightHelpers.RawFiducial[] fiducials, java.util.Set<Integer> ownScoreTags){
+            if (fiducials == null) {
+                return null;
+            }
+            LimelightHelpers.RawFiducial best = null;
+            int bestRank = Integer.MAX_VALUE;
+            for (LimelightHelpers.RawFiducial f : fiducials) {
+                if (f == null) {
+                    continue;
+                }
+                boolean legal = isAliasedScoreTag(f.id) || ownScoreTags.contains(f.id);
+                if (!legal) {
+                    continue;
+                }
+                // 0 = centred on its face (no lateral correction), 1 = offset to one side.
+                int rank = FieldConstants.tagLateralOffsetMeters(f.id) == 0.0 ? 0 : 1;
+                if (best == null || rank < bestRank || (rank == bestRank && f.ta > best.ta)) {
+                    best = f;
+                    bestRank = rank;
+                }
+            }
+            return best;
+        }
+
+        // Camera-space point of a raw fiducial: bearing (txnc, degrees, +right) and range
+        // (distToCamera) back to the (x, z) the aim helpers work in. Package-private + static
+        // for AutoAimTest.
+        static double fiducialCamX(double txncDeg, double distToCamera){
+            return distToCamera * Math.sin(Math.toRadians(txncDeg));
+        }
+        static double fiducialCamZ(double txncDeg, double distToCamera){
+            return distToCamera * Math.cos(Math.toRadians(txncDeg));
         }
 
         // Should auto-aim WRITE a new hood setpoint this loop? Only when the distance-derived
@@ -1198,6 +1246,8 @@ public class ShooterSubsystem extends SubsystemBase{
                 () -> {
                     autoAimHadTag = false;
                     autoAimHasCommanded = false;
+                    autoAimServoSeeded = false;
+                    autoAimTagId = -1;
                     hasShotTarget = false;
                     target_distance = 0;
                     aimHeadingValid = false;
@@ -1207,6 +1257,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 // view must do nothing, even if one was seen moments before the press.
                 .beforeStarting(() -> {
                     autoAimHadTag = false;
+                    autoAimServoSeeded = false;
                     // Every press starts fresh, so the first good frame always commands the
                     // hood -- the hood may have been moved by the DPAD since the last hold.
                     autoAimHasCommanded = false;
@@ -1239,9 +1290,26 @@ public class ShooterSubsystem extends SubsystemBase{
             // A good frame: this is what the hold counts from.
             autoAimHadTag = true;
             autoAimTagTimer.restart();
-            double lateral = FieldConstants.tagLateralOffsetMeters(visibleTagId);
-            double distance = autoAimDistanceMeters(tagCameraPose.getX(), tagCameraPose.getZ(), lateral);
-            if (!(distance > 0.01)) {   // also catches NaN from a garbage tag pose
+            // PICK THE TAG rather than taking the Limelight's primary: a centred tag (10, 26)
+            // needs no lateral correction, so it is preferred over a side tag (9, 25) whenever
+            // both are in frame. Geometry comes from that tag's own raw fiducial, which is the
+            // only source that works for a NON-primary tag (targetpose_cameraspace always
+            // describes the primary one).
+            LimelightHelpers.RawFiducial picked = pickAutoAimTag(
+                LimelightHelpers.getRawFiducials(Vision.CAM_LIMELIGHT),
+                FieldConstants.ownScoreTags(ownAlliance()));
+            if (picked == null || !(picked.distToCamera > 0.01)) {
+                target_distance = 0;
+                aimHeadingValid = false;
+                refuseShot();
+                return;
+            }
+            autoAimTagId = picked.id;
+            double camX = fiducialCamX(picked.txnc, picked.distToCamera);
+            double camZ = fiducialCamZ(picked.txnc, picked.distToCamera);
+            double lateral = FieldConstants.tagLateralOffsetMeters(picked.id);
+            double distance = autoAimDistanceMeters(camX, camZ, lateral);
+            if (!(distance > 0.01)) {   // also catches NaN from a garbage solve
                 target_distance = 0;
                 aimHeadingValid = false;
                 refuseShot();
@@ -1253,19 +1321,34 @@ public class ShooterSubsystem extends SubsystemBase{
             // CCW-positive, so the bearing is SUBTRACTED from the current heading. Re-sampled
             // every loop, so the servo converges as the robot turns; consumed by the RB binding's
             // aim hold and by isAimedAtTarget(), which gates the kicker.
-            double bearingDeg = autoAimBearingDegrees(tagCameraPose.getX(), tagCameraPose.getZ(), lateral);
+            double bearingDeg = autoAimBearingDegrees(camX, camZ, lateral);
             double headingDeg = drivetrain.getState().Pose.getRotation().getDegrees();
             // TWO headings, deliberately, and they must not be collapsed into one:
-            //  - aimHeadingDeg is the TRUE bearing to the hub centre. isAimedAtTarget() measures
-            //    against it, so it is what gates the kicker. Scaling this would widen the aim
-            //    gate by 1/scale -- at 0.5 the kicker would open at 4 deg of error, not 2 -- and
-            //    the shot would fire while still visibly off target.
-            //  - autoAimServoHeadingDeg is what the drivetrain servo chases, damped by
-            //    AUTOAIM_ROTATION_SCALE so the robot turns less hard. It still settles pointed
-            //    at the hub, because the bearing it is built from only reaches zero there.
+            //  - aimHeadingDeg is the TRUE absolute bearing to the hub centre. isAimedAtTarget()
+            //    measures against it, so it is what reports the aim. Damping this would widen
+            //    that report by 1/scale and it would read "aimed" while visibly off target.
+            //  - autoAimServoHeadingDeg is what the drivetrain servo chases: the same absolute
+            //    target, LOW-PASS FILTERED toward it.
+            //
+            // THE FILTER IS ON AN ABSOLUTE HEADING, and that is the whole point (overshoot fix,
+            // 2026-08-29). It used to be (live heading - scaled bearing), rebuilt from scratch
+            // every loop -- and the heading term updates instantly while the camera bearing lags
+            // by a frame or two of vision latency. So as the robot turned, the target ran ahead
+            // of it: the servo was chasing a goal that moved because the servo was moving. That
+            // is a positive feedback loop, and it overshoots however small the gain is. Filtering
+            // toward a target that stands still in the field frame removes the feedback entirely
+            // -- the hub is not moving, so neither should the target be.
             aimHeadingDeg = headingDeg - bearingDeg;
-            autoAimServoHeadingDeg =
-                headingDeg - bearingDeg * ShooterSubsystemConstants.AUTOAIM_ROTATION_SCALE;
+            if (!autoAimServoSeeded) {
+                autoAimServoHeadingDeg = aimHeadingDeg;
+                autoAimServoSeeded = true;
+            } else {
+                // Wrapped error, so a target either side of +-180 takes the short way round.
+                double err = MathUtil.inputModulus(aimHeadingDeg - autoAimServoHeadingDeg, -180, 180);
+                autoAimServoHeadingDeg = MathUtil.inputModulus(
+                    autoAimServoHeadingDeg + ShooterSubsystemConstants.AUTOAIM_ROTATION_SCALE * err,
+                    -180, 180);
+            }
             aimHeadingValid = true;
             // Table value is raw units ABOVE THE ENABLE DATUM, so anchor it to the datum.
             // getHoodFloorAngle() IS that datum (and the floor clampDesiredAngle enforces).

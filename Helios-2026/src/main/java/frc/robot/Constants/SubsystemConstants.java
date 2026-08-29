@@ -686,9 +686,15 @@ public class SubsystemConstants {
                 // settle where the correction IS zero, i.e. pointed at the hub centre. Scaling
                 // changes how hard it drives toward that point, not where the point is -- it is
                 // damping, not a smaller target.
+                // 0.5 -> 0.25 on 2026-08-29: still overshooting at 0.5. Note the STRUCTURAL fix
+                // landed in the same pass (the servo target is now an absolute field heading
+                // that is filtered, not a live-heading-plus-lagging-bearing sum rebuilt every
+                // loop -- see ShooterSubsystem), so this gain is now a plain first-order filter
+                // constant rather than a band-aid on a feedback loop. 0.25 reaches ~90% of a
+                // step in about 8 loops (0.16 s).
                 // TODO tune on robot: lower if it still overshoots or hunts, raise toward 1.0 if
                 // it is now too slow to come round before the spin-up ends.
-                public static double AUTOAIM_ROTATION_SCALE = 0.5;
+                public static double AUTOAIM_ROTATION_SCALE = 0.25;
                 // TAG-LOSS HOLD (s). Team report 2026-08-29: with RB held the hood "keeps
                 // going up and down". A Limelight fiducial drops out for a frame or two
                 // routinely, and every dropout used to refuse the shot instantly, so the hood
