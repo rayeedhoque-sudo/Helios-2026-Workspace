@@ -219,11 +219,11 @@ public class SubsystemConstants {
                 public static final double KICKER_SPINUP_DELAY_SEC = 2.0;
                 public static final int HOPPER_CURRENT_LIMIT_A = 5;
                 public static final int HOPPER_SHOT_CURRENT_LIMIT_A = (int)(HOPPER_CURRENT_LIMIT_A * 1.2);
-                // Belt limit while B (manual hopper run) is held -- team request 2026-08-27,
-                // raised 30 -> 60 the same day after the risk was flagged and confirmed.
-                // 60 A is the data-sheet CAP for a hopper NEO 2.0 (never exceed) and is above a
-                // 40 A breaker: on a real jam the BREAKER trips before this limit does anything.
-                public static final int HOPPER_MANUAL_CURRENT_LIMIT_A = 60;
+                // Belt limit while B (manual hopper run) is held -- team request 2026-08-27
+                // (30 -> 60), lowered to 40 on 2026-08-28. 40 A sits at/below the branch
+                // breaker, so the software limit now acts before the breaker does, and stays
+                // under the data-sheet 60 A cap for a hopper NEO 2.0.
+                public static final int HOPPER_MANUAL_CURRENT_LIMIT_A = 40;
         }
 
         public static class ShooterSubsystemConstants{
