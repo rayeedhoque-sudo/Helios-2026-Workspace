@@ -664,12 +664,18 @@ public class SubsystemConstants {
             //RB AUTO-AIM (team request 2026-08-29). CONSTANT flywheel speed, hood angle from
             // the measured tag distance. Deliberately independent of the RT constants: RT is
             // the manual mode and its DPAD trim must not move this.
-                // Flywheel target, MOTOR RPM (team-specified "around 1000"). Constant with
-                // distance -- range comes entirely from the hood angle. Converted to surface
-                // speed by ShooterSubsystem.surfaceSpeedForMotorRpm.
-                // TODO tune on robot: if every shot is short at every distance, raise this
-                // FIRST, then re-tune the table below (the table is only valid for one speed).
-                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1000.0;
+                // Flywheel target, MOTOR RPM. Constant with distance -- range comes entirely
+                // from the hood angle. Converted to surface speed by
+                // ShooterSubsystem.surfaceSpeedForMotorRpm.
+                //
+                // 985, NOT the "around 1000" first specified (team correction 2026-08-29): every
+                // scoring shot in docs/shot-log.csv was taken at 985, and THE HOOD TABLE IS ONLY
+                // VALID AT THE SPEED IT WAS TUNED AT. Running auto-aim 15 RPM faster than the
+                // data would put every tabled angle slightly long, for no reason -- the two
+                // constants are a matched pair.
+                // TODO if every shot is short at every distance, raise this FIRST and then
+                // RE-TUNE the whole table; changing it alone silently invalidates every row.
+                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 985.0;
                 // TAG-LOSS HOLD (s). Team report 2026-08-29: with RB held the hood "keeps
                 // going up and down". A Limelight fiducial drops out for a frame or two
                 // routinely, and every dropout used to refuse the shot instantly, so the hood
