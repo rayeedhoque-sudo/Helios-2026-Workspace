@@ -29,6 +29,11 @@ const T_RPM_TARGET = TAB + 'RT Target (motor RPM)';
 const T_HOOD_VOLTS = TAB + 'Hood Volts (cmd)';
 const T_HOOD_AMPS = TAB + 'Hood Current (A)';
 const T_RAW = TAB + 'Hood Encoder Raw (rot)';
+// The datum the robot re-captures on every enable rising edge (ShooterSubsystem.periodic).
+// Angle is SHOWN relative to it so the hood reads 0 at enable, matching what the driver is
+// actually asked to trim. Motion tracking below still runs on the absolute angle -- the datum
+// jumps at enable and a relative feed would fake a giant "move" out of that jump.
+const T_BASE = TAB + 'Hood Base Angle (deg)';
 
 // Motion thresholds. The hood encoder is noisy at ~0.2 raw units (HOOD_RAW_NOISE_DEADBAND on
 // the robot), so "moving" has to sit clear of that: 3 units/s is well above sensor jitter and
@@ -52,6 +57,7 @@ let rpmTarget: number | null = null;
 let hoodVolts = 0;
 let hoodAmps = 0;
 let raw: number | null = null;
+let base = 0; // enable-time datum; 0 before the robot has captured one
 
 // Motion tracking, all derived here from the angle samples.
 let lastAngle: number | null = null;
@@ -203,6 +209,7 @@ function ensureShooterSubs(): void {
       // a different enable (the robot re-datums the hood on every enable). Keeping the old
       // "last move" across that would be a lie, so drop the lot.
       angle = angleTarget = rpm = rpmTarget = raw = null;
+      base = 0;
       lastAngle = lastStampUs = lastMove = parkedAngle = moveStartAngle = quietSinceMs = null;
       rate = 0;
       moving = false;
@@ -222,6 +229,7 @@ function ensureShooterSubs(): void {
   onValue(T_HOOD_VOLTS, (v) => { hoodVolts = Number(v); render(); });
   onValue(T_HOOD_AMPS, (v) => { hoodAmps = Number(v); render(); });
   onValue(T_RAW, (v) => { raw = Number(v); render(); });
+  onValue(T_BASE, (v) => { base = Number(v); render(); });
 
   // The settle debounce has to expire on its own: the hood stops moving by the robot sending
   // the SAME angle over and over, and NT4 does not resend an unchanged value, so nothing would
@@ -278,7 +286,7 @@ function render(): void {
   if (!rootEl) return;
   renderBanner();
 
-  setBig('angle', angle, 1);
+  setBig('angle', angle === null ? null : angle - base, 1);
   setBig('rpm', rpm, 0);
 
   set('lastMove', lastMove === null ? '--' : signed(lastMove, 1) + ' units');
@@ -290,7 +298,7 @@ function render(): void {
   const err = angle !== null && angleTarget !== null ? angleTarget - angle : null;
   set('angleErr', angleTarget === null || err === null
     ? '--'
-    : num(angleTarget, 1) + '  /  ' + signed(err, 1), angleReached ? 'ok' : undefined);
+    : num(angleTarget - base, 1) + '  /  ' + signed(err, 1), angleReached ? 'ok' : undefined);
 
   // Volts with no motion is the stall case -- the hood is a NEO 550 on a 20 A smart limit and
   // there is no move timeout in the robot code, so flag it loudly rather than burying it.
