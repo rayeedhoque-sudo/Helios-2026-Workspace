@@ -845,7 +845,7 @@ public class SubsystemConstants {
                 // deleted because it is the right knob if every shot later turns out uniformly
                 // long or short at all distances -- one number to change instead of re-tuning
                 // every row. Positive values flatten the hood.
-                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 0.0;
+                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 12.0;
 
                 // MEASURED ON THE ROBOT 2026-08-29 (team), replacing the original placeholder
                 // rows. Every row is a shot that SCORED at AUTOAIM_FLYWHEEL_MOTOR_RPM (1010) --
