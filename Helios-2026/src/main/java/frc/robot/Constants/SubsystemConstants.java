@@ -535,8 +535,10 @@ public class SubsystemConstants {
                 // direction, three times: "10", "10", then "20 encoder units less"); 258 is
                 // ~5.4 physical degrees flatter than the original 298. Speed was raised in the
                 // same pass (935 -> 1200 motor RPM), so the two go together: flatter hood,
-                // faster wheel.
-                public static double FEED_SHOT_HOOD_UNITS = 258.0;   // raw units above the enable floor
+                // faster wheel. Back up to 280 on 2026-08-30 (team read it off the driver
+                // companion's Hood Angle number, which is exactly this scale: units above the
+                // enable floor). Still under the 309.6 travel ceiling.
+                public static double FEED_SHOT_HOOD_UNITS = 280.0;   // raw units above the enable floor
                 public static double FEED_SHOT_MOTOR_RPM = 1200.0;   // motor RPM (935 -> 1200, on-robot 2026-08-29)
                 // Time-of-flight linear fits (s) for moving-shot compensation, refit AT 38 DEG
                 // (refit_38.py 2026-07-21, residual <= 0.011 s): score 0.188 + 0.115*d,
