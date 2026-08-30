@@ -102,14 +102,21 @@ public class TunerConstants {
         // affects current, because the draw comes from accelerating and pushing, not from
         // cruising. If the robot needs to be SLOWER as well, that is MaxSpeed in
         // RobotContainer (currently 0.8 of kSpeedAt12Volts).
+        // RAISED 50% ON 2026-08-30 (team request: "up the current limit on the drivetrain by
+        // 50%"): burst 20 -> 30 A, sustained 15 -> 23 A (22.5 rounded). Budget back to
+        // 30 x4 = 120 A burst folding to 23 x4 = 92 A sustained; with steer also raised 50%
+        // to 32 x4 = 128 A the drivetrain worst case is ~248 A, still under the ~290 A that
+        // sags a healthy pack to the RIO2 brownout floor. Hardware sheet sec.7 cap is 70 A
+        // drive supply -- 30 is well inside it, and below the original July value of 40.
+        // This buys back roughly the torque the two 30% cuts took away.
         .withCurrentLimits(new CurrentLimitsConfigs()
-            .withSupplyCurrentLimit(Amps.of(20))
+            .withSupplyCurrentLimit(Amps.of(30))
             // Burst-then-fall-back: 40 A is allowed for accelerations, but sustained draw
             // (pushing matches, stalls) drops to 30 A after 0.25 s. Window shortened 0.5 ->
             // 0.25 s (2026-07-18): teleop is a stream of fresh transients that each re-arm
             // the window, so a 0.5 s window meant the drives lived at full burst and the
             // fold-back never engaged during a full-stick reversal (which also lasted 0.5 s).
-            .withSupplyCurrentLowerLimit(Amps.of(15))
+            .withSupplyCurrentLowerLimit(Amps.of(23))
             .withSupplyCurrentLowerTime(Seconds.of(0.25))
             .withSupplyCurrentLimitEnable(true));
     private static final TalonFXConfiguration steerInitialConfigs = new TalonFXConfiguration()
@@ -140,7 +147,14 @@ public class TunerConstants {
                 // Team-confirmed 2026-08-29 (supply-only cut chosen over cutting both).
                 .withStatorCurrentLimit(Amps.of(40))
                 .withStatorCurrentLimitEnable(true)
-                .withSupplyCurrentLimit(Amps.of(21))
+                // SUPPLY RAISED 50% on 2026-08-30 (team request, alongside the drive raise):
+                // 21 -> 32 A (31.5 rounded), so the steer ceiling goes from 21 x4 = 84 A back
+                // to 32 x4 = 128 A. Hardware sheet sec.7 cap is 40 A steer supply, so this is
+                // inside the cap and above the sheet's 25 A "regular" tier -- deliberate, it is
+                // the value range that never locked modules mid-swing. Stator stays 40 A (see
+                // above): stator is not pack draw, and 40 is the known low-torque suspect --
+                // raise it to 60 first if modules hesitate.
+                .withSupplyCurrentLimit(Amps.of(32))
                 .withSupplyCurrentLimitEnable(true)
         )
         // Brake so the wheels hold their commanded steer angle instead of coasting.

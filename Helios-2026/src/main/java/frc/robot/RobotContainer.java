@@ -37,9 +37,15 @@ public class RobotContainer {
     // full for more controllable driving. Applied at the top-level scalar so it flows into every
     // teleop drive path (default drive + the shaped/scaled suppliers). Autos use explicit speeds
     // and are NOT affected. TODO tune the 0.8 factor to driver preference.
-    private double MaxSpeed = 0.8 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // 80% of kSpeedAt12Volts
-    // 0.8 rot/s teleop spin rate (was 1.0; -20% per the same request). Physical ceiling ~1.9 rot/s.
-    private double MaxAngularRate = RotationsPerSecond.of(0.8).in(RadiansPerSecond);
+    // RAISED 2026-08-30 (team request: "up the ... speed" by 50%, alongside the drivetrain
+    // current raise). Translation 0.8 -> 1.0: +50% would be 1.2, which does not exist --
+    // kSpeedAt12Volts IS the ceiling -- so it is clamped to 1.0. WATCH ITEM: 4.76 m/s is the
+    // Tuner-measured FREE speed at 12 V; loaded, the robot cannot reach it, so full stick
+    // saturates the drive velocity loop at 12 V chasing a speed it will never hit. If full
+    // stick feels like it is burning current for no extra speed, 0.95 is the knob.
+    private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // 100% of kSpeedAt12Volts
+    // Teleop spin rate 0.8 -> 1.2 rot/s (a real +50%; physical ceiling ~1.9 rot/s).
+    private double MaxAngularRate = RotationsPerSecond.of(1.2).in(RadiansPerSecond);
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
