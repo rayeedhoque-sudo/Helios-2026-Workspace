@@ -538,8 +538,8 @@ public class SubsystemConstants {
                 // faster wheel. Back up to 280 on 2026-08-30 (team read it off the driver
                 // companion's Hood Angle number, which is exactly this scale: units above the
                 // enable floor). Still under the 309.6 travel ceiling.
-                public static double FEED_SHOT_HOOD_UNITS = 280.0;   // raw units above the enable floor
-                public static double FEED_SHOT_MOTOR_RPM = 1200.0;   // motor RPM (935 -> 1200, on-robot 2026-08-29)
+                public static double FEED_SHOT_HOOD_UNITS = 240.0;   // raw units above the enable floor
+                public static double FEED_SHOT_MOTOR_RPM = 1100.0;   // motor RPM (935 -> 1200, on-robot 2026-08-29)
                 // Time-of-flight linear fits (s) for moving-shot compensation, refit AT 38 DEG
                 // (refit_38.py 2026-07-21, residual <= 0.011 s): score 0.188 + 0.115*d,
                 // feed 0.583 + 0.081*d. (The stale 44.5-deg fits over-read ToF ~14% at range,
@@ -712,7 +712,7 @@ public class SubsystemConstants {
                 // silently invalidates every row. It has been 985 (the first data set) and 1100
                 // (a speed nothing was ever measured at); 1010 is the first value here that
                 // matches the data underneath it.
-                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1010.0;
+                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1100.0;
 
                 // How much of the computed heading correction to apply per loop, 1.0 = all of
                 // it. 0.5 (team direction 2026-08-29: "the rotation correction is too much,
@@ -847,7 +847,7 @@ public class SubsystemConstants {
                 // deleted because it is the right knob if every shot later turns out uniformly
                 // long or short at all distances -- one number to change instead of re-tuning
                 // every row. Positive values flatten the hood.
-                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 12.0;
+                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 25.0;
 
                 // MEASURED ON THE ROBOT 2026-08-29 (team), replacing the original placeholder
                 // rows. Every row is a shot that SCORED at AUTOAIM_FLYWHEEL_MOTOR_RPM (1010) --
