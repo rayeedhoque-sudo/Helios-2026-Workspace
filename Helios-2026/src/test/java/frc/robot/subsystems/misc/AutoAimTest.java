@@ -53,15 +53,30 @@ class AutoAimTest {
         double bias = ShooterSubsystemConstants.AUTOAIM_HOOD_SUBTRACT_UNITS;
         double floor = 100.0;   // stand-in for the enable datum
         for (double[] row : ShooterSubsystemConstants.AUTOAIM_HOOD_TABLE) {
-            double commanded = floor + table.get(row[0]) - bias;
-            assertEquals(floor + row[1] - bias, commanded, EPS,
+            double commanded = floor + Math.max(0.0, table.get(row[0]) - bias);
+            assertEquals(floor + Math.max(0.0, row[1] - bias), commanded, EPS,
                 "distance " + row[0] + " m must be commanded " + bias + " units flatter");
-            assertEquals(row[1] - bias, commanded - floor, EPS);
+            assertTrue(commanded >= floor, "the bias must never command below the datum");
         }
         // Between rows too -- it is a flat offset, not a per-row edit.
         double[][] rows = ShooterSubsystemConstants.AUTOAIM_HOOD_TABLE;
         double mid = (rows[0][0] + rows[1][0]) / 2;
         assertEquals((rows[0][1] + rows[1][1]) / 2 - bias, table.get(mid) - bias, EPS);
+    }
+
+    /**
+     * A bias LARGER than the tabled angle must floor at the datum, not go negative. Without
+     * the clamp a 500-unit bias would ask for a negative rise, and autoAimLastTarget would
+     * remember that impossible number while setDesired_Angle silently clamped to the floor --
+     * so the retarget deadband would then compare against an angle the hood never held.
+     */
+    @Test
+    void anOversizedBiasFloorsAtTheDatumInsteadOfGoingNegative() {
+        InterpolatingDoubleTreeMap table = ShooterSubsystem.buildAutoAimHoodTable();
+        for (double[] row : ShooterSubsystemConstants.AUTOAIM_HOOD_TABLE) {
+            assertEquals(0.0, Math.max(0.0, table.get(row[0]) - 500.0), EPS,
+                "distance " + row[0] + " m must floor at the datum, not command a negative rise");
+        }
     }
 
     /** The table must stay sorted and never ask for more travel than the hood has. */

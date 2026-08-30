@@ -1466,10 +1466,14 @@ public class ShooterSubsystem extends SubsystemBase{
             // already raised and every angle here is biased by the same amount.
             // Table lookup, then the flat AUTOAIM_HOOD_SUBTRACT_UNITS bias (team direction
             // 2026-08-29) -- applied to EVERY auto-aim angle, at every distance, on every tag.
-            // setDesired_Angle still clamps to the enable-time floor afterwards, so the bias
-            // can lower the angle but never drive the hood below where this enable started.
-            double hoodTarget = getHoodFloorAngle() + autoAimHoodTable.get(distance)
-                - ShooterSubsystemConstants.AUTOAIM_HOOD_SUBTRACT_UNITS;
+            // The bias can only FLATTEN toward the datum, never past it (team direction
+            // 2026-08-30): a bias bigger than the tabled angle would otherwise ask for a
+            // negative rise. setDesired_Angle clamps to the floor too, but clamping here is
+            // what keeps autoAimLastTarget equal to the angle actually commanded -- otherwise
+            // the retarget deadband compares against a target the hood was never sent to.
+            double hoodRise = Math.max(0.0, autoAimHoodTable.get(distance)
+                - ShooterSubsystemConstants.AUTOAIM_HOOD_SUBTRACT_UNITS);
+            double hoodTarget = getHoodFloorAngle() + hoodRise;
             // First command of the hold always goes through; after that only a real change does.
             if (!autoAimHasCommanded || autoAimShouldRetarget(hoodTarget, autoAimLastTarget)) {
                 setDesired_Angle(hoodTarget);
