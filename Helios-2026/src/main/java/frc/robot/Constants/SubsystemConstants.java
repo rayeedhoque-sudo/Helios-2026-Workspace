@@ -442,11 +442,16 @@ public class SubsystemConstants {
                 // How far ABOVE its enable-time position the hood may be commanded, in RAW UNITS
                 // (2026-08-27). This is the ONLY upper travel limit now: MAX_ANGLE is a physical
                 // degree belonging to the shot model and cannot be compared against a raw reading.
-                // The hood's whole stroke is HOOD_RAW_UNITS_PER_FULL_TRAVEL, so this permits
-                // exactly the full travel above the datum -- same assumption as before, that the
-                // hood is enabled resting on its bottom stop. Enable it already raised and the
-                // ceiling sits that much too high; see captureHoodDatum's note.
-                public static double HOOD_TRAVEL_WINDOW_DEG = HOOD_RAW_UNITS_PER_FULL_TRAVEL; // 309.6
+                // 290 (team direction 2026-08-30), down from the full geometric stroke of
+                // HOOD_RAW_UNITS_PER_FULL_TRAVEL (309.6) -- ~19.6 units (2.6 deg) of margin held
+                // back from the top stop, so a commanded angle cannot drive the hood into it.
+                // DELIBERATELY NOT the same constant any more: HOOD_RAW_UNITS_PER_FULL_TRAVEL is
+                // the SCALE (it divides into HOOD_UNITS_PER_DEG and every hood gain), so trimming
+                // the ceiling through it would silently rescale the whole loop. The travel limit
+                // and the scale are separate facts; only the limit moved.
+                // Still assumes the hood is enabled resting on its bottom stop -- enable it
+                // already raised and the ceiling sits that much too high; see captureHoodDatum.
+                public static double HOOD_TRAVEL_WINDOW_DEG = 290.0;
             //SHOT MODEL (distance -> velocity; quadratic-drag ballistics for the OFFICIAL FUEL
             // ball -- 5.91 in / 0.203-0.227 kg foam, Cd~0.5, manual sec.5.10.1 -- validated
             // against the no-drag closed form. Angle rule: FIXED at MAX_ANGLE (38 deg since the
@@ -847,7 +852,7 @@ public class SubsystemConstants {
                 // deleted because it is the right knob if every shot later turns out uniformly
                 // long or short at all distances -- one number to change instead of re-tuning
                 // every row. Positive values flatten the hood.
-                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 25.0;
+                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 35.0;
 
                 // MEASURED ON THE ROBOT 2026-08-29 (team), replacing the original placeholder
                 // rows. Every row is a shot that SCORED at AUTOAIM_FLYWHEEL_MOTOR_RPM (1010) --

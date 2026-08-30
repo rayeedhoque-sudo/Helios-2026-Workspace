@@ -131,9 +131,16 @@ public class HoodTrackingTest {
         assertEquals(base + 5,
             ShooterSubsystem.clampDesiredAngle(base + 5, base, true), 1e-9,
             "DPAD-RIGHT's base + 5 must survive the clamp at any encoder offset");
-        assertEquals(ShooterSubsystemConstants.HOOD_RAW_UNITS_PER_FULL_TRAVEL,
-            ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG, 1e-9,
-            "the window is the hood's whole stroke, in raw units");
+        // The window is now 290 (team direction 2026-08-30), deliberately SHORT of the full
+        // geometric stroke so the top stop keeps a margin. The two constants must stay
+        // separate: HOOD_RAW_UNITS_PER_FULL_TRAVEL is the SCALE behind HOOD_UNITS_PER_DEG and
+        // every hood gain, so re-aliasing the window to it would rescale the whole loop.
+        assertTrue(ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG
+                < ShooterSubsystemConstants.HOOD_RAW_UNITS_PER_FULL_TRAVEL,
+            "the ceiling must hold margin back from the physical top stop");
+        assertTrue(ShooterSubsystemConstants.HOOD_TRAVEL_WINDOW_DEG
+                > ShooterSubsystemConstants.FEED_SHOT_HOOD_UNITS,
+            "the feed shot angle must still fit under the ceiling");
     }
 
     /**
