@@ -77,6 +77,20 @@ public class RobotContainer {
     private final SlewRateLimiter xSlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
     private final SlewRateLimiter ySlewLimiter = new SlewRateLimiter(kTranslationSlewRate);
 
+    // DRIVE-ONLY MODE (team request 2026-08-30): in TELEOP the driver gets the two sticks,
+    // MENU re-zero, and DPAD LEFT/RIGHT hood steps -- nothing else. Every intake, hopper and
+    // shot binding, plus LB (hood-to-floor) and DPAD UP/DOWN (RT speed trim), is simply not
+    // registered while this is true. Set false to bring the full match layer back; that one
+    // flag is the whole switch, so nothing had to be deleted to get here.
+    // The subsystems are still CONSTRUCTED on purpose -- construction is what applies their
+    // current limits and brake modes, so skipping it would leave whatever was last flashed.
+    // With no command ever scheduled, IntakeSubsystem.periodic() idles into its roller brake
+    // and HopperSubsystem.periodic() is telemetry-only, so no motor is driven.
+    // NOT AFFECTED, deliberately: the TEST-mode layer (configureTestBindings) is untouched --
+    // flipping the DS to Test still exercises every mechanism -- and the "Forward 3 m then
+    // Left 3 m intaking" auto still runs the intake, since this is a teleop-layer request.
+    private static final boolean DRIVE_ONLY_MODE = true;
+
     // KILL SWITCH for the teleop DPAD hood moves (2026-08-27). false = the bindings are not
     // registered at all, so nothing can drive the hood from the driver station; the hood still
     // holds on its brake and commanded shot angles are unaffected. See the bindings below.
@@ -301,10 +315,13 @@ public class RobotContainer {
             // [0, SHOT_MAX_MOTOR_RPS] in the subsystem, and NOT persisted -- a redeploy returns
             // it to RT_FLYWHEEL_SURFACE_SPEED. Trims RT ONLY -- RB's auto-aim speed is a
             // separate constant and is not trimmable from the controller.
-                joystick2.povUp().and(RobotModeTriggers.teleop())
-                    .onTrue(shooterSS.trimRtSpeedCommand(kRtSpeedTrimRpm));
-                joystick2.povDown().and(RobotModeTriggers.teleop())
-                    .onTrue(shooterSS.trimRtSpeedCommand(-kRtSpeedTrimRpm));
+            // Not registered in DRIVE_ONLY_MODE -- it trims the RT shot, and RT is gone.
+                if (!DRIVE_ONLY_MODE) {
+                    joystick2.povUp().and(RobotModeTriggers.teleop())
+                        .onTrue(shooterSS.trimRtSpeedCommand(kRtSpeedTrimRpm));
+                    joystick2.povDown().and(RobotModeTriggers.teleop())
+                        .onTrue(shooterSS.trimRtSpeedCommand(-kRtSpeedTrimRpm));
+                }
 
             // DPAD-RIGHT (PRESS) = raise the hood by HOOD_UP_STEP_UNITS, EVERY PRESS (team
             // direction 2026-08-27). The target is read off the hood itself at the moment of
@@ -329,8 +346,12 @@ public class RobotContainer {
                     // cannot be driven into the bottom stop. Inside the kill switch with the
                     // DPAD moves, so HOOD_DPAD_MOVES_ENABLED = false still kills every
                     // driver-station hood move.
-                    joystick2.leftBumper().and(RobotModeTriggers.teleop())
-                        .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
+                    // LB is a hood move too, so DRIVE_ONLY_MODE drops it -- the request was
+                    // DPAD LEFT/RIGHT only. The two DPAD steps below stay.
+                    if (!DRIVE_ONLY_MODE) {
+                        joystick2.leftBumper().and(RobotModeTriggers.teleop())
+                            .onTrue(shooterSS.moveHoodToCommand(shooterSS::getHoodFloorAngle));
+                    }
                     joystick2.povLeft().and(RobotModeTriggers.teleop())
                         .onTrue(shooterSS.moveHoodToCommand(
                             () -> shooterSS.getHoodAngle()
@@ -342,6 +363,14 @@ public class RobotContainer {
                 }
 
             drivetrain.registerTelemetry(logger::telemeterize);
+
+        // DRIVE-ONLY MODE STOPS HERE (team request 2026-08-30). Everything above -- the two
+        // sticks, the disabled-idle that applies brake neutral, MENU re-zero, and the DPAD
+        // LEFT/RIGHT hood steps -- stays live. Everything below (intake, hopper, and all four
+        // shot bindings) is never registered. Flip DRIVE_ONLY_MODE to false to restore it all.
+            if (DRIVE_ONLY_MODE) {
+                return;
+            }
 
         //INTAKE + HOPPER FEED
             // LT (hold) = intake: slider extends until stall-stop, THEN rollers spin in AND
