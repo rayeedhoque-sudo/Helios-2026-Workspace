@@ -533,17 +533,23 @@ public class SubsystemConstants {
                 // companion readout, so they are RAW: the hood target is this many RAW ENCODER
                 // UNITS ABOVE the enable-time floor (the same scale the DPAD steps use), and the
                 // speed is MOTOR RPM, converted to surface speed by surfaceSpeedForMotorRpm.
-                // 288 sits under the HOOD_TRAVEL_WINDOW_DEG ceiling (309.6), so
-                // clampDesiredAngle leaves it alone from a normal resting enable and clips it
-                // only if the robot was enabled with the hood already raised.
+                // It sits under the HOOD_TRAVEL_WINDOW_DEG ceiling (290), so clampDesiredAngle
+                // leaves it alone from a normal resting enable and clips it only if the robot
+                // was enabled with the hood already raised.
                 // Dropped 298 -> 288 -> 278 -> 258 on 2026-08-29 from on-robot tuning (team
-                // direction, three times: "10", "10", then "20 encoder units less"); 258 is
-                // ~5.4 physical degrees flatter than the original 298. Speed was raised in the
-                // same pass (935 -> 1200 motor RPM), so the two go together: flatter hood,
-                // faster wheel. Back up to 280 on 2026-08-30 (team read it off the driver
-                // companion's Hood Angle number, which is exactly this scale: units above the
-                // enable floor). Still under the 309.6 travel ceiling.
-                public static double FEED_SHOT_HOOD_UNITS = 240.0;   // raw units above the enable floor
+                // direction, three times: "10", "10", then "20 encoder units less"). Speed was
+                // raised in the same pass (935 -> 1200 motor RPM), so the two go together:
+                // flatter hood, faster wheel. Back up to 280, then 240, on 2026-08-30 (team
+                // read it off the driver companion's Hood Angle number, which is exactly this
+                // scale: units above the enable floor).
+                // CUT 20% (240 -> 192) 2026-08-30, team direction: at 240 the shot "comes off
+                // the hood and becomes unreachable" -- the lob was so high the ball left the
+                // hood's guide before the flywheels could set it. 192 is ~6.4 physical degrees
+                // flatter (48 units / 7.5 units-per-deg).
+                // NOTE: the flywheel speed was NOT re-tuned with it, and the two have always
+                // moved together before -- a flatter hood usually wants a slower wheel to land
+                // in the same place. Expect to re-tune FEED_SHOT_MOTOR_RPM after this.
+                public static double FEED_SHOT_HOOD_UNITS = 192.0;   // raw units above the enable floor
                 public static double FEED_SHOT_MOTOR_RPM = 1100.0;   // motor RPM (935 -> 1200, on-robot 2026-08-29)
                 // Time-of-flight linear fits (s) for moving-shot compensation, refit AT 38 DEG
                 // (refit_38.py 2026-07-21, residual <= 0.011 s): score 0.188 + 0.115*d,
