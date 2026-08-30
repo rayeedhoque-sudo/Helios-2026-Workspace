@@ -704,13 +704,13 @@ public class SubsystemConstants {
                 // from the hood angle. Converted to surface speed by
                 // ShooterSubsystem.surfaceSpeedForMotorRpm.
                 //
-                // 1100 (team direction 2026-08-29), raised from the 985 every logged shot was
-                // taken at. THE HOOD TABLE IS ONLY VALID AT THE SPEED IT WAS TUNED AT, so this
-                // and AUTOAIM_HOOD_TABLE are a matched pair: at 1100 the tabled angles are for a
-                // slower shot and will run LONG until the table is re-taken at 1100. The table
-                // is still placeholder values, so nothing real is being invalidated yet -- but
-                // take the tuning passes AT 1100 now, not 985.
-                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1000.0;
+                // 1010 (team data 2026-08-29): the speed all three rows of AUTOAIM_HOOD_TABLE
+                // were actually shot at. THE TABLE IS ONLY VALID AT THE SPEED IT WAS TUNED AT,
+                // so these two are a matched pair -- changing this without re-taking the table
+                // silently invalidates every row. It has been 985 (the first data set) and 1100
+                // (a speed nothing was ever measured at); 1010 is the first value here that
+                // matches the data underneath it.
+                public static double AUTOAIM_FLYWHEEL_MOTOR_RPM = 1010.0;
 
                 // How much of the computed heading correction to apply per loop, 1.0 = all of
                 // it. 0.5 (team direction 2026-08-29: "the rotation correction is too much,
@@ -836,41 +836,37 @@ public class SubsystemConstants {
                 // degree. Between points it interpolates linearly; outside the ends it CLAMPS
                 // to the nearest endpoint (never extrapolates off a two-point line).
                 //
-                // *** EVERY VALUE HERE IS A PLACEHOLDER. SHOTS WILL NOT LAND UNTIL IT IS TUNED. ***
-                // Placeholders only encode the shape (farther = higher hood) so the mechanism
-                // can be verified moving in the right direction. TO TUNE, per row:
-                //   1. Enable with the hood RESTING DOWN (the datum assumption everything here
-                //      shares -- see ShooterSubsystem.captureHoodDatum).
-                //   2. Park the robot at the row's distance from the hub center.
-                //   3. Hold RT (constant-speed manual mode) and step the hood on DPAD LEFT/RIGHT
-                //      until the shot goes in. Set RT's speed to AUTOAIM_FLYWHEEL_MOTOR_RPM
-                //      first (DPAD UP/DOWN, watch "RT Target (motor RPM)") or the angle you find
-                //      belongs to a different speed.
-                //   4. Read "Hood Travel Since Datum (deg)" off the Shooter dashboard tab -- that
-                //      number IS the second column. Type it in here.
-                // Rows must stay sorted by distance. Add rows freely; 4 is not special.
-                // A FLAT OFFSET SUBTRACTED FROM EVERY AUTO-AIM HOOD ANGLE (team direction
-                // 2026-08-29: "always subtracted by 10 encoder units every time, no matter
-                // what"). Applied after the table lookup and before the clamp, so it is the
-                // last word on the angle -- there is no distance, tag or state that escapes it.
-                // 10 raw units is ~1.3 physical degrees, i.e. a small flattening bias.
+                // A FLAT OFFSET SUBTRACTED FROM EVERY AUTO-AIM HOOD ANGLE. Applied after the
+                // table lookup and before the clamp, so no distance, tag or state escapes it.
                 //
-                // It is deliberately SEPARATE from the table rather than folded into the rows:
-                // a bias that is wrong is one number to change, while a bias baked into four
-                // rows is four numbers to unpick. Set it to 0 to remove the bias without
-                // touching the table.
-                //
-                // NOTE the floor still wins. clampDesiredAngle will not let a setpoint go below
-                // the enable-time datum, so if a tabled angle is under 10 units above the floor,
-                // subtracting 10 lands ON the floor rather than below it.
-                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 5.0;
+                // BACK TO 0 on 2026-08-29 (team direction) now that the table holds MEASURED
+                // angles instead of placeholders: the rows already are the angles that scored,
+                // so there is nothing left for a bias to correct. Kept as a constant rather than
+                // deleted because it is the right knob if every shot later turns out uniformly
+                // long or short at all distances -- one number to change instead of re-tuning
+                // every row. Positive values flatten the hood.
+                public static double AUTOAIM_HOOD_SUBTRACT_UNITS = 0.0;
 
+                // MEASURED ON THE ROBOT 2026-08-29 (team), replacing the original placeholder
+                // rows. Every row is a shot that SCORED at AUTOAIM_FLYWHEEL_MOTOR_RPM (1010) --
+                // the table and that speed are a matched pair, so re-tune both together.
+                // Source data, including the AprilTag geometry each row was taken with, is in
+                // docs/shot-log.csv.
+                //
+                // Distance is ll_hub_dist_m -- the camera's own range to the hub centre, which
+                // is what runAutoAimTargeting computes at match time. Deliberately NOT the tape
+                // measurement: keying on the robot's own number means no conversion and no bias.
+                // The tape readings the rows came from were 39.2 in, 70.75 in and 90 in.
+                //
+                // NOTE THE SHAPE: flat 137 units from 1.81 m to 2.55 m, then rising to 170.8 by
+                // 3.07 m. The hood does nothing across the near half of the range and then
+                // climbs steeply -- so interpolation between rows 2 and 3 is doing real work,
+                // while anything nearer than 1.81 m clamps to 137.
                 public static double[][] AUTOAIM_HOOD_TABLE = {
-                    // { distance m, raw units above the enable datum }
-                    { 2.0,  60.0 },   // TODO placeholder
-                    { 3.0, 100.0 },   // TODO placeholder
-                    { 4.0, 140.0 },   // TODO placeholder
-                    { 5.0, 180.0 },   // TODO placeholder
+                    // { hub distance m, raw units above the enable datum }
+                    { 1.808, 137.0 },
+                    { 2.548, 137.0 },
+                    { 3.065, 170.8 },
                 };
         }
 }
