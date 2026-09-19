@@ -86,7 +86,7 @@ public class RobotContainer {
     // Left 3 m intaking" auto still runs the intake, since this is a teleop-layer request.
     // OFF as of 2026-08-30 (team request): the full match layer is live again. Everything
     // below stays in place so this is a one-word switch if drive-only is wanted again.
-    private static final boolean DRIVE_ONLY_MODE = false;
+    private static final boolean DRIVE_ONLY_MODE = true;
 
     // KILL SWITCH for the teleop DPAD hood moves (2026-08-27). false = the bindings are not
     // registered at all, so nothing can drive the hood from the driver station; the hood still
