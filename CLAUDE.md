@@ -74,3 +74,9 @@ Past sessions kept introducing new bugs while fixing old ones. Every code change
   issues in that doc are now resolved (issue 1's "jackshaft CAN ID" was never actually
   missing — see the intake correction above); remaining open work lives in that doc's
   device-side checklist and on-robot verify list, not the numbered issues.
+- **⚠ 2026-09-29: the robot CODE is out of sync with the V2 hardware** (launcher + hopper redesign,
+  intake roller X60). The robot data was updated; the code was not. Blocked on the team assigning V2 CAN IDs +
+  the other items in `Helios-2026-Robot-Data\Hardware-Data-Sheet.md` §11.0 (hood encoder/homing,
+  sector teeth + travel, hopper pinion). **Do not enable the current (V1) code on the V2 robot**, and
+  do not give a V2 motor a V1 CAN ID with a different role (e.g. hood X44 on 13–16) — V1 code would
+  drive it as a flywheel/follower. Proposed §7 limits for the new motors need team approval.

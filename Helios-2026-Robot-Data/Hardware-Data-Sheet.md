@@ -78,7 +78,7 @@ Single CAN bus = default RIO bus (`kCANBus = new CANBus("", "./logs/example.hoot
 | DIO 8 | Indexer beam-break A (constant only) | intended `DigitalInput` | `LightSensor.INDEXER_SENSOR_ID_A = 8` | `[verified-in-code]` (constant); behavior `[placeholder]` |
 | DIO 9 | Indexer beam-break B (constant only) | intended `DigitalInput` | `LightSensor.INDEXER_SENSOR_ID_B = 9` | `[verified-in-code]` (constant); behavior `[placeholder]` |
 | NT `limelight-knight` | Limelight camera | vision (AprilTags) | `Vision.CAM_LIMELIGHT` | `[verified-in-code]` |
-| On SparkMax 19 | Hood absolute encoder | `SparkAbsoluteEncoder` (REV) | `shooterAngle.getAbsoluteEncoder()` | `[verified-in-code]` |
+| ~~On SparkMax 19~~ **(V1 only — V2 hood is a TalonFX X44; no encoder found in V2 CAD, see §4.2 / §11.0 V2-2)** | Hood absolute encoder | `SparkAbsoluteEncoder` (REV) | `shooterAngle.getAbsoluteEncoder()` | `[verified-in-code]` |
 | CAN (see §2) | 4× CANcoder + Pigeon2 | CTRE | swerve | `[verified-in-code]` |
 
 > **CRITICAL — sensors are NOT actually wired.** `frc.robot.subsystems.utility.Sensors` is a **stub**: `getIndexSensorA()` and `getIndexSensorB()` both `return true` unconditionally. It imports `DigitalInput` and `LightSensor` but **never constructs a `DigitalInput`** on DIO 8 or 9. Therefore the hopper's `fuelDetectedIndexer = getIndexSensorA() && getIndexSensorB()` is **permanently `true`**. The rewrite must actually instantiate `new DigitalInput(8)` / `new DigitalInput(9)` and read them.

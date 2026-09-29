@@ -24,7 +24,7 @@ Master list of every fact still to confirm and every decision still to make befo
   - [ ] intake slider NEO V1.1 (22) — `smartCurrentLimit` **20**  *(reg 30–40 · cap 60)*
 - [ ] ⛔ **Neutral (brake/coast) mode per mechanism** — it's a *design choice*, not a lookup (decided, see §7): **Brake** = drive, steer, hood, slider (must hold); **Coast** = flywheels (regen!), kicker, rollers. Default is Coast, so brake motors must be set explicitly. API: TalonFX `NeutralModeValue.Brake`, SPARK MAX `IdleMode.kBrake`.
 - [ ] ⛔ **Bound every open-loop move with a timeout / limit.** Old `stowSliderCommand` runs the slider forever (no timeout) → stall. Every "run until X" needs a timeout + measured-current stall check (`getOutputCurrent()` / `getStatorCurrent()`, debounced — never `.get()`).
-- [ ] ⛔ **Hood travel limits enforced in software** (MIN 3.224° / MAX 44.5° today — confirm real range) so the NEO 550 can't pin against a hard stop.
+- [ ] ⛔ **Hood travel limits enforced in software** (V1 was MIN 3.224° / MAX 44.5° — **V2 travel unknown, measure it**) so the **V2 Kraken X44 hood (~42.5:1)** can't pin against a hard stop.
 
 ---
 
@@ -38,8 +38,8 @@ Master list of every fact still to confirm and every decision still to make befo
 - [ ] CAN bus choice: stays on the default roboRIO bus (CAN 2.0, 100 Hz odometry) or move swerve to a CANivore/CAN FD? Affects bus name + odometry rate.
 
 ### Motor models & polarity
-- [ ] 📷 Confirm CAD-resolved motor models on the real robot: drive **Kraken X60**, steer **Kraken X44**, flywheel/kicker **Kraken X60**, intake roller **Kraken X44**, hood **NEO 550**, hopper **NEO 2.0**, slider **NEO V1.1**.
-- [ ] 📷 **Every motor inversion / direction** — CAD gives geometry, never electrical direction. Verify each mechanism spins the right way (drive, steer, all 4 flywheels + follower alignments, kicker, intake roller, slider, 3 hopper, hood).
+- [ ] 📷 Confirm CAD-resolved motor models on the real robot: drive **Kraken X60**, steer **Kraken X44**, **V2:** flywheel ×3 / feeder / intake roller **Kraken X60**, hood **Kraken X44**, hopper ×2 **NEO 2.0**, slider **NEO 2.0** (CAD label V1.1).
+- [ ] 📷 **Every motor inversion / direction** — CAD gives geometry, never electrical direction. Verify each mechanism spins the right way (**V2:** drive, steer, 3 flywheels + follower alignments, feeder, intake roller, slider, 2 hopper, hood).
 
 ### Sensors
 - [ ] 📷 **Indexer beam-breaks on DIO 8/9** — actually wire/construct `DigitalInput(8)`/`DigitalInput(9)` (old `Sensors.java` is a stub returning `true`). Confirm active-high vs active-low.
@@ -118,8 +118,8 @@ Master list of every fact still to confirm and every decision still to make befo
 
 - ✅ Software stack: WPILib/GradleRIO **2026.2.1**, Phoenix6 **26.1.0**, REVLib **2026.0.3**, PathPlanner **2026.1.2**, Java 17, team **9704**.
 - ✅ Full CAN map (IDs 1–23) and motor models (CAD-confirmed).
-- ✅ Motor inventory: 9× Kraken X60, 5× Kraken X44, 3× NEO 2.0, 1× NEO V1.1, 1× NEO 550; 4 CANcoders, 1–2 Pigeon 2, 1 Limelight 4.
-- ✅ Swerve ratios/geometry, flywheel 1.5:1, hood sector 7.5:1.
+- ✅ Motor inventory **(V2 2026-09-29):** 9× Kraken X60, 5× Kraken X44, 3× NEO 2.0 (no NEO 550 / CIM) — *V1 was:* 9× Kraken X60, 5× Kraken X44, 3× NEO 2.0, 1× NEO V1.1, 1× NEO 550; 4 CANcoders, 1–2 Pigeon 2, 1 Limelight 4.
+- ✅ Swerve ratios/geometry. *(V1 flywheel 1.5:1 / hood 7.5:1 sector are superseded — V2: flywheel 18T→26T, hood ~42.5:1, see data sheet §4.2.)*
 - ✅ **No climber this season.**
 
 ---
