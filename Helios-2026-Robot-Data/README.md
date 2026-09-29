@@ -2,6 +2,8 @@
 
 Everything currently known about the **Helios 2026** robot, gathered as reference for the **from-scratch code rewrite**. Nothing here is robot code — it's the hardware/config knowledge base the new code should be built from.
 
+> **⚠ HELIOS V2 (2026-09-29):** the shooter (Launcher V3) and hopper were redesigned and the intake roller became a Kraken X60. The data sheet §2/§4.2/§4.3/§7/§10.0/§11.0 carry the V2 data re-pulled from CAD. **V2 launcher + intake-roller CAN IDs are not assigned yet.** Any V1 shooter/hopper number below or elsewhere (1.5× flywheel, NEO 550 hood 187.5:1, CIM kicker, 3-position hopper gearbox) is **superseded**.
+
 ## ▶ START HERE (coding agent)
 
 If you're the agent writing the new robot code, read in this order:
@@ -12,7 +14,7 @@ If you're the agent writing the new robot code, read in this order:
 Rules for the new code (also in the project `CLAUDE.md`):
 - **Every motor gets a current limit + neutral mode from line one** — use the §7 *conservative-start* column; never the vendor default. (Old code had none → brownout/burnout.)
 - Values tagged `[placeholder]`, `[CAD]`, or `[inferred]` are **not yet real** — write them as `// TODO` constants with units, don't trust them as final.
-- **No climber this season.** The hopper has **3** motors (old code wired 2).
+- **No climber this season.** The V2 hopper is a **belt floor driven by 2× NEO 2.0** on one 60T gear.
 - Don't invent CAN IDs / ratios / offsets — if it's not here, it's in §11 as "needs the robot": leave a TODO and surface it.
 
 ## What's in this folder
@@ -43,15 +45,15 @@ Rules for the new code (also in the project `CLAUDE.md`):
 ## Key facts at a glance
 
 - **Drivetrain:** swerve, 4 modules (WCP X3, 10T pinion). Drive Kraken X60 @ **6.48:1**, steer Kraken X44 @ **12.1:1**, wheel radius **2"**, max speed **4.93 m/s**. Wheelbase **26.75"** × track **16.75"**.
-- **Motors (19 total):** 9× Kraken X60, 5× Kraken X44, 3× NEO 2.0, 1× NEO V1.1, 1× NEO 550. Plus 4 CANcoders, 2× Pigeon 2.0 (1 used), 1× Limelight 4.
-- **Subsystems:** swerve · shooter (4 flywheel Kraken + NEO 550 hood) · hopper (3× NEO 2.0 — code wires only 2) · intake (Kraken X44 roller + NEO V1.1 slider) · kicker (Kraken X60).
+- **Motors (V2, 17 total):** 9× Kraken X60, 5× Kraken X44, 3× NEO 2.0; 14 TalonFX + 3 SPARK MAX; no NEO 550, no CIM/Victor SPX. Plus 4 CANcoders, 2× Pigeon 2.0 (1 used), 1× Limelight 4, Orange Pi 5 in CAD (role TBD).
+- **Subsystems (V2):** swerve · launcher (3× Kraken X60 flywheel @ 18T→26T, Kraken X60 feeder @ 2.5:1, **Kraken X44 hood** @ ~42.5:1) · hopper belt floor (2× NEO 2.0) · intake (Kraken X60 roller + NEO 2.0 slider @ MAXPlanetary 20:1).
 - **No climber this season.**
 - **Mass:** PathPlanner has 63.5 kg / MOI 7.68 kg·m² (hand-entered). CAD masses are unreliable (unassigned materials) — weigh the robot.
 - **⚠ Biggest carryover risk:** the old code has **no current limits on any mechanism motor** (only swerve steer @ 40 A). The rewrite must add limits everywhere — see §7 of the data sheet.
 
 ## Open questions (full list in Hardware-Data-Sheet.md §11)
 
-Hood total ratio (code 187.5:1 vs ~18:1 readable — missing sector stage), 3rd hopper motor CAN ID/role, intake slider spur stage, kicker ratio, 2nd Pigeon, all current limits, brake/coast modes, CANcoder offsets, sensor polarity, motor inversions. **Robot photos will close most of these.**
+**V2 first (§11.0):** launcher/intake-roller CAN IDs, hood encoder + homing, hood sector teeth + travel, hopper pinion, flywheel follower directions, Limelight pose. V1 list: intake slider spur stage, 2nd Pigeon, all current limits, brake/coast modes, CANcoder offsets, sensor polarity, motor inversions. **Robot photos will close most of these.**
 
 ---
 *Compiled by Team 9704 with Claude Code. Sources: old codebase + Onshape CAD. Not verified against the physical robot.*

@@ -4,17 +4,23 @@ Master list of every fact still to confirm and every decision still to make befo
 
 **Legend:** ⛔ = safety blocker (resolve before the motor runs under power) · 📷 = a robot photo / quick look at the robot answers it · 🎯 = a strategy/tuning decision the team makes (not a "lookup") · ✅ = already known (listed for boundary, no action).
 
+> **⚠ V2 (2026-09-29):** the shooter and hopper were redesigned. The **V2 safety items are first** below. Tier 0–2 V1 items about the 4 flywheels, CAN 13–17/19, kicker, NEO 550 hood, 3rd hopper motor, 187.5:1 and 1.5× flywheel describe removed hardware; they're struck through or superseded. Full V2 list: Hardware-Data-Sheet §11.0.
+
 ---
 
 ## Tier 0 — Safety (do NOT run a motor without these)
 
+- [ ] ⛔ **V2 hood (Kraken X44 @ ~42.5:1)**: proposed START St 20 / Sup 15, Brake, **Phoenix soft limits + homing routine before any closed loop**, and a capped cruise velocity. ~170 N·m at the sector at full stall can strip the pinions. **The team has to approve the values** (Data Sheet §7).
+- [ ] ⛔ **V2 feeder (Kraken X60, replaces the CIM)**: proposed St 30 / Sup 20 + `Debouncer` stator-current stall detection.
+- [ ] ⛔ **V2 flywheel directions**: spin-test L1/L2 (belted 1:1, likely Aligned) and R (mirrored, likely Opposed) one motor at a time before following. A wrong alignment on the belted pair = the motors fight at the limit.
+- [ ] ⛔ **V2 CAN IDs** for flywheel ×3, feeder, hood, intake roller. The team will supply them; don't guess.
 - [ ] ⛔ **Current limit on every motor** — **3 tiers (conservative-start / regular / cap) in Hardware-Data-Sheet §7.** Team preference: **start at the conservative numbers**, raise toward regular only if a mechanism is underpowered, never pass the cap. Old code limits nothing except swerve steer (40 A). Conservative starting values (`St`=stator/`Sup`=supply, A):
   - [ ] 4× drive Kraken X60 (2,5,8,11) — St 40 / Sup 30  *(reg 120/60 · cap 120/70)*
-  - [ ] 4× flywheel Kraken X60 (13–16) — St 40 / Sup 25  *(reg 80/30 · cap 120/40)* — #1 brownout risk
-  - [ ] kicker Kraken X60 (17) — St 30 / Sup 20  *(reg 40/20 · cap 80/40)*
-  - [ ] intake roller Kraken X44 (18) — St 30 / Sup 20  *(reg 40/25 · cap 60/40)*
-  - [ ] hood **NEO 550** (19) — `smartCurrentLimit` **20**  *(cap 30 — fragile)* ← highest burnout risk; today no config
-  - [ ] 3× hopper NEO 2.0 (20, 21, ?) — `smartCurrentLimit` **20**  *(reg 40 · cap 60)*
+  - [ ] ~~4×~~ **V2: 3×** flywheel Kraken X60 (CAN TBD) — St 40 / Sup 25  *(reg 80/30 · cap 120/40)* — #1 brownout risk
+  - [ ] ~~kicker (17)~~ **V2 feeder** Kraken X60 (CAN TBD) — St 30 / Sup 20  *(reg 40/20 · cap 80/40)*
+  - [ ] intake roller **Kraken X60 (V2; was X44)**, CAN TBD — St 30 / Sup 20  *(reg 40/25 · cap 80/40)*
+  - [ ] ~~hood NEO 550 (19)~~ **V2 hood = Kraken X44, see above.** V1 text: — `smartCurrentLimit` **20**  *(cap 30 — fragile)* ← highest burnout risk; today no config
+  - [ ] **2×** hopper NEO 2.0 (20?, 21?) — `smartCurrentLimit` **20**  *(reg 40 · cap 60)*
   - [ ] intake slider NEO V1.1 (22) — `smartCurrentLimit` **20**  *(reg 30–40 · cap 60)*
 - [ ] ⛔ **Neutral (brake/coast) mode per mechanism** — it's a *design choice*, not a lookup (decided, see §7): **Brake** = drive, steer, hood, slider (must hold); **Coast** = flywheels (regen!), kicker, rollers. Default is Coast, so brake motors must be set explicitly. API: TalonFX `NeutralModeValue.Brake`, SPARK MAX `IdleMode.kBrake`.
 - [ ] ⛔ **Bound every open-loop move with a timeout / limit.** Old `stowSliderCommand` runs the slider forever (no timeout) → stall. Every "run until X" needs a timeout + measured-current stall check (`getOutputCurrent()` / `getStatorCurrent()`, debounced — never `.get()`).
@@ -26,7 +32,7 @@ Master list of every fact still to confirm and every decision still to make befo
 
 ### CAN bus / device count
 - [ ] 📷 Confirm every CAN ID 1–23 matches the physical bus (see [CAN-Bus-and-DIO-Map.md](CAN-Bus-and-DIO-Map.md)).
-- [ ] 📷 **3rd hopper motor** — CAD shows 3 NEO 2.0 + 5 SPARK MAX, code wires only 2. Does it exist? What CAN ID (assign 24+)? Is it a CAN follower of A/B or independent?
+- [x] ~~**3rd hopper motor**~~ (V1; the V2 hopper has 2 NEO 2.0 on one 60T gear) — CAD shows 3 NEO 2.0 + 5 SPARK MAX, code wires only 2. Does it exist? What CAN ID (assign 24+)? Is it a CAN follower of A/B or independent?
 - [ ] 📷 **2nd Pigeon 2.0** — CAD shows two; code uses one (CAN 23). Real/redundant? Its CAN ID, or drop it.
 - [ ] ✅ Limelight 4, NT name `limelight-knight` (confirmed).
 - [ ] CAN bus choice: stays on the default roboRIO bus (CAN 2.0, 100 Hz odometry) or move swerve to a CANivore/CAN FD? Affects bus name + odometry rate.
@@ -37,19 +43,22 @@ Master list of every fact still to confirm and every decision still to make befo
 
 ### Sensors
 - [ ] 📷 **Indexer beam-breaks on DIO 8/9** — actually wire/construct `DigitalInput(8)`/`DigitalInput(9)` (old `Sensors.java` is a stub returning `true`). Confirm active-high vs active-low.
-- [ ] 📷 **Hood absolute encoder zero** — confirm the `SHOOTER_ANGLE_OFFSET = 63` and re-zero on the robot; verify which direction increases angle.
+- [ ] 📷 **V2: hood position sensing?** (no encoder in the V2 CAD; maybe one on the 23T pulley on the hood shaft) + homing reference. *(V1:)* **Hood absolute encoder zero** — confirm the `SHOOTER_ANGLE_OFFSET = 63` and re-zero on the robot; verify which direction increases angle.
 - [ ] Decide fuel-detection logic (which sensor gates indexing vs. kicking).
 
 ---
 
 ## Tier 2 — Gear ratios & drivetrain geometry to finalize
 
-- [x] ✅ **Hood ratio RESOLVED: 187.5:1** = UltraPlanetary 2× 5:1 (25:1) × 24T→180T sector (7.5:1). Team confirmed the 5:1 cartridges; CAD BOM's "3:1" label was wrong.
+- [ ] 📷 **V2 hood ratio ~42.5:1** (12T→30T × 10T→170T sector). Confirm the sector teeth (CAD PCD suggests 10.3 DP) + hood travel (no CAD mate limits).
+- [ ] 📷 **V2 hopper pinion** (12T by geometry → 3.889:1 vs 10T → 4.667:1).
+- [ ] ✅ **V2 flywheel 18T→26T = 1.444:1 reduction** `[CAD-v2]` (was 1.5× overdrive), 2" radius. **V2 feeder 2.5:1.**
+- [x] ~~V1:~~ **Hood ratio RESOLVED: 187.5:1** = UltraPlanetary 2× 5:1 (25:1) × 24T→180T sector (7.5:1). Team confirmed the 5:1 cartridges; CAD BOM's "3:1" label was wrong.
 - [ ] 📷 **Intake roller full chain** — 12T→24T (2:1) motor stage known; confirm downstream routing + final roller surface speed.
 - [ ] 📷 **Intake slider — travel type & distance** — MAXPlanetary 5:1 + a 10T/20T (10 DP) stage seen in CAD, but **rack-vs-geared and inches-per-motor-rotation can't be read from CAD**. Measure on the robot (code's slider constants are all 0).
-- [ ] 📷 **Kicker** ratio — not derivable from BOM.
-- [ ] 📷 **Hopper** — 10T→60T (6:1) + 18T→36T (2:1) known; confirm which feeds the 2" rollers and the effective roller diameter.
-- [ ] ✅ Flywheel **1.5:1 overdrive** (36T→24T), 2" radius — confirmed (code + CAD).
+- [x] ~~Kicker ratio~~ (V1 CIM kicker removed; V2 feeder = 2.5:1)
+- [x] ~~V1 hopper~~ 10T→60T (6:1) + 18T→36T (2:1); confirm which feeds the 2" rollers and the effective roller diameter.
+- [x] ~~V1 flywheel 1.5:1 overdrive~~ (superseded, V2 = 18T→26T).
 - [ ] ✅ Swerve: drive 6.48:1, steer 12.1:1, couple 5.4, wheel radius 2" — confirmed.
 - [ ] **CANcoder magnet offsets** — re-zero all 4 on the robot (three config sources disagree; never trust the stored numbers).
 - [ ] **Pigeon mount-pose** — `pigeonConfigs = null` today; set mount orientation.

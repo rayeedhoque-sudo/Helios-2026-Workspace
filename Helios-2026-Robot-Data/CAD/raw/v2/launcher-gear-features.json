@@ -1,0 +1,3041 @@
+{
+ "source": "Part Studio 10ad8c0e95b8c995ba88c7b8 (Launcher V3), filtered to gear/pulley generator features",
+ "features": [
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d5742c8cde4b06c68b362d748::v1db29081376c095cf10e2a3d::e01a666571e625f8b819fd75b::m51a90a6a7be5af507d9e2ebf",
+   "name": "Spur gear (#teeth teeth)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM5Sa$entityTypeBa$EntityTypeS6$VERTEXSb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S12.6$F1hoXIE2oRBzeNn_10wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc.3$V3ER5qJeyhjWend\",id);",
+       "nodeId": "FpF78uTNJEEu5el",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "VERTEX"
+       },
+       "operand2": {
+        "btType": "BTSketchObjectFilter-184",
+        "isSketchObject": true,
+        "objectType": "ANY_SKETCH_OBJECT"
+       }
+      },
+      "operand2": {
+       "btType": "BTBodyTypeFilter-112",
+       "bodyType": "MATE_CONNECTOR"
+      }
+     },
+     "nodeId": "BaIkBNV88OVWsw8Z",
+     "parameterId": "center",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.2 in",
+     "nodeId": "219YQNYJ8uU9eZys",
+     "parameterId": "gearDepth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "sL7OQXggVLS3xKnl",
+     "parameterId": "flipGear",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "Pl0WIoYq1ElQ0tiu",
+     "parameterId": "symmetric",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "170",
+     "nodeId": "rrLvxQTTvBhBMbgX",
+     "parameterId": "numTeeth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d5742c8cde4b06c68b362d748::v1db29081376c095cf10e2a3d::e01a666571e625f8b819fd75b::m51a90a6a7be5af507d9e2ebf",
+     "nodeId": "rm5sajfn3dw6Blvc",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GearInputType",
+     "value": "DIAMETRAL_PITCH",
+     "parameterId": "GearInputType",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.09705882352941177*in",
+     "nodeId": "+WgMt1gWzcO8jpJR",
+     "parameterId": "module",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "10.303030303030305",
+     "nodeId": "uMlazbc+DjPOfMDq",
+     "parameterId": "diametralPitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.3049192869660681*in",
+     "nodeId": "Rs1QXxqH44Qqg214",
+     "parameterId": "circularPitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "16.5 in",
+     "nodeId": "tA+NwUwFZyeR6ZfZ",
+     "parameterId": "pitchCircleDiameter",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "20 deg",
+     "nodeId": "V/9lGmea1DpLC/KG",
+     "parameterId": "pressureAngle",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d5742c8cde4b06c68b362d748::v1db29081376c095cf10e2a3d::e01a666571e625f8b819fd75b::m51a90a6a7be5af507d9e2ebf",
+     "nodeId": "Qe0YAxvPjt6SEL+0",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "RootFilletType",
+     "value": "THIRD",
+     "parameterId": "rootFillet",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "8KbUZrPpOmia9/MX",
+     "parameterId": "backlash",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d5742c8cde4b06c68b362d748::v1db29081376c095cf10e2a3d::e01a666571e625f8b819fd75b::m51a90a6a7be5af507d9e2ebf",
+     "nodeId": "S5S9hC5n1f3aOZbV",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "DedendumFactor",
+     "value": "D250",
+     "parameterId": "dedendumFactor",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "ETUJHYlviR++FW/o",
+     "parameterId": "offsetClearance",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "3A3vuNx7V+pufKbC",
+     "parameterId": "offsetDiameter",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "(PI) deg",
+     "nodeId": "XSllRT8HrfkwmT8w",
+     "parameterId": "offsetAngle",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "/fV3NI76C9aJaKQG",
+     "parameterId": "helical",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "15 deg",
+     "nodeId": "lfCLFOgjKq2diRRs",
+     "parameterId": "helixAngle",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d5742c8cde4b06c68b362d748::v1db29081376c095cf10e2a3d::e01a666571e625f8b819fd75b::m51a90a6a7be5af507d9e2ebf",
+     "nodeId": "m2GqmJEnV7ONZePn",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "HelixDirection",
+     "value": "CW",
+     "parameterId": "handedness",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "9kFzbCfXLGvfHiCu",
+     "parameterId": "double",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "QvR6bz+8Mr6KPLs4",
+     "parameterId": "chamfer",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d5742c8cde4b06c68b362d748::v1db29081376c095cf10e2a3d::e01a666571e625f8b819fd75b::m51a90a6a7be5af507d9e2ebf",
+     "nodeId": "ZqiOGt5GrCx61As2",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GearChamferType",
+     "value": "OFFSET_ANGLE",
+     "parameterId": "chamferType",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.02 in",
+     "nodeId": "A2MfgT1FbMVdQx5D",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.02 in",
+     "nodeId": "9R3mh9iud+dKOlu1",
+     "parameterId": "width1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "kFRoFb+4TcnLFxXj",
+     "parameterId": "oppositeDirection",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.02 in",
+     "nodeId": "Y297YIH/+BhGb1YG",
+     "parameterId": "width2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "60 deg",
+     "nodeId": "wi7UmqV/wIeYXAwq",
+     "parameterId": "angle",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "Ons2G6gZV2ZB6Qh8",
+     "parameterId": "centerHole",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.375 in",
+     "nodeId": "8+33hqIrZzg9D3fD",
+     "parameterId": "centerHoleDia",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "o7z7FSBoFlt/uzJB",
+     "parameterId": "key",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.125 in",
+     "nodeId": "+FHqTYNeOUicyzRm",
+     "parameterId": "keyWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.125 in",
+     "nodeId": "JLDN2F41cOAH+ser",
+     "parameterId": "keyHeight",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "FmTfMNeuJIjsOFJ_26",
+   "nodeId": "M3LznjxdjQyAy/fHz",
+   "featureType": "SpurGear",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "W/KznfxMK0/DAONw",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "BELT",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "AoUtTRal3iK5Dwj2",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "9",
+     "nodeId": "8w3hSzIgjxbRYgAB",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "24",
+     "nodeId": "0BTNW6+9XoPNIaSP",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "24",
+     "nodeId": "amwSkawz33u3RLuB",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "26",
+     "nodeId": "0r00+PZHfppzlrwl",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "BS8npi8WvQIVmAdX",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "HEX",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.5 in",
+     "nodeId": "wS+BxRGDYxtHCEYq",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "ENOxnm5Ia+qq+7lk",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "cw5Fbv8uBuHjTKvo",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "6ijdiRy9TkOGAeBl",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "XJhKQGxFLiOo9u6s",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "HEX",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.4 in",
+     "nodeId": "o38PR02vGMZj3Nt1",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "OHg++LSUElXcisgO",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "nvRW0emA07aJ0+Np",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "y1MzaXkILTcQ//hh",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "UQfXwnlb5YgG4n8z",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"&2db$eJyFkU9zmzAQxb/M9ghjyfwxR4zlhGmNXYmZTnLxCLSJNcZAhWjjb19h0sy0Ofgmad97+9Pul3UI30c0110oKlBo9C9UW9NdUpotdpEgFJQe5KXSr6O0ums30sqU7OjnSnntUZAl7Hn+kBfpt+OGHVixYUX2JBLojH7VrWyGNHLBoZCArdX2OrnWEtjHRQTANg/M0Zz0YDszP64g4ywt833hCl2P5tYyV2sKuUqJo/FjP/Ij2FqKz6susKfz8+58OVLSm+5FNzic0dan39rgvnc8P6dP36IViK+szB6PrCjz8kkgzNIZKVdi6YdwwrdGt7iY2HnIIx7zFU94xWuuOAqPhE40KchdBb2rWN5VBHcVrprFbpbbNGOTSMSgB2GlsSVPstqNzFO+W0vP3qwZFfJ6mnF6OE6GWzqZ1swpX/Ig/e9Xf/2V7734HllAPdotSjsaHN5JSAC9QWV006B67BrMtKkbdBkE/w3xaOx259EA8ANFgvjBDuUN5nPb2ZFA1blc2Xb9ej44YwJ5UTIuWFb+AdwM5X8=\",id);",
+       "nodeId": "FjzVyC2RIwLiC9n",
+       "deterministicIds": []
+      },
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"&2db$eJyFkU9zmzAQxb/M9ghjyfwJRyzLCVMbuxLTTk4egTaxpgSokNu4n77CpJlpc/BN0r739qfdT6sYvpzRXnaxrEGjNT9Rb2z/klO22CWSUNBmVC+1eT4rZ/purZzKyY5+rFSXASVZwl4U90WZb49rfuDlmpfsUWbQW/NsOtWOeeKDY6kAO2fcZXKtFPD3i4yAr++5pzmZ0fV2frwDJnheFfvSF/oB7bVloVcUCp0TTxOmYRImsJHx/rL72mwPjWTb30dKB9s/mRbH7+ia0y9jcT94nh/Tp6/RGuRnXrGHIy+ronqUCLN0Riq0XIYxnPC1NR0uJnYRi0Sk4k5kohaN0AJlQGIvmhTkpoLeVCxvKqKbCl9lqZ/lJmd8EskUzCidsq4SGWv8yAId+rUM/NXZs0bRTDPOD8fJcE0n05oFFUsR5f/96q+/DoOnMCALaM5ug8qdLY5vJCSCwaK2pm1RP/QtMmObFn0GwX9DApr63QU0AnxHUSC/8UN1hfnYdnZkUPc+V3X9sJoP3phBUVZcSM6qPzOC5Ss=\",id);",
+       "nodeId": "FSaiEGvqiibdflw",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "EpdBraNQqeXgEiQB",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "CZ1Yn3KcF4BiVxkR",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "uz6E/PV7PaDV62yp",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "YMQrLQSzjUh5QpoV",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "FvSazYxuQfdMTfr_48",
+   "nodeId": "MMK6/+EOTmEs1nlGP",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "rpUQsKHSqskKMMhM",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "BELT",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "UvN9eFpWlyicvgVa",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "9",
+     "nodeId": "M1F/p9CZHA6HZALC",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "30",
+     "nodeId": "375i1WTVsfWaF1m3",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "12",
+     "nodeId": "5hVn6UFvL126kOB1",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "12",
+     "nodeId": "r8RkBQvuX8BQ3lBO",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "Ac3ACxCZIj+R8r63",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "HEX",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "(1/2) in",
+     "nodeId": "pU8iO4o2CAyNRp6K",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "tZuSlBh00QaS2daG",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "SxGZ2EqG0fnFnusH",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "i+q+2Apk/4Fl4Jo/",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "GKyeoeRUbsxkhClI",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "VEXSPLINE",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "(1/2) in",
+     "nodeId": "g+sRwGE8+tSnZ1hh",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "fDQmQ49QKHjwjVMS",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "2iisWK2lYpbzO3Qn",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "EB3Rw2ZJNSk3VebL",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "F4tLsKsCiGRWke2q",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"&2db$eJyFkU9zmzAQxb/M9ghj8TccMRYJ0xo7EjOtTx6BNrYmBLAQbfztK0ybmTYH3yTte29/2v2yDuF5Qn3dhrwGiVr9RJnr/i31stU24sQDqUbxVqvTJIzqu40wIiVb73Olug7IiQ87VjwWZfrtuKF7Wm5omR14Ar1WJ9WJdkwjGxxyAdgZZa6zay2Aflx4AHTzSC3NWY2m18vjA2SMplWxK22hH1DfWhZy7UEhU2Jp3NiN3Ahyrk6X1x/Ph/QSJLV/JPGg+xfV4viKpjn/Uhp3g+W5zJ++RUvgX2mVPR1pWRXVgSMs0gWpkNx3Qzjje6s6XM3sLGQRi9kDS1jNGiYZcoeEVjQryF2Fd1fh31UEdxW2msV2lnma0VnEY1AjN0KbnCVZY0fmSNeuZaDvRk8SWTPPON0fZ8MtncxrZh7zWZD+96u//tp1XlyHrKCZTI7CTBrHPyQkgEGj1KptUT71LWZKNy3aDIL/hjhebHfneAHgB4oA/p3uqxvM57aLI4G6t7mi64f1crDGBIqyoozTrPoNOk3lJQ==\",id);",
+       "nodeId": "FpgWgFRc0cLLg3F",
+       "deterministicIds": []
+      },
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"&2e2$eJx9UltzqjAQ/jN7HnUaEITHgEE5LagJtWNfGC6pMl5CQ0T01zfoTGdOz9i3bPa77SZ/PAuWJy4vkcVyKLmsWl4GUhyw4T9FNkMGlFWTHfJqc8pUJY6TTGUYRcb/neRSc4ZMmNNwGsb4JZ2QBYknJPbXzAUhq011zPYNtrWwxTLgR1WpS8/yMiDfBRsBmUyJTrOtGiXk/dIBnxKchPNYN0TN5c0yLD0DwhIjhtDQhsB3HHtZt9Nd3JncSEfnSvJ5rd0/+xFvQiWwZ5L4s5TESZisGYdmx1WxvQcIS1ZooaVlSs/Y1Z7HV7lQShz6zNSiNh1Th7o0pwUtKWcDZA5NUKL+pT+CPf9QDwAF4DcatXIZFK/h6RFoOEAjwNE6cTtv1r64j4ADlGuoDdTyx3qPAfZJj2BjqBqmMqkC6vrFfV0uBHbROvn1PP+7bd+3UeqImnRKnkpOi37heJH2Cjcv1L85NahJRxj9634XNIYDDkF3vTqSn9+fPl93oZci83tMeyalMTl2h6JrNRfxH2QDQXC98lXzPK2W5mpfbG5s/U/YG1kktyQ/PAfGeDjWc+RC7Hl2FLV3P2iWC2GcEMqIn3wBEmvnSQ==\",id);",
+       "nodeId": "FMTK7cS1RxjvJkb",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "BoQixQHbuky3l2/m",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "ioaovUmyX/XC49LR",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "Wng8eA388+rS1uJV",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "um6oonsyA2r1usoL",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "FERX2Ey1U2jNHt8_49",
+   "nodeId": "Mgkh5vE2HomlFrNNI",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "jFcaCsYO53wJUUDS",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "BELT",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "ZKJumNyz17HT6bBF",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "9",
+     "nodeId": "OTShT8HpQXTBPA2L",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "30",
+     "nodeId": "ZHHMFgvn9tvVj6h/",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "12",
+     "nodeId": "4jMi8NxuGklxLp/c",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "12",
+     "nodeId": "74OYTBXW6USBnmtb",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "MfnQUuoxOSBmnb4h",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "HEX",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.5 in",
+     "nodeId": "2R85P9iLmIteQyfY",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "xaTC0LtiCsq0CpBy",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "1CI2IDRNPi45vB/u",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "xcLyqFfflblJVrE7",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "18BNUqOD1qEME487",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "VEXSPLINE",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "umH0clPU+oYYfhi7",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "0tNpVxpaSvmljnAP",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "oPa6zFMyZSt5Yd6g",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "5yXfpagTViburRsu",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "TPWPsCfA/7Df2OK/",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"&2db$eJyFkU9zmzAQxb/M5ghjYf6YIwbhkNbYlZjJ5OQRaBNrQoAK0cb99BWmzUybg2+S9r23P+3ebQP4NqG+7ANeg0StfqDMdf+WeOlqH3LigVSjeKvVyySM6rtMGJGQvfe5Ul0G5GQNB1bsijL5esrokZYZLdMnHkOv1YvqRDsmoQ0OuADsjDKX2bUVQD8u3Aea7ailOavR9Hp53EDKaFIVh9IW+gH1tWUhtx4UMiGWxo3c0A0hT39le/LwuBu6zfEBT95q0P2zanF8RdOcfyqNh8HyfJ8/fY2WwL/QKr0/0bIqqieOsEgXpELytRvAGd9b1eFqZmcBC1nENixmNWuYZMgdEljRrCA3Fd5Nxfqmwr+psNU0srPMk5TOIh6BGrkR2uQsThs7Mke6di0DfTd6ksiaecbJ8TQbrulkXjPz2Jr5yX+/+uuvXefZdcgKmsnkKMykcfxDQnwYNEqt2hblfd9iqnTTos0g+G+I40V2d47nA36gCOCP9FhdYT63XRwx1L3NFV0/bJeDNcZQlBVlnKbVb7il5OY=\",id);",
+       "nodeId": "F5Wq0OdMbDJj4JO",
+       "deterministicIds": []
+      },
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"&2e1$eJx9UtlymzAU/ZnbR5hILIZHgYVDGrAt4WTcF4ZFjRkvoiATO19fYTqdph33TdI9m470JXBgfRbdNXF4CbXomkHUUSePBIcPicsRhrrpi2PZvJ0L1cjTvFAFQQn+d5JdW8GRBUsWL+KUPOdzuqLpnKbhlvsgu+atORWHnrha2OEFiJNq1HVkBQXQ3xtuA50vqE6za3olu+nQg5BRksXLVA9kK7qbZVwHGOKaII6Q6UIUep67bofFPr1YAuf2e9OJZavdf4xXvAnVwL/SLHzMaZrF2ZYL6PdCVbspQFzzSgutHasL8L4NAvFSSqXkcczMHOayGfOYz0pWsZoJbiDLtEDJ9j9zGw7iu7oDqIC8smTo1lG1ic/3QKaBbCDJNvMvwePw7N8DGqjUUBeYE850jxEJ6YjgM2h6ropOZcwPq6kuHyK3Grzy4335tBu+7ZLcky29qO5cC1aNhZNVPircvND45gwzi9kEfXafBLE5Mw0BUb+hdZqoTbrNnmiUo4epXutXQgdK2feWZiPxB93AtumZBkYgpgQar78If6Wr7BbiL7sRb2BPe/paUB5EcZJtMC0004c4zSjjNMx+Aplb5XE=\",id);",
+       "nodeId": "FOCkGhrWLC1qTxY",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "HX4oGbN0Bx0AY2ME",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "WCXBVCnSgVzFazWW",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "VFpxi8BP/nzVSp5L",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "iGGNXw/GM+fLRIz2",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "FxylhUjhoSAxg2z_50",
+   "nodeId": "Mioct7H1OZr7pV36r",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "RT/mvW4YxKb5CECr",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "PULLEYSINGLE",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "pBoKCKXtyOTO7Lit",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "15",
+     "nodeId": "IMKSWrcucwdeBBTb",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "+wCKFoIQ3R+bOZIJ",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "S7cAVXKkTva87enK",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "zqVl4zVhOdpor6/3",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "tuulEPjAE7xzjeWV",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "HEX",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.5 in",
+     "nodeId": "DZkeBYtMVjCcKfcA",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "7yjN2iC52nv51O64",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "zt92pp90k0tlp5pq",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "yPM2yUNj1XTVFh5Y",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "Ec4jHz/Y+ysuLrRS",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "CIRCULAR",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "0tnoQBeqcumFzrHQ",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "Yt/EOlKWFGm+Zk8L",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "nkaler3SzB5cmIjq",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "Xswqzs5X8JS7qreN",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "1ir4QGWP/KcsGXnW",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S11.6$FC886QpvGkNx3e2_4wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc$QLTgFKEPkHcjR4R5R6R7S7$isStartFR8CbA1S11.9$F6cv8bzwOJhvZhM_8opExtrudeRbS8$CAP_EDGE\",id);",
+       "nodeId": "FoELypdesOUoqkR",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "+R5QFQU+civgcW2i",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "bAhSSmXkGeWzxFEW",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "rVX9z9xgyGrKV/5q",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "GRlBqRgje2eF8uR1",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "FFLZeFBLD7mThKO_51",
+   "nodeId": "MsYXKd7d4S4vAYx94",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "Gx6w1wzVt87a3c7O",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "PULLEYSET",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "3QQvuETghveA0CHp",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "15",
+     "nodeId": "93uPP1vp1UR0cJeN",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "M8dBXeKCN64Z+Mv1",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "de8poN+JbX50otZY",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "LoDz7U1BappKGkmL",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "kEpeoA3n+KQHrSOP",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "HEX",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.5 in",
+     "nodeId": "tJL9+3WzzRtBVRGJ",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "7nV+5sIRJbrHTZTj",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "8i/OFrqahL+67O94",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "m+EjECNaHxVlRnLf",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "XpCBmsD8IWcseK0M",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "HEX",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.5 in",
+     "nodeId": "dHkMkaOKRzxgW1v3",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "9V/Hu+oV9+HRQllM",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "okwDiAp96QnHSei5",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "zguER8D7fY9WxDog",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "ae67EY0mCwcFjmcf",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S11.6$FC886QpvGkNx3e2_4wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc$DehLNYYM3ToAR4R5R6R7S7$isStartFR8CbA1S11.9$F6cv8bzwOJhvZhM_8opExtrudeRbS8$CAP_EDGE\",id);",
+       "nodeId": "FW33hsEkuCBGYam",
+       "deterministicIds": []
+      },
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S11.6$FC886QpvGkNx3e2_4wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc$G95DaeWDmEmQR4R5R6R7S7$isStartFR8CbA1S11.9$F6cv8bzwOJhvZhM_8opExtrudeRbS8$CAP_EDGE\",id);",
+       "nodeId": "FXnFQuT7MbhPz9b",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "X2sb5zc/uUAiFLr7",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "4V1hNNC8CvFo/EQ9",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "zyYv+Ex3DJnXyGqm",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "8cLpntAe/NDNZYen",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "F8TGqLGLTpYVbik_52",
+   "nodeId": "MEWJ+X/0NDQInn2gI",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "grNniyMQ1uwbnR7F",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "BELT_PULLEY",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "9Rnn8oTf+GFPmc/S",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "9",
+     "nodeId": "NZxWSsBhN4vwgyrM",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "24",
+     "nodeId": "/ro0nLSVorxYiFsS",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "24",
+     "nodeId": "7dH2sfPTEuwDTbFn",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "12",
+     "nodeId": "4dAJEqSbJGY3cDfx",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "GHOam59hHqEvjIty",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "HEX",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.5 in",
+     "nodeId": "mG2NvsI65JyCYvd6",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "GGNc8CHguLSSfTyf",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "RHW4XyWvjdXN5jhl",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "MnOi8Gxt/f0NrrTT",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "7xNESO1j6Eyc3E/c",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "HEX",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.5 in",
+     "nodeId": "eBG/x3JG2C9tYmWm",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "Zf5NPVrMBSoBar4d",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "0re3Sh4wQePp7jSD",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "uRbvumC71fMNvAT7",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "Tsm7qTQc5Hv2z9VW",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6Sb$derivedFromC0M6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S12.6$F1hoXIE2oRBzeNn_10wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc$ROFz3ICN2d0ZR5R6R7R8S7$isStartFR9CcA1S12.9$FBYaX2128WetJZH_10opExtrudeRcS8$CAP_EDGER5R6R7R8Sc$instanceNameS1$1R9CcA1S12.9$F5hCOhQY1uoGLKp_10opPatternRcS4$COPY\",id);",
+       "nodeId": "FGvfo1emFTCAbik",
+       "deterministicIds": []
+      },
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6Sb$derivedFromC0M6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S12.6$F1hoXIE2oRBzeNn_10wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc$oVQ4Q40XYjQ0R5R6R7R8S7$isStartFR9CcA1S12.9$FBYaX2128WetJZH_10opExtrudeRcS8$CAP_EDGER5R6R7R8Sc$instanceNameS1$1R9CcA1S12.9$F5hCOhQY1uoGLKp_10opPatternRcS4$COPY\",id);",
+       "nodeId": "FOAqZRkvJ13dbUo",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "l5aL2B59nzfx8/xI",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "oKy5dkyPj6JQ8zdg",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "rAW/0tIMinGTRQad",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "tyz/Gqnvs7jgDxpU",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "FbFs6YYkgccjDuB_53",
+   "nodeId": "MLhR3YLpcPmZEd4Am",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "RK+ZWoa1KNhDQnKH",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "BELT",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "j95DkZ5xhnfQB0/x",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "9",
+     "nodeId": "DRfsR9HkFvnNemwd",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "oSSsepkmaGMLsysn",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "6UMZN8ngNAL6Uo0X",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "12",
+     "nodeId": "XuRrjtXWFKaiurTe",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "97CUKnmQtO50J/oB",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "CIRCULAR",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "ls8bEqMoDe8R+/RY",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "w2m98aST3eDDdl6Z",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "LryLjATqcL1iOOqn",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "p/HVN1zGyTE1WQAm",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "/kdq0FnOX3DVLiJt",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "CIRCULAR",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "pL/yMcc3lo38s3N7",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "1qLRsks4Hy5lbml6",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "69SE4cyTJ/bPvO2G",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "37wIBLsNUuJ0wqXw",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "Uid47kNpjXhxpRvL",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S12.11.6$FFLZeFBLD7mThKO_51firstflangeSketchwireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSa$flangeCircR4R5R6R7S7$isStartFR8CbA1S-c.12.9$firstflangeExtrudeopExtrudeRbS8$CAP_EDGE\",id);",
+       "nodeId": "Fp1n8Hbwn0o7siu",
+       "deterministicIds": []
+      },
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S12.11.6$F8TGqLGLTpYVbik_52firstflangeSketchwireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSa$flangeCircR4R5R6R7S7$isStartFR8CbA1S-c.12.9$firstflangeExtrudeopExtrudeRbS8$CAP_EDGE\",id);",
+       "nodeId": "Fyjz5jrhApfqbGE",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "2HwwLvhz66GUe6rA",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "c/ZLhDOmdB9FpPrV",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "8rIXTP6vhK0QOW0k",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "aeJtu6t013aXHXkt",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "FPBqveHV4Z3ZU74_54",
+   "nodeId": "MsyVj0ooJ4uUZ5plk",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "ApQ69plc89yIvyMf",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "BELT",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "5pmrSsHrmtiJZDTy",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "9",
+     "nodeId": "GZh4SbDrtKaEjn5c",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "h2mfK/yWFDzZRJmC",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "20",
+     "nodeId": "VeGNOuCWCC4oKGA+",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "12",
+     "nodeId": "DwqfwKFq4zc9Xuwz",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "oBDPe6N0BydoK96Q",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "CIRCULAR",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "ggunfqgnb6idQ+FT",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "xYed3QPOkHNGs2oB",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "igF7cPmQAHczhC8K",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "Zb4fu04d5GUTivoH",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d9438f3cb8047fad06da99fbb::vb49bd1dd1b57c764abbac686::e5bffb9f93981c597d66bf353::mfb93d3b46fb6e4ca2d2597aa",
+     "nodeId": "QmF71ltHkhAq0TZ8",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "CIRCULAR",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "reLKDA8CU8v7/Nna",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "byA/fhx1aAxquOCA",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "9CGt9g5S6xBzCA1N",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "VTKyQqQ+GNSkBV82",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "xDOSVxZqWSnkvXFb",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"&1c9$eJxtkF1vgjAUhv/M2eXMysSPS4TKyBywlizhilRatVEoHuo2//2KGrNkuzs9p33O8/Zh4cP7SeH5bcLXIBXqTyWXaJrwyXWIB1L3olnr7UlYbdpIWBGQN+/vpDh3ipNnyFgSJ2mwqiKa0zSiaVjyORjUW92KQx8QB/a5ANVabc/Dq4UAej/wMdAops5lp3tr8NqcQchoUCRZ6gamU3hZmciFB4kMiLMZETKawHJWxMdVvCq68mOt95XvbTT2dnMQ7VbxvbL17kujyjqndBxSX+gS+CstwpeKpkVSlFxBf7l6tUqks70SQo0189mETdmMT0H33Aq0SzYPayfxKEfOYw6/VtJviyepTHcrWD1ECfJqyHgn1aDb3oq2Vqlo3CcC+Y/YaESDubBWYWu6W+GIYwizvPwBgh6bOA==\",id);",
+       "nodeId": "FRVylYqdNe3m6DH",
+       "deterministicIds": []
+      },
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"&1cc$eJxtkN9vwiAQgP+Z2+PM6Kw/HmuLXTNtO2iW9KnBwpRooQJu878fVWOWbAkPx93x3Xc8LEJ4OwlzXk/oBrgw8lPwpdFd/OQzKAAuLes2cntiTmqVMMcitA7+VqpzLyh6hoJkaZZHqybBJc4TnMc1nYM2cisVO9gIeXBIGQjlpDsPrxYM8P1Cx4CTFHuXnbROm2tyBjHBUZUVuS/oXpjLyIwvAsh4hLzNyJ8JLGdVelylq6qv3zdy34SBFa1W/OPA1FbQvXDt7ksaUfTe6TisfcFzoK+4il8anFdZVVMB9tJ61cq4170SYmlaEpIJmZIZnYK01DHjlmQet97ikY/Q82gOv2fib2dOXOj+FpB2WCYqm2HLO6oFqaxjqhU56/w3AvoX2UljtCmZc8Io3d8CjxxDXJT1D0/jnDc=\",id);",
+       "nodeId": "FQwS0Wgyk3INGw1",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "GwBcmezgJ3855Ox+",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "X21UNofuOb0J+v2v",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "iVMNzdHIo0tiw+Tv",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "rhqMLTl+zupZ0GhP",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "FiKhmGXpJuHcnHT_55",
+   "nodeId": "Mdpdf5Qasab92h29y",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+     "nodeId": "34/swLWumaoH3T1y",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "BELT",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+     "nodeId": "8g1tSxgGtIFFwW8M",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "8",
+     "nodeId": "kk21S2oxmjBHJl3m",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "26",
+     "nodeId": "E2N4fLWDAuIwSiXl",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "18",
+     "nodeId": "6b3XKkvZFBta7jof",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "12",
+     "nodeId": "sGZVJSB8sOQ7CKKt",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+     "nodeId": "OS3h/Qnulwi9JdjF",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "CIRCULAR",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "cZX0qI/PlDTahwDE",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "/eXMft+P+cGV3zTx",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "V4jOWo2TdwJRUjcx",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "+m2/CBYbGEcRvWc0",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+     "nodeId": "J9UMiMuC32qJ1Znh",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "CIRCULAR",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "fIpUnYLulm9H3X8a",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "XLICtS4j1N6uRd2E",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "qRg64SrXE7sAj4bx",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "7nBWzqgMy1VlYdOW",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "vJIaNwV5WefXqJV1",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S12.3.3.6$FNP6UGIZik3LmDU_14s1wsk0wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdS2$c1R4R5R6R7S7$isStartTR8CbA1S-c.-d.3.9$ex1opExtrudeRbS8$CAP_EDGE\",id);",
+       "nodeId": "F5VioveVEQn7K5e",
+       "deterministicIds": []
+      },
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S12.3.3.6$FNP6UGIZik3LmDU_14s1wsk0wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdS2$c0R4R5R6R7S7$isStartTR8CbA1S-c.-d.3.9$ex0opExtrudeRbS8$CAP_EDGE\",id);",
+       "nodeId": "FkfeMcggv4IKYvv",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "oL6OqejYc39+cqU5",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "otYxGHg46GF+ySpL",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "hgAkmxWM9B2bKwIK",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "E9St+jU0hWIck+SQ",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "FAlDCaGD6lDZSN6_56",
+   "nodeId": "MiufbpEg+NtvKuFRf",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  },
+  {
+   "btType": "BTMFeature-134",
+   "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+   "name": "#genType : #teeth Tooth Belt (#pitch mm)",
+   "suppressed": false,
+   "parameters": [
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+     "nodeId": "0EKaQeKQVj+lJ5Co",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "GenType",
+     "value": "BELT",
+     "parameterId": "gen",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+     "nodeId": "I+9PVkpUrSixjANq",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Pitch",
+     "value": "HTD5",
+     "parameterId": "pitch",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "9",
+     "nodeId": "nOmo0ZSQDhQoTVKE",
+     "parameterId": "width",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "18",
+     "nodeId": "4uwRKLMhTyEIAT55",
+     "parameterId": "ptooth1",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "18",
+     "nodeId": "hSibrHz2Cbdec5Cg",
+     "parameterId": "ptooth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": true,
+     "value": 0.0,
+     "units": "",
+     "expression": "12",
+     "nodeId": "zlcwuc/fyFxe4h1A",
+     "parameterId": "ptooth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+     "nodeId": "JYGFM0rJLUYoIEg5",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "CIRCULAR",
+     "parameterId": "bore",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "Stsn+mTE10TPVZG5",
+     "parameterId": "boreDiam",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "UEFKCkO6JFcKIj37",
+     "parameterId": "flanged",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "eWKwo3Kklzjd4ssl",
+     "parameterId": "flangeWidth",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "+eqDfQ10aEcKOJe1",
+     "parameterId": "flangeHeight",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterEnum-145",
+     "namespace": "d028ca8fb10baf53e1f6fce96::v821c8b51ed0953526b51926e::e2a05bf271725b7afd76cabe0::mb50ff3455a441cd3a10d647a",
+     "nodeId": "MxSoga98MAZRCGST",
+     "libraryRelationType": "DEFAULT",
+     "enumName": "Bore",
+     "value": "CIRCULAR",
+     "parameterId": "bore2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.38 in",
+     "nodeId": "6AGK9APKT26oJEod",
+     "parameterId": "boreDiam2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "71gb8+bR9yR1NtDT",
+     "parameterId": "flanged2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.0625 in",
+     "nodeId": "6injD7zCfDM9xX69",
+     "parameterId": "flangeWidth2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.04 in",
+     "nodeId": "7Lp80F17mAjRIqUd",
+     "parameterId": "flangeHeight2",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0.005 in",
+     "nodeId": "kMB8sxBrVCOtTNT0",
+     "parameterId": "expansion",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQueryList-148",
+     "libraryRelationType": "DEFAULT",
+     "queries": [
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S12.3.3.6$FNP6UGIZik3LmDU_14s1wsk0wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdS2$c0R4R5R6R7S7$isStartTR8CbA1S-c.-d.3.9$ex0opExtrudeRbS8$CAP_EDGE\",id);",
+       "nodeId": "FAf9Ui5EoQzdFSf",
+       "deterministicIds": []
+      },
+      {
+       "btType": "BTMIndividualQuery-138",
+       "queryStatement": null,
+       "queryString": "query=qCompressed(1.0,\"%B5$QueryM6S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S12.3.3.6$FNP6UGIZik3LmDU_14s0wsk0wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdS2$c0R4R5R6R7S7$isStartTR8CbA1S-c.-d.3.9$ex0opExtrudeRbS8$CAP_EDGE\",id);",
+       "nodeId": "FAicORrLszwMtTM",
+       "deterministicIds": []
+      }
+     ],
+     "filter": {
+      "btType": "BTOrFilter-167",
+      "operand1": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "CIRCLE"
+       }
+      },
+      "operand2": {
+       "btType": "BTAndFilter-110",
+       "operand1": {
+        "btType": "BTEntityTypeFilter-124",
+        "entityType": "EDGE"
+       },
+       "operand2": {
+        "btType": "BTGeometryFilter-130",
+        "geometryType": "ARC"
+       }
+      }
+     },
+     "nodeId": "0It3Cff1B3SYYu5L",
+     "parameterId": "points",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": false,
+     "nodeId": "m7zB/59Zchm5aMCs",
+     "parameterId": "direction",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterQuantity-147",
+     "libraryRelationType": "DEFAULT",
+     "isInteger": false,
+     "value": 0.0,
+     "units": "",
+     "expression": "0 in",
+     "nodeId": "aiY8e8GOhO1S6pKb",
+     "parameterId": "offset",
+     "parameterName": ""
+    },
+    {
+     "btType": "BTMParameterBoolean-144",
+     "libraryRelationType": "DEFAULT",
+     "value": true,
+     "nodeId": "n5J9kjN34LiShUgD",
+     "parameterId": "noRound",
+     "parameterName": ""
+    }
+   ],
+   "featureId": "F2qHAnyTBlsoUjJ_57",
+   "nodeId": "MKFZG0JiF9eiUwp3m",
+   "featureType": "beltPulleyGen",
+   "returnAfterSubfeatures": false,
+   "subFeatures": [],
+   "parameterLibraries": [],
+   "suppressionState": null
+  }
+ ]
+}

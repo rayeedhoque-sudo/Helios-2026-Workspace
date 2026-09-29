@@ -2,7 +2,7 @@
 
 Single CAN bus = default roboRIO bus (`rio`, CAN 2.0). Motor models in **bold** are CAD-confirmed; others from code. Full detail in [Hardware-Data-Sheet.md](Hardware-Data-Sheet.md).
 
-## CAN devices (IDs 1–23, no gaps)
+## CAN devices (V2 — updated 2026-09-29 from CAD; launcher/intake-roller IDs pending)
 
 | CAN ID | Device | Controller | Motor | Mechanism |
 |---|---|---|---|---|
@@ -18,24 +18,22 @@ Single CAN bus = default roboRIO bus (`rio`, CAN 2.0). Motor models in **bold** 
 | 10 | Front Left Steer | TalonFX | **Kraken X44** | Swerve steer FL |
 | 11 | Front Left Drive | TalonFX | **Kraken X60** | Swerve drive FL |
 | 12 | Front Left CANcoder | CANcoder | — | Swerve azimuth FL |
-| 13 | Shooter flywheel A (master) | TalonFX | **Kraken X60** | Shooter flywheel |
-| 14 | Shooter flywheel B (follower, Aligned) | TalonFX | **Kraken X60** | Shooter flywheel |
-| 15 | Shooter flywheel C (follower, Aligned — was Opposed; skipped in team test 2026-07-16) | TalonFX | **Kraken X60** | Shooter flywheel |
-| 16 | Shooter flywheel D (follower, Opposed — spin test 2026-07-16: wrong way when Aligned) | TalonFX | **Kraken X60** | Shooter flywheel |
-| 17 | Kicker | **Victor SPX** (fw 22.1) | **CIM** (motor swapped from the CAD Kraken, 2026-07-16) | Kicker into shooter — ID verified LIVE 2026-07-16 (Phoenix diagnostics scan: only Victor on the bus, at 17) |
-| 18 | Intake roller | TalonFX | **Kraken X44** | Intake rollers |
-| 19 | Shooter hood / angle | SPARK MAX | **NEO 550** | Hood pivot (abs encoder) |
-| 20 | Hopper A | SPARK MAX | **NEO 2.0** | Hopper indexing |
-| 21 | Hopper B | SPARK MAX | **NEO 2.0** | Hopper indexing |
-| 22 | Intake slider / pivot | SPARK MAX | **NEO V1.1** | Intake slider |
+| TBD | Launcher flywheel L1 (belted 1:1 to L2) | TalonFX | **Kraken X60** | Flywheel (V2) |
+| TBD | Launcher flywheel L2 | TalonFX | **Kraken X60** | Flywheel (V2), 18T→26T |
+| TBD | Launcher flywheel R (mirrored) | TalonFX | **Kraken X60** | Flywheel (V2) |
+| TBD | Launcher feeder (replaces CIM kicker) | TalonFX | **Kraken X60** | 3-roller feed, 2.5:1 |
+| TBD | Launcher hood (replaces NEO 550) | TalonFX | **Kraken X44** | Hood sector, ~42.5:1 |
+| TBD (V1: 18) | Intake front rollers | TalonFX | **Kraken X60** (was X44) | Intake rollers, 2:1 |
+| 20? | Hopper A | SPARK MAX | **NEO 2.0** | Hopper belt floor (V2), confirm ID |
+| 21? | Hopper B | SPARK MAX | **NEO 2.0** | Hopper belt floor (V2), confirm ID |
+| 22 | Intake slider / jackshaft | SPARK MAX | **NEO 2.0** (CAD label V1.1) | Intake slider, MAXPlanetary 20:1 |
 | 23 | Pigeon 2.0 | Pigeon2 | — | Heading (IMU) |
 
-## Not yet assigned a CAN ID (exists in CAD, missing in code)
+## V2 notes (2026-09-29)
 
-| Device | Controller | Motor | Note |
-|---|---|---|---|
-| Hopper C (3rd hopper motor) | SPARK MAX | **NEO 2.0** | CAD shows 3 hopper NEOs + 5 SPARK MAX; code wires only 2. Needs a CAN ID (24+). |
-| Pigeon 2.0 #2 | Pigeon2 | — | CAD shows two Pigeons; code uses one. Confirm if redundant/backup, else drop. |
+- The team has **wired** the V2 motors but **has not assigned CAN IDs to new/replaced motors yet**. Don't guess them.
+- **Gone from V1:** 4th flywheel, Victor SPX + CIM kicker (V1 CAN 17), hood SPARK MAX + NEO 550 (V1 CAN 19), intake X44 (V1 CAN 18). The V2 CAD still shows 4 SPARK MAX; one is probably the leftover hood controller. Confirm whether it's still on the bus.
+- Pigeon 2.0 #2: the V2 CAD has one in the drivetrain and one in the launcher; code uses one (CAN 23). Confirm.
 
 ## DIO
 

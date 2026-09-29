@@ -9,13 +9,27 @@ The team's CAD documents and how the data in this folder was pulled from them. R
 | Shooter | "mahinski on the shootski" | `https://cad.onshape.com/documents/33c1707818bb825081d64496/v/d463951fbe3acea693177426/e/eaa2bd86ab52340572b184e0` | ✅ all modes |
 | Intake | "slideuzzy intuzzy" | `https://cad.onshape.com/documents/13ee370048fd8ffd56bbee96/v/2f243b30b721e9c736969a31/e/a55e4e29195b7ca807f24ae1` | ✅ all modes |
 | Hopper | "Hoppity Hopper" (has "gearbox goon") | `https://cad.onshape.com/documents/e5843f80827566d656536e4a/v/307372e77bc2ce584ace8b4a/e/2bdc84552249bbf56972dfe1` | ✅ all modes |
-| Top-level robot v2 | "helios_v2" | `https://cad.onshape.com/documents/303789bd62fb0d9d609c14b6/w/a87ec714c13eeda7135bab77/e/07728cb84454d25bab1e0df4` | ✅ massprops + bom |
+| **Launcher V3 (V2 shooter)** | "Unvaulting may 4 2019" (Launcher V3 folder) | `https://cad.onshape.com/documents/33c1707818bb825081d64496/w/6da0fa1b2da5c93748f3fd3d/e/b3a34082366b447d854f9347` | ✅ 2026-09-29 all modes + indented BOM + assembly def + Part Studio `10ad8c0e…` features |
+| **Hopper V2** | "Assembly 1" | `https://cad.onshape.com/documents/706596de2507bbf61861d0a7/w/8a09c46db37b18c30360443b/e/9bfd675f4546e27aaa2716da` | ✅ 2026-09-29 all modes + indented BOM + assembly def |
+| Top-level robot v2 | "Helios V2" (re-pulled 2026-09-29: flat + multi-level BOM) | `https://cad.onshape.com/documents/303789bd62fb0d9d609c14b6/w/a87ec714c13eeda7135bab77/e/07728cb84454d25bab1e0df4` | ✅ massprops + bom |
 | Top-level robot v1 | "helios_v1" | `https://cad.onshape.com/documents/303789bd62fb0d9d609c14b6/w/a87ec714c13eeda7135bab77/e/eb069a40237674fe1af7e361` | not pulled |
 | Variable Studio | — | `https://cad.onshape.com/documents/303789bd62fb0d9d609c14b6/w/a87ec714c13eeda7135bab77/e/044435da11aeedef217d4b11` | empty (team uses gear relations + COTS, not named variables) |
 
 Notes from the config: *"Swerve ratios come from CTRE Tuner X, not CAD."* · *"No climber this season."* · Sub-assemblies are pinned `/v/` versions (immutable, cacheable, quota-friendly).
 
-## What each raw pull contains ([raw/](raw/))
+## V2 raw pulls ([raw/v2/](raw/v2/), 2026-09-29, ~20 API calls)
+
+| File | Contents |
+|---|---|
+| `launcher-v3.json`, `hopper-v2.json` | helper `--mode all` (BOM, massprops, relations — no gear relations modeled) |
+| `toplevel-v2-bom.json`, `toplevel-v2-bom-multilevel.json` | flat + multi-level indented BOM of "Helios V2" (shows which subassembly owns each motor) |
+| `assembly-defs.json` | launcher + hopper assembly definitions (occurrence transforms + mates) — used to pair motors↔pulleys↔shafts |
+| `launcher-gear-features.json` | Part Studio `10ad8c0e…` features (filtered to gear/pulley generators): belt/pulley generator tooth counts + the **170T hood sector** spur-gear feature |
+| `hopper-pinion-partstudio-features.json` | Part Studio `0ce2eac6…` (imported STEP only — no tooth count readable) |
+
+Method notes: workspace (`/w/`) reads aren't cache-stable — prefer pinning a `/v/` version for re-pulls. Belt/gear pairings were done by matching occurrence (y,z) shaft positions and checking belt length = 2C + π(D1+D2)/2 against the BOM belt tooth counts.
+
+## What each raw pull contains ([raw/](raw/)) — V1 (2026-06-14)
 
 | File | Source | Highlights |
 |---|---|---|

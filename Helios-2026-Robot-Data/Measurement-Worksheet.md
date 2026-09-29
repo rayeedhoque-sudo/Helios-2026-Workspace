@@ -4,6 +4,17 @@ Fill these in at the robot (or from the game manual / team knowledge) and hand t
 
 > Not here on purpose: PID/FF gains, the shooting lookup values, motor inversions, CANcoder zero offsets — those only come from **running/tuning** the robot, not from a measurement. See §G.
 
+## V2 — measure / read these first (2026-09-29 redesign)
+- [ ] **CAN IDs** (Tuner X / REV HW Client): flywheel L1 ____ , L2 ____ , R ____ , feeder ____ , hood X44 ____ , intake roller X60 ____ ; hopper A/B still 20/21? ____ ; is a leftover SPARK MAX (old hood, 19) still on the bus? ____
+- [ ] **Hood sector teeth** ____ (CAD 170T, 10 DP pinion 10T) and **hood travel** min ____° / max ____° (no CAD mate limits)
+- [ ] **Hood encoder?** ____ (what's on the 23T pulley on the hood pinion shaft?) and its homing reference ____
+- [ ] **Hopper NEO pinion teeth** ____ (CAD geometry says 12T 20 DP)
+- [ ] Flywheel ratio spot-check: 18T motor pulleys → 26T flywheel pulleys ____ (confirm)
+- [ ] Feeder tube-roller OD ____ ; upper (flywheel-driven) roller OD ____
+- [ ] Limelight lens height / offsets / pitch **in the V2 launcher** ____ ; shot release height ____
+- [ ] Swerve module type on the robot: WCP X2 or X3? ____ (CAD says X2)
+- [ ] Orange Pi 5 on the robot? ____ role ____
+
 ---
 
 ## A. Tape measure / calipers
@@ -14,11 +25,11 @@ Fill these in at the robot (or from the game manual / team knowledge) and hand t
 - [x] ~~Intake slider total stroke~~ — **CAD says ~11.2"** (mate limit 2"→13.207"). Just spot-check it on the robot; still need rack-vs-geared (for inches/motor-rot).
 - [ ] Flywheel wheel diameter ____ (CAD 4") ; ball compression gap ____
 - [ ] Intake roller wheel diameters ____ (CAD 4" mecanum, 3" compliant)
-- [ ] Hopper roller diameters ____ (CAD 2")
-- [ ] Kicker wheel diameter ____
+- [ ] ~~Hopper roller diameters (V1)~~ V2 hopper is a belt floor (15T HTD5 drive pulleys)
+- [ ] ~~Kicker wheel diameter~~ (V1 kicker removed — see V2 feeder above)
 
 ## B. Protractor / digital angle gauge
-- [x] ~~Hood min/max angle~~ — **CAD confirms ~42° of sweep** (mate limit; matches code 3.224°→44.5°). Just confirm the zero reference physically.
+- [ ] **V2 hood travel — see V2 section** *(V1:)* ~~Hood min/max angle~~ — CAD confirmed ~42° of sweep (mate limit; matches code 3.224°→44.5°). Just confirm the zero reference physically.
 - [ ] Is the intake slider **rack-and-pinion** or **geared**? ____  (count pinion teeth if rack: ____)
 - [ ] Limelight mount **pitch** angle ____° (roll: **mounted upside down — 180°**, user-stated 2026-07-17; LL OS appears to flip in firmware, see Hardware-Data-Sheet §3)
 
@@ -30,12 +41,12 @@ Fill these in at the robot (or from the game manual / team knowledge) and hand t
 
 ## D. Read off labels / Phoenix Tuner X / REV Hardware Client (concrete, no running needed)
 - [ ] Confirm every CAN ID 1–23 matches [CAN-Bus-and-DIO-Map.md](CAN-Bus-and-DIO-Map.md)
-- [ ] **3rd hopper NEO 2.0** — its CAN ID ____ and is it geared with the other two or separate?
+- [x] ~~**3rd hopper NEO 2.0**~~ (V1 only) — its CAN ID ____ and is it geared with the other two or separate?
 - [ ] **2nd Pigeon 2.0** — CAN ID ____ , or confirm it's not on the robot
 - [ ] Motor model per location (Kraken X60 vs X44; NEO vs NEO 550 vs NEO 2.0) — read the labels
-- [ ] **Intake slider MAXPlanetary cartridge ratio** ____ (single 5:1?) — confirm like you did the hood
-- [ ] Hopper "gearbox goon": confirm 10T→60T (6:1) + 18T→36T (2:1); which stage drives the rollers ____
-- [ ] Kicker reduction — count the pinion + final belt/pulley teeth ____
+- [ ] **Intake slider MAXPlanetary cartridge ratio** ____ (V2 CAD: 5:1 + 4:1 = 20:1, team says CAD is right) — confirm like you did the hood
+- [x] ~~Hopper "gearbox goon"~~ (V1 only): confirm 10T→60T (6:1) + 18T→36T (2:1); which stage drives the rollers ____
+- [x] ~~Kicker reduction~~ (V1 only) — count the pinion + final belt/pulley teeth ____
 
 ## E. Electrical (validates the current-limit caps in §7) — read off the PDH/PDP and wiring
 - [ ] Breaker size on each motor channel ____ A (Krakens should be 40 A; NEO 550 20–30 A)

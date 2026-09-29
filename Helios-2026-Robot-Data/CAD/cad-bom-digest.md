@@ -2,6 +2,8 @@
 
 Human-readable digest of the Onshape pulls in [raw/](raw/). Tooth counts, wheel diameters, and shaft lengths read directly from the BOMs; derived ratios noted. All `[CAD]` — reflects the design, not the wired robot.
 
+> **⚠ V2 (2026-09-29): this digest describes the V1 CAD.** The shooter, hopper and intake-roller data is superseded. See Hardware-Data-Sheet §10.0 and §4.2/§4.3 for the V2 digest (3× X60 flywheel 18T→26T, X60 feeder 2.5:1, X44 hood ~42.5:1, belt-floor hopper 2× NEO 2.0, intake roller X60, slider MAXPlanetary 20:1).
+
 ## Motors & controllers (top-level robot BOM)
 
 | Item | Qty (CAD) | Part # | Used by |
