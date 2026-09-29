@@ -463,6 +463,7 @@ Neither the old code nor the CAD pins these down. Get them before/while writing 
 - **V2-8. Limelight 4 mount pose** (it now lives in the launcher assembly) and shot release height, which need re-measuring.
 - **V2-9. Upper-roller and feeder tube-roller diameters** (for surface speeds).
 - **V2-10. Swerve module label** (CAD: WCP Swerve X2 vs tuner-project "X3 10T"). Ratios stay from Tuner X.
+- **V2-12. Intake not re-examined in depth.** The V2 intake (doc `13ee3700…`, v `c8eef8ca…`, e `a55e4e29…`) was only read through the top-level BOM. The slider stroke (~11.2") and the unpaired slider spur/rack chain still come from the V1 intake pull. Re-pull its assembly definition if the slider needs inches per rotation.
 - **V2-11. Orange Pi 5** in the CAD: is it on the robot, and what does it run?
 
 **Robot-code constants invalidated by V2** (don't edit them until V2-1..V2-4 are answered; that's a separate, team-directed change): flywheel `FLYWHEEL_ROTATIONS_PER_MOTOR_ROTATION` 1.5 → 18/26; 4 → 3 flywheel motors and their follower alignments; the kicker is no longer a Victor SPX/CIM (now a TalonFX X60 feeder); the hood is no longer a SPARK MAX NEO 550 with an absolute encoder (now a TalonFX X44, 42.5:1, encoder TBD); all hood raw-unit anchors/ceilings (e.g. 290, the 240→192 B-feed value); the shot tables and shot-model fits; the hopper ratio; the intake-roller motor model (X44 → X60 limits).
