@@ -103,8 +103,7 @@ public class RobotContainer {
 
     // Full robot: all subsystems constructed.
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    // V2 launcher (2026-09-30). The V1 ShooterSubsystem is NOT constructed any more -- its code
-    // (incl. RB auto-aim) is kept in the tree but would drive V2 motors wrongly if built.
+    // V2 launcher (2026-09-30). The V1 ShooterSubsystem was deleted (last in commit ccd5075).
     public final LauncherSubsystem launcherSS = new LauncherSubsystem();
     public final IntakeSubsystem intakeSS = new IntakeSubsystem();
     public final HopperSubsystem hopperSS = new HopperSubsystem();
@@ -330,9 +329,9 @@ public class RobotContainer {
                 .onTrue(launcherSS.stepHoodCommand(LauncherConstants.HOOD_STEP_DEG));
             joystick2.povDown().and(RobotModeTriggers.teleop())
                 .onTrue(launcherSS.stepHoodCommand(-LauncherConstants.HOOD_STEP_DEG));
-            // RB: intentionally unbound (team 2026-09-30). The V1 auto-aim binding is in git
-            // history (commit 15cd4ea, RobotContainer RB block) and its logic is still in
-            // ShooterSubsystem.autoAimShotCommand -- both target the V1 hood/flywheel.
+            // RB: intentionally unbound (team 2026-09-30). The V1 auto-aim binding and its
+            // ShooterSubsystem logic are in git history (commit ccd5075) -- both target the V1
+            // hood/flywheel and need re-deriving for V2.
     }
 
     /**

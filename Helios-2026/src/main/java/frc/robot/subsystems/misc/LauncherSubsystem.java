@@ -206,8 +206,6 @@ public class LauncherSubsystem extends SubsystemBase {
         public boolean isShooting(){ return shooting; }
         /** Belt gate: flywheels AND feeder at speed (team spec 2026-09-30). */
         public boolean isReadyToFeed(){ return flywheelAtSpeed && feederAtSpeed; }
-        public double getFlywheelTargetRpm(){ return flywheelTargetRpm; }
-        public HoodState getHoodState(){ return hoodState; }
 
         private double getFlywheelRpm(){
             return motorRpsToFlywheelRpm(flywheelLeader.getVelocity().getValueAsDouble());

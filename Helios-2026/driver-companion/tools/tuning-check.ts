@@ -97,12 +97,7 @@ const real = readFileSync(
 );
 // Mirrors CONSTANT_NAMES in src/renderer/pidtune.ts. If a rename breaks that map, this fails
 // here instead of silently writing nothing during a tuning session.
-const PANEL_CONSTANTS = [
-  'SHOOTER_SPEED_kP', 'SHOOTER_SPEED_kI', 'SHOOTER_SPEED_kD',
-  'SHOOTER_SPEED_kS', 'SHOOTER_SPEED_kV', 'SHOOTER_SPEED_kA',
-  'SHOOTER_ANGLE_kP', 'SHOOTER_ANGLE_kI', 'SHOOTER_ANGLE_kD',
-  'HEADING_kP', 'HEADING_kI', 'HEADING_kD',
-];
+const PANEL_CONSTANTS: string[] = []; // see CONSTANT_NAMES in pidtune.ts -- empty since 2026-09-30
 for (const name of PANEL_CONSTANTS) {
   // Patch to a value nothing is currently set to, so "already at this value" can't mask a miss.
   const { changed, skipped } = patchConstants(real, { [name]: -12345.5 });

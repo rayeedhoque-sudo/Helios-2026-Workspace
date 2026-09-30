@@ -340,20 +340,10 @@ function writeGain(name: string, input: HTMLInputElement): void {
 // ---- copy-back ---------------------------------------------------------------
 // Maps an NT gain name to the CONSTANT it came from — emitting the NT name (or the
 // shooterVelConfigs field name) would paste something that does not compile.
-const CONSTANT_NAMES: Record<string, string> = {
-  'Shooter/Flywheel/kP': 'SHOOTER_SPEED_kP',
-  'Shooter/Flywheel/kI': 'SHOOTER_SPEED_kI',
-  'Shooter/Flywheel/kD': 'SHOOTER_SPEED_kD',
-  'Shooter/Flywheel/kS': 'SHOOTER_SPEED_kS',
-  'Shooter/Flywheel/kV': 'SHOOTER_SPEED_kV',
-  'Shooter/Flywheel/kA': 'SHOOTER_SPEED_kA',
-  'Shooter/Hood/kP': 'SHOOTER_ANGLE_kP',
-  'Shooter/Hood/kI': 'SHOOTER_ANGLE_kI',
-  'Shooter/Hood/kD': 'SHOOTER_ANGLE_kD',
-  'Drive/Heading/kP': 'HEADING_kP',
-  'Drive/Heading/kI': 'HEADING_kI',
-  'Drive/Heading/kD': 'HEADING_kD',
-};
+// Empty since 2026-09-30: the V1 shooter gains and the drivetrain heading gains it mapped were
+// deleted with the V1 shooter. The V2 launcher gains are compile-time constants (not live-tuned),
+// so nothing on the robot publishes a writable gain right now.
+const CONSTANT_NAMES: Record<string, string> = {};
 
 /** Build the paste-into-SubsystemConstants block. Pure string work; see selfCheck(). */
 export function javaBlock(names: string[], values: Map<string, number>): string {

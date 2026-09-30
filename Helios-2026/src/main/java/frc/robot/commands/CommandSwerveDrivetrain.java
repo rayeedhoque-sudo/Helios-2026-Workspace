@@ -4,22 +4,17 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -27,7 +22,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoublePublisher;
@@ -39,9 +33,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.SubsystemConstants.DriveConstants;
 import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.Constants.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.utility.LimelightHelpers;
@@ -72,75 +64,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * ONLY come from the driver's MENU press (seedFieldCentric). */
     private boolean m_hasBeenEnabled = false;
 
-    /* Swerve requests to apply during SysId characterization */
-    private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
-    private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
-    private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
-
-    /* SwerveRequest.ApplyChassisSpeeds */
-        SwerveRequest.ApplyRobotSpeeds m_applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
-
-    /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
-    private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
-        new SysIdRoutine.Config(
-            null,        // Use default ramp rate (1 V/s)
-            Volts.of(4), // Reduce dynamic step voltage to 4 V to prevent brownout
-            null,        // Use default timeout (10 s)
-            // Log state with SignalLogger class
-            state -> SignalLogger.writeString("SysIdTranslation_State", state.toString())
-        ),
-        new SysIdRoutine.Mechanism(
-            output -> setControl(m_translationCharacterization.withVolts(output)),
-            null,
-            this
-        )
-    );
-
-    /* SysId routine for characterizing steer. This is used to find PID gains for the steer motors. */
-    private final SysIdRoutine m_sysIdRoutineSteer = new SysIdRoutine(
-        new SysIdRoutine.Config(
-            null,        // Use default ramp rate (1 V/s)
-            Volts.of(7), // Use dynamic voltage of 7 V
-            null,        // Use default timeout (10 s)
-            // Log state with SignalLogger class
-            state -> SignalLogger.writeString("SysIdSteer_State", state.toString())
-        ),
-        new SysIdRoutine.Mechanism(
-            volts -> setControl(m_steerCharacterization.withVolts(volts)),
-            null,
-            this
-        )
-    );
-
-    /*
-     * SysId routine for characterizing rotation.
-     * This is used to find PID gains for the FieldCentricFacingAngle HeadingController.
-     * See the documentation of SwerveRequest.SysIdSwerveRotation for info on importing the log to SysId.
-     */
-    // private final SysIdRoutine m_sysIdRoutineRotation = new SysIdRoutine(
-    //     new SysIdRoutine.Config(
-    //         /* This is in radians per second², but SysId only supports "volts per second" */
-    //         Volts.of(Math.PI / 6).per(Second),
-    //         /* This is in radians per second, but SysId only supports "volts" */
-    //         Volts.of(Math.PI),
-    //         null, // Use default timeout (10 s)
-    //         // Log state with SignalLogger class
-    //         state -> SignalLogger.writeString("SysIdRotation_State", state.toString())
-    //     ),
-    //     new SysIdRoutine.Mechanism(
-    //         output -> {
-    //             /* output is actually radians per second,    but SysId only supports "volts" */
-    //             setControl(m_rotationCharacterization.withRotationalRate(output.in(Volts)));
-    //             /* also log the requested output for SysId */
-    //             SignalLogger.writeDouble("Rotational_Rate", output.in(Volts));
-    //         },
-    //         null,
-    //         this
-    //     )
-    // );
-
-    /* The SysId routine to test */
-    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+    /* Robot-relative speeds request used by PathPlanner's AutoBuilder output. */
+    private final SwerveRequest.ApplyRobotSpeeds m_applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -271,16 +196,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
     
     /**
-     * 
-     * Returns a command that runs the specified path from PathPlanner. The path must be located in the "paths" folder in the project directory, and should be created using the PathPlanner tool.
-     * @param name
-     * @return Auto Command
-     */
-        public Command getAuton(String name){
-            return new PathPlannerAuto(name);
-        }
-
-    /**
      * Returns a command that applies the specified control request to this swerve drivetrain.
      *
      * @param request Function returning the request to apply
@@ -288,28 +203,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      */
     public Command applyRequest(Supplier<SwerveRequest> request) {
         return run(() -> this.setControl(request.get()));
-    }
-
-    /**
-     * Runs the SysId Quasistatic test in the given direction for the routine
-     * specified by {@link #m_sysIdRoutineToApply}.
-     *
-     * @param direction Direction of the SysId Quasistatic test
-     * @return Command to run
-     */
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.quasistatic(direction);
-    }
-
-    /**
-     * Runs the SysId Dynamic test in the given direction for the routine
-     * specified by {@link #m_sysIdRoutineToApply}.
-     *
-     * @param direction Direction of the SysId Dynamic test
-     * @return Command to run
-     */
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutineToApply.dynamic(direction);
     }
 
     @Override
@@ -347,13 +240,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     // badge: 0 = odometry only. Lives in the same NT table as Pose/robotPose (Telemetry).
     private final DoublePublisher visionTagCountPub = NetworkTableInstance.getDefault()
         .getTable("Pose").getDoubleTopic("visionTagCount").publish();
-
-    // Heading-servo gains, live-tunable from the driver-companion PID panel. setPID is called
-    // fresh every time one of the aim/align requests is built, so reading these needs no
-    // re-apply gating. Constant values when TUNING_MODE is off.
-    private final Tunable headingKp = new Tunable("Drive/Heading/kP", DriveConstants.HEADING_kP);
-    private final Tunable headingKi = new Tunable("Drive/Heading/kI", DriveConstants.HEADING_kI);
-    private final Tunable headingKd = new Tunable("Drive/Heading/kD", DriveConstants.HEADING_kD);
 
     /**
      * AprilTag pose correction, two layers (both BLUE-origin -- PathPlanner and this
@@ -477,118 +363,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
     }
 
-    public Command rotateToAngle(double targetAngleDegrees){
-        return rotateToAngle(() -> targetAngleDegrees);
-    }
-
-    /**
-     * Supplier overload so the target can be a LIVE value (e.g. a vision bearing that updates
-     * every loop). A plain double is frozen at binding-construction time -- binding
-     * rotateToAngle(shooter.getDegreesToAlignToTarget()) would rotate to whatever the value was
-     * at boot (0 deg) forever; bind rotateToAngle(shooter::getDegreesToAlignToTarget) instead.
-     */
-    public Command rotateToAngle(DoubleSupplier targetAngleDegrees){
-        var request = new SwerveRequest.FieldCentricFacingAngle();
-        // The HeadingController gains default to 0 -- without this the request outputs zero
-        // rotation and the command would hold the drivetrain forever. Radians in, rad/s out.
-        request.HeadingController.setPID(
-            headingKp.get(), headingKi.get(), headingKd.get()); // live-tunable, see Tunable
-        request.HeadingController.enableContinuousInput(-Math.PI, Math.PI); // take the short way around
-        // Cap the commanded spin (P-only at 5 rad/s per rad could otherwise demand ~15 rad/s).
-        request.MaxAbsRotationalRate = 1.5 * Math.PI; // rad/s. TODO tune on robot
-        // Targets here are computed from the BLUE-ORIGIN pose (pose heading + delta), but the
-        // request DEFAULTS to OperatorPerspective, which re-rotates TargetDirection 180 deg on
-        // red alliance -- the servo would chase the wrong heading while the .until() tolerance
-        // (blue-frame) could never latch. Fixed 2026-07-17.
-        request.ForwardPerspective = SwerveRequest.ForwardPerspectiveValue.BlueAlliance;
-
-        // The command must END when on target (or on the timeout backstop) so the drivetrain
-        // returns to the driver's default drive command -- chaining an Idle request here would
-        // hold the drivetrain forever and lock the driver out.
-        return this.applyRequest(() ->
-            request.withTargetDirection(
-                Rotation2d.fromDegrees(targetAngleDegrees.getAsDouble())
-            )
-        ).until(() ->
-            // Rotation2d.minus wraps, so 179 deg vs -179 deg reads as 2 deg apart, not 358.
-            Math.abs(
-                this.getState().Pose.getRotation()
-                    .minus(Rotation2d.fromDegrees(targetAngleDegrees.getAsDouble())).getDegrees()
-            ) < 2 // deg. P-only control may hold a small steady-state error; 1 deg could never latch
-        ).withTimeout(2.0); // s -- backstop so a stalled align can never hang the drivetrain. TODO tune
-    }
-
-    /**
-     * SEARCH-ALIGN (A / DPAD-UP, hold): while no usable tag is in view, rotate in place
-     * slowly (translation stays zero) so the Limelight sweeps the field; the moment seesTag
-     * reports a scoring tag of OUR alliance, face it -- targetHeadingDegrees is re-sampled
-     * EVERY loop, so the aim tracks the live vision bearing. Deliberately never self-ends
-     * (no until/withTimeout): this is bound whileTrue, so the driver's hold IS the timeout
-     * and release returns the drivetrain to the default drive command.
-     */
-    public Command searchAndAlignCommand(BooleanSupplier seesTag, DoubleSupplier targetHeadingDegrees){
-        var searchRequest = new SwerveRequest.FieldCentric(); // velocities default 0 -- rotate in place
-        var faceRequest = new SwerveRequest.FieldCentricFacingAngle();
-        // Same heading-servo setup as rotateToAngle: the HeadingController gains default to 0
-        // (zero rotation output without this), continuous input takes the short way around,
-        // and the rate cap tames P-only spikes. Radians in, rad/s out.
-        faceRequest.HeadingController.setPID(
-            headingKp.get(), headingKi.get(), headingKd.get()); // live-tunable, see Tunable
-        faceRequest.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-        faceRequest.MaxAbsRotationalRate = 1.5 * Math.PI; // rad/s. TODO tune on robot
-        // Blue-origin targets (pose heading + camera bearing) -- see rotateToAngle: the
-        // OperatorPerspective default would re-rotate them 180 deg on red alliance.
-        faceRequest.ForwardPerspective = SwerveRequest.ForwardPerspectiveValue.BlueAlliance;
-
-        return this.applyRequest(() ->
-            seesTag.getAsBoolean()
-                ? faceRequest.withTargetDirection(
-                    Rotation2d.fromDegrees(targetHeadingDegrees.getAsDouble()))
-                : searchRequest.withRotationalRate(
-                    FieldConstants.SEARCH_ROTATE_RATE_ROT_PER_SEC * 2.0 * Math.PI) // rot/s -> rad/s, CCW
-        );
-    }
-
-    // (driveWithAimLockCommand DELETED 2026-07-21: unused since the 07-17 RT redesign to
-    // aim-then-freeze. If strafe-while-aiming ever comes back, restore it from git history
-    // at commit 1a88475 or earlier -- it handled the operator->blue frame rotation.)
-
-    /**
-     * AIM-then-stop for the precision shot (team request 2026-07-17: "auto-aim, THEN disable
-     * drive"). Rotate IN PLACE (translation 0) toward the live blue-origin {@code targetHeadingDeg}
-     * and END the instant {@code aimed} reports the robot is lined up on a REAL target. Differs
-     * from {@link #rotateToAngle}: it ends on the SHOOTER's own aim gate (not a fixed 2 deg) and
-     * has NO timeout -- with no target {@code aimed} never latches, so it just holds heading rather
-     * than ending early and letting a never-aimed shot fire. The caller sequences a freeze (Idle)
-     * + feed AFTER this, so the drivetrain is disabled and fuel is fed only once the aim is made.
-     */
-    public Command aimUntilAligned(DoubleSupplier targetHeadingDeg, BooleanSupplier aimed) {
-        var request = new SwerveRequest.FieldCentricFacingAngle();
-        // Same heading servo as rotateToAngle / driveWithAimLock. Radians in, rad/s out.
-        request.HeadingController.setPID(
-            headingKp.get(), headingKi.get(), headingKd.get()); // live-tunable, see Tunable
-        request.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-        request.MaxAbsRotationalRate = 1.5 * Math.PI; // rad/s
-        // Blue-origin bearing (from pose) -- OperatorPerspective default would re-rotate it 180 on red.
-        request.ForwardPerspective = SwerveRequest.ForwardPerspectiveValue.BlueAlliance;
-        return this.applyRequest(() ->
-                request.withTargetDirection(Rotation2d.fromDegrees(targetHeadingDeg.getAsDouble())))
-            .until(aimed);
-    }
-
-    /**
-     * DPAD-LEFT/RIGHT: rotate exactly deltaDegrees (CCW positive, per WPILib convention)
-     * from wherever the robot points when the command is SCHEDULED -- deferred, because a
-     * heading read at binding-construction time would snapshot the boot heading forever.
-     * Delegates to rotateToAngle, keeping its 2 deg tolerance and 2 s timeout so the
-     * command self-ends and hands the drivetrain back to the driver.
-     */
-    public Command rotateBy(double deltaDegrees){
-        return Commands.defer(
-            () -> rotateToAngle(this.getState().Pose.getRotation().getDegrees() + deltaDegrees),
-            Set.of(this));
-    }
-
     /** Reset odometry to the alliance auto start pose (X, Y AND heading). Start of auto only. */
     public Command resetToAutoStartPose() {
         return this.runOnce(() -> this.resetPose(FieldConstants.autoStartPose()));
@@ -674,50 +448,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     // One-shot X-lock so the command ENDS (default command then holds 0) -- a
                     // run-forever brake leg would keep the drivetrain and lock the driver out.
                     .andThen(this.runOnce(() -> this.setControl(lock)));
-        }, Set.of(this));
-    }
-
-    public Command driveToPose(Pose2d targetPose){
-        PathConstraints constraints = new PathConstraints(
-            Vision.PP_MAX_VELOCITY, 
-            Vision.PP_MAX_ACCELERATION, 
-            Vision.PP_MAX_ANGULAR_VELOCITY, 
-            Vision.PP_MAX_ANGULAR_ACCELERATION
-        );
-        Command pathfindingCommand = AutoBuilder.pathfindToPose(targetPose, constraints, 0.0);
-        return pathfindingCommand;
-    }
-
-    public Command driveToPose(Translation2d targetTranslation, Translation2d velocityTranslation){
-        // Deferred so the CURRENT pose is read when the command is scheduled, not when the
-        // binding is constructed at boot.
-        return Commands.defer(() -> {
-            double velocityMag = velocityTranslation.getNorm();
-            if(velocityMag < 0.001){
-                return Commands.none();
-            }
-
-            // Distance from where the robot IS to the target. The old code used
-            // targetTranslation.getNorm() -- the target's distance from the FIELD ORIGIN (0,0),
-            // which is unrelated to how far the robot actually has to travel.
-            double distance = targetTranslation.minus(this.getState().Pose.getTranslation()).getNorm();
-            double time = distance / velocityMag;
-
-            var idle = new SwerveRequest.Idle();
-
-            return this.applyRequest(() ->
-                m_applyRobotSpeeds.withSpeeds(
-                    ChassisSpeeds.fromFieldRelativeSpeeds(
-                        velocityTranslation.getX(),
-                        velocityTranslation.getY(),
-                        0,
-                        this.getState().Pose.getRotation()
-                    )
-                )
-            ).withTimeout(time)
-            // One-shot stop so the command ENDS and the driver's default command resumes -- a
-            // run-forever applyRequest(Idle) leg would hold the drivetrain and lock the driver out.
-            .andThen(this.runOnce(() -> this.setControl(idle)));
         }, Set.of(this));
     }
 }
