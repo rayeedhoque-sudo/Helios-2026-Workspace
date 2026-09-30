@@ -135,7 +135,7 @@ function build(container: HTMLElement): void {
   cards.className = 'sh-cards';
   container.appendChild(cards);
 
-  cards.appendChild(card('Hood Angle', 'angle', 'raw units', [
+  cards.appendChild(card('Hood Angle', 'angle', 'deg', [
     ['Last move', 'lastMove'],
     ['Drift since parked', 'drift'],
     ['Rate', 'rate'],
@@ -300,7 +300,7 @@ function render(): void {
     ? '--'
     : num(angleTarget - base, 1) + '  /  ' + signed(err, 1), angleReached ? 'ok' : undefined);
 
-  // Volts with no motion is the stall case -- the hood is a NEO 550 on a 20 A smart limit and
+  // Volts with no motion is the stall case -- the hood is a Kraken X44 on a 20 A stator limit and
   // there is no move timeout in the robot code, so flag it loudly rather than burying it.
   const stalling = Math.abs(hoodVolts) > 0.5 && !moving && hoodAmps > HOOD_IDLE_AMPS;
   set('hoodPower', num(hoodVolts, 2) + ' V  /  ' + num(hoodAmps, 1) + ' A',
@@ -326,7 +326,7 @@ function renderBanner(): void {
   }
   const stalling = Math.abs(hoodVolts) > 0.5 && !moving && hoodAmps > HOOD_IDLE_AMPS;
   if (stalling) {
-    bannerEl.textContent = 'Hood driven but not moving — ' + num(hoodAmps, 1) + ' A into a stalled NEO 550';
+    bannerEl.textContent = 'Hood driven but not moving — ' + num(hoodAmps, 1) + ' A into a stalled hood motor';
     bannerEl.dataset.level = 'bad';
     return;
   }

@@ -16,12 +16,12 @@ import { focusMotor } from './graphs';
 // /names order is fixed by spec (17 slots). Group + display-only bar scale (amps)
 // per index — scales match each motor's configured current limit so a pinned motor
 // fills its bar (they are display geometry, NOT the limits themselves):
-//   drive 120, steer 40, shooter 40 (Kraken), Hood 20 (NEO 550),
-//   IntakeRoller 40 (Kraken X44), IntakeSlider 60 (SparkMax NEO 2.0),
+//   drive 120, steer 40, flywheels 40 (Kraken X60), feeder 30 (X60), Hood 20 (Kraken X44),
+//   IntakeRoller 40 (Kraken X60), IntakeSlider 60 (SparkMax NEO 2.0),
 //   Hopper 20 (SparkMax NEO 2.0 — HopperSubsystem smartCurrentLimit(20)).
 const SCALE: number[] = [
   120, 40, 120, 40, 120, 40, 120, 40, // drive/steer FL..BR
-  40, 40, 40, 40, // shooter A-D
+  40, 40, 40, 30, // flywheels 15/14/13, feeder
   20, // hood
   40, 60, // intake roller (Kraken), slider (Spark)
   20, 20, // hopper A, B (Spark)
@@ -30,7 +30,7 @@ const SCALE: number[] = [
 // Exported for the motor recorder's subsystem/motor picker (recorder.ts).
 export const SPEC_NAMES = [
   'DriveFL', 'SteerFL', 'DriveFR', 'SteerFR', 'DriveBL', 'SteerBL', 'DriveBR', 'SteerBR',
-  'ShooterA', 'ShooterB', 'ShooterC', 'ShooterD', 'Hood', 'IntakeRoller', 'IntakeSlider',
+  'Flywheel15', 'Flywheel14', 'Flywheel13', 'Feeder', 'Hood', 'IntakeRoller', 'IntakeSlider',
   'HopperA', 'HopperB',
 ];
 export const GROUPS: { name: string; idx: number[] }[] = [
@@ -50,11 +50,10 @@ const INTAKE = '/Shuffleboard/Intake Subsystem Tab';
 const HOPPER = '/Shuffleboard/Hopper Subsystem Tab';
 
 // Per-index temp thresholds [warn, bad] °C — one 70/90 cutoff fit only the TalonFX
-// rows; the NEO 550 hood is fragile and the NEO 2.0 sparks sit in between.
+// rows; the NEO 2.0 sparks sit a little lower.
 // TODO tune against real on-robot temps once the mechanisms run under load.
 const TEMP_DEFAULT: [number, number] = [70, 90]; // Kraken X60/X44 (TalonFX)
 const TEMP_LIMITS: Record<number, [number, number]> = {
-  12: [55, 70], // Hood — NEO 550
   14: [65, 85], // IntakeSlider — NEO 2.0
   15: [65, 85], // HopperA — NEO 2.0
   16: [65, 85], // HopperB — NEO 2.0
@@ -539,34 +538,15 @@ function renderChooserStatus(): void {
 // ===================== CONTROLS REFERENCE =====================
 // Static driver reference of the Xbox bindings in RobotContainer.configureBindings().
 // KEEP IN SYNC with RobotContainer.java — bindings are not published over NT, so this
-// mirrors the code by hand (re-synced 2026-08-22: RT = flywheels-only with a manually
-// jogged hood, DPAD ← / → = hood jog in TELEOP too, intake disabled, manual hopper
-// (B) no longer runs the kicker. Earlier sync 2026-07-16: full team-spec rebind — shooter
-// RE-ENABLED, sticks swapped, MENU re-zero / DPAD hood jog / RT test shot removed).
-// MENU desc re-synced 2026-07-21: AprilTag auto-seed now stops at first enable, so
-// MENU is the only in-match re-zero.
-// RE-SYNCED 2026-08-27 (hood raw-unit rework): the hood angle IS the raw encoder reading
-// now -- every hood number the driver sees is in RAW ENCODER UNITS, not physical degrees
-// (7.5 units = 1 physical degree). Teleop DPAD -> steps the hood up 5 units per press and
-// DPAD <- returns it to the enable base in one press; the old +/-2 deg per click setpoint
-// nudge is gone. RB was already dead (disabled 2026-08-22) and is now shown as such.
-// RE-SYNCED 2026-08-29 (full pass over every row against RobotContainer): RB is now the
-// AUTO-AIM shot (constant ~1000 motor RPM, hood angle from the AprilTag distance), LB drops
-// the hood to the enable base, DPAD <- steps DOWN (it no longer returns to the base), the
-// DPAD hood step is 2 raw units (was 10) and the RT speed trim is 25 motor RPM (was 200).
-// Test-mode DPAD <- / -> is the same per-press closed-loop step as teleop; the held voltage
-// jog it used to describe was deleted 2026-08-28. Same day: OUTTAKE moved from Y to A (no
-// search-align binding is left on the match layer) and Y became a FIXED FEED SHOT.
-// REBOUND AGAIN 2026-08-29 (team request, three-way rotation of the face buttons): Y is
-// BACK to outtake, B is the FIXED FEED SHOT, and A is the MANUAL HOPPER RUN that used to
-// be on B. Nothing about what those three commands DO changed -- only which button holds
-// them.
-// TEST MODE bindings added 2026-07-21 (RobotContainer.configureTestBindings): the SAME
-// physical controller carries a second, mode-gated binding set active ONLY in Driver
-// Station Test mode (RobotModeTriggers.test() — mutually exclusive with the match set's
-// RobotModeTriggers.teleop() gate, so the two never collide). Groups marked testOnly
-// below are hidden here unless the live /FMSInfo/FMSControlData feed reports Test mode,
-// so this panel never shows bindings that aren't actually live for the current DS mode.
+// mirrors the code by hand. RE-SYNCED 2026-09-30 for the V2 launcher (team spec): RT is the
+// shot (DPAD-set flywheel rpm + feeder, belts only at speed, slider cycles, drive at 10%),
+// DPAD ← / → = flywheel rpm, DPAD ↑ / ↓ = hood ±5°, RB unbound. Every binding that no longer
+// exists was dropped from this table (the old "Removed" history group is gone — git has it).
+// TEST MODE bindings (RobotContainer.configureTestBindings): the SAME physical controller
+// carries a second, mode-gated binding set active ONLY in Driver Station Test mode
+// (RobotModeTriggers.test() — mutually exclusive with the match set's teleop() gate).
+// Groups marked testOnly are hidden unless the live /FMSInfo/FMSControlData feed reports
+// Test mode, so this panel never shows bindings that aren't live for the current DS mode.
 type CtlRow = { btn: string; desc: string; off?: string };
 const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
   {
@@ -574,36 +554,31 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     rows: [
       { btn: 'L STICK', desc: 'Translate (forward = stick forward on this controller; TODO verify)' },
       { btn: 'R STICK X', desc: 'Rotate' },
-      { btn: 'LB', desc: 'Press: hood all the way DOWN to this enable’s base position in one press (2026-08-29)' },
       { btn: 'MENU', desc: 'Re-zero field heading — the ONLY in-match re-zero (AprilTags seed the pose only before first enable / at boot)' },
-      { btn: 'DPAD ← / →', desc: 'Hood DOWN / UP one step per press — see the Shooter group (2026-08-22: replaced the ±90° heading snaps)' },
     ],
   },
   {
     group: 'Intake — slider + rollers (hold-to-run; slider stows on release)',
     rows: [
-      { btn: 'LT', desc: 'Hold: intake — slider out to stall, THEN rollers in + belts (kicker stays OFF; feed only while rolling, never while sliding); release = rollers/belts stop, then slider retracts to stall' },
-      { btn: 'Y', desc: 'Hold: outtake — same choreography, rollers out (briefly on A earlier on 2026-08-29, moved back the same day)' },
+      { btn: 'LT', desc: 'Hold: intake — slider out to stall, THEN rollers in + belts; release = rollers/belts stop, then slider retracts to stall' },
+      { btn: 'Y', desc: 'Hold: outtake — same choreography, rollers out' },
       { btn: 'X', desc: 'Manual stow: rollers stop immediately, then retract to stall' },
     ],
   },
   {
-    group: 'Shooter — RT is flywheels-only, hood set by hand on the DPAD (angles are RAW ENCODER UNITS)',
+    group: 'Launcher (V2) — RT shoots; DPAD sets speed and hood',
     rows: [
-      { btn: 'DPAD ↑ / ↓', desc: 'Press: RT flywheel target +/- 25 motor RPM (2026-08-29; was 200, then 50). Clamped to the motor ceiling; resets to the constant on redeploy. Does NOT change RB’s auto-aim speed' },
-      { btn: 'DPAD →', desc: 'Press: hood UP one 2-unit step, measured from where the hood is at the press (2026-08-28; every press steps again). EXPECT MORE THAN 2: the hood cannot move below ~7.5 V and one 20 ms loop at that voltage already carries it 25–55 units ≈ 3–7 physical degrees, so below ~60 units the step sets the DIRECTION of a press, not its distance. ~6–12 presses reach the ceiling guard' },
-      { btn: 'DPAD ←', desc: 'Press: hood DOWN one 2-unit step from where it is (2026-08-28, replacing the old one-press return to base — LB does that now). Never goes below the enable base, which is the floor nothing may drive past' },
-      { btn: 'LB', desc: 'Press: hood all the way DOWN to the enable base in one press (2026-08-29). Same closed-loop path as the DPAD steps — it just asks for the floor' },
-      { btn: 'B', desc: 'Hold: FIXED feed shot (2026-08-29; it briefly sat on Y the same day) — hood to a fixed 298 raw units above this enable’s floor, flywheels to a fixed 935 motor RPM. Otherwise identical to RT: belts always, kicker 2 s after the press, drive + intake locked. The hood is commanded ONCE at the press and is NOT returned on release' },
-      { btn: 'RT', desc: 'Hold: flywheels-only shot (2026-08-22) — fixed flywheel speed, belts always, kicker opens 2 s after the press (spin-up delay, NOT an at-speed check). NO vision, NO auto-aim, and the HOOD IS NOT COMMANDED: it stays at the DPAD-set angle, on press AND on release. Drive + intake locked for the hold, so aim BEFORE pressing' },
-      { btn: 'RB', desc: 'Hold: AUTO-AIM shot (2026-08-29) — CONSTANT flywheel speed (~1000 motor RPM); the only thing that changes with distance is the HOOD ANGLE, looked up from the AprilTag distance. Belts always, kicker 2 s after the press, drive + intake locked. NO auto-rotate: point the robot yourself (search-align is not bound to anything). No tag in view = no shot. THE HOOD MOVES BY ITSELF on this binding — the one place it does. TESTING: tag 17 is aliased to a scoring tag, and the distance→hood table is still PLACEHOLDER values, so shots will not land until it is tuned' },
+      { btn: 'RT', desc: 'Hold: SHOT — flywheels spin to the DPAD-set speed and the feeder spins up; hopper belts run ONLY while both are at speed. The intake slider cycles out and in (rollers off). Drive still works at 10% speed. Release = flywheels/feeder coast, slider stows. The hood is not moved by RT' },
+      { btn: 'DPAD ← / →', desc: 'Press: flywheel target −/+ 100 flywheel RPM (starts at 2000, range 0–4000). Works mid-shot; resets to 2000 on redeploy' },
+      { btn: 'DPAD ↑ / ↓', desc: 'Press: hood up / down 5° (0–30° above the bottom stop). The hood homes itself on every enable and ignores the DPAD until homed — watch “Hood State” on the Shooter tab' },
+      { btn: 'RB', desc: 'Not bound — the old auto-aim shot needs re-tuning for the V2 hood/flywheel', off: 'unbound' },
     ],
   },
   {
     group: 'Hopper',
     rows: [
-      { btn: 'A', desc: 'Hold: MANUAL hopper — belts ONLY, kicker stays OFF (2026-08-22; moved off B 2026-08-29 to free B for the feed shot); release = stop' },
-      { btn: 'VIEW', desc: 'Hold: UNJAM — reverse belts + kicker at low duty; release = stop' },
+      { btn: 'A', desc: 'Hold: manual hopper — belts only; release = stop' },
+      { btn: 'VIEW', desc: 'Hold: UNJAM — reverse belts + launcher feeder at low duty; release = stop' },
     ],
   },
   {
@@ -622,29 +597,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     rows: [
       { btn: 'LB', desc: 'Hold: belt A alone (isolation diagnostic)' },
       { btn: 'RB', desc: 'Hold: belt B alone (isolation diagnostic)' },
-      { btn: 'X', desc: 'Hold: both belt motors together, no kicker' },
-      { btn: 'B', desc: 'Hold: kicker alone' },
-    ],
-  },
-  {
-    group: 'TEST MODE ONLY — Shooter (manual/fixed setpoints, no vision)',
-    testOnly: true,
-    rows: [
-      { btn: 'Y', desc: 'Hold: manual test-fire — fixed feed flywheel speed, belts + kicker at-speed-gated — actually launches a ball. NOTE (2026-08-27): its hood request (RB_FEED_ANGLE, 25) is still a PHYSICAL degree while the hood setpoint is in raw units, so it clamps to the floor and the hood does NOT move — park the hood on the DPAD first' },
-      { btn: 'DPAD ← / →', desc: 'Press: the SAME per-press closed-loop hood step as teleop (2 raw units down / up from where the hood is), flywheels off. The held voltage jog that used to live here was deleted 2026-08-28 — CONSEQUENCE: the hood can no longer be driven onto a hard stop from the controller, so the encoder-anchor calibration has to be done by moving the hood BY HAND' },
-    ],
-  },
-  {
-    group: 'Removed 2026-07-16 (team spec: no bindings beyond the above)',
-    rows: [
-      { btn: 'MENU', desc: 'Re-zero field heading', off: 'removed' },
-      { btn: 'DPAD ↑ / ↓', desc: 'Hood jog', off: 'removed (↑ is now search-align)' },
-      { btn: 'RT', desc: 'Test shot', off: 'replaced by precision shot' },
-      { btn: 'RT', desc: 'Precision vision shot (auto-aim + shot model)', off: 'removed 2026-08-22 — RT is now flywheels-only, hood set by hand' },
-      { btn: 'DPAD ← / →', desc: 'Rotate ±90°', off: 'removed 2026-08-22 — DPAD ← / → now move the hood' },
-      { btn: 'DPAD ← / →', desc: 'Hood setpoint −2° / +2° per click', off: 'replaced 2026-08-27 — DPAD ← / → now step the hood down / up 2 raw units per press' },
-      { btn: 'A', desc: 'Hold: search-align to our scoring tag', off: 'removed 2026-08-29 — A now holds the manual hopper run. The drivetrain command and the shooter gates it used are all still in the code if it comes back' },
-      { btn: 'RB', desc: 'Fixed 25° feed shot', off: 'disabled 2026-08-22 (a fixed physical degree means nothing against the relative hood), replaced 2026-08-29 by the RB auto-aim shot above' },
+      { btn: 'X', desc: 'Hold: both belt motors together' },
     ],
   },
 ];
