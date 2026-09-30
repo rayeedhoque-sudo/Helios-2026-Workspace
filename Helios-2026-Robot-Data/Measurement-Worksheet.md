@@ -5,7 +5,7 @@ Fill these in at the robot (or from the game manual / team knowledge) and hand t
 > Not here on purpose: PID/FF gains, the shooting lookup values, motor inversions, CANcoder zero offsets — those only come from **running/tuning** the robot, not from a measurement. See §G.
 
 ## V2 — measure / read these first (2026-09-29 redesign)
-- [ ] **CAN IDs** (Tuner X / REV HW Client): flywheel L1 ____ , L2 ____ , R ____ , feeder ____ , hood X44 ____ , intake roller X60 ____ ; hopper A/B still 20/21? ____ ; is a leftover SPARK MAX (old hood, 19) still on the bus? ____
+- [ ] **CAN IDs** (Tuner X / REV HW Client): flywheel L1 ____ , L2 ____ , R ____ , feeder ____ , hood X44 ____ , intake roller X60 **16** (team, 2026-09-30); anything left on 18? ____ ; hopper A/B still 20/21? ____ ; is a leftover SPARK MAX (old hood, 19) still on the bus? ____
 - [ ] **Hood sector teeth** ____ (CAD 170T, 10 DP pinion 10T) and **hood travel** min ____° / max ____° (no CAD mate limits)
 - [ ] **Hood encoder?** ____ (what's on the 23T pulley on the hood pinion shaft?) and its homing reference ____
 - [ ] **Hopper NEO pinion teeth** ____ (CAD geometry says 12T 20 DP)

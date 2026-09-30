@@ -194,7 +194,7 @@ Single CAN bus = default RIO bus (`kCANBus = new CANBus("", "./logs/example.hoot
 
 | Motor | CAN | Controller | Model | Tag |
 |---|---|---|---|---|
-| intakeMotor (front rollers) | **TBD** (V1: 18) | **TalonFX** | **Kraken X60** (V2 CAD + team 2026-09-29 "CAD is right"; V1 was a Kraken X44) | `[CAD-v2]` + team-confirmed |
+| intakeMotor (front rollers) | **16** (team-stated 2026-09-30: the former flywheel-D motor; V1 roller was 18) | **TalonFX** | **Kraken X60** (V2 CAD + team 2026-09-29 "CAD is right"; V1 was a Kraken X44) | `[CAD-v2]` + team-confirmed |
 | intakeSliderMotor (slider/jackshaft) | 22 | SparkMax | **NEO 2.0** (team-confirmed; CAD mislabeled NEO V1.1; swapped from a Kraken post-CAD, IMG_2880) | `[user-verified]` 2026-06-16 + 2026-07-21 |
 
 > **V2 intake changes (2026-09-29, team: "CAD is right"):** (1) the front-roller motor is now a **Kraken X60** (still a TalonFX; 12T SplineXS → 24T = **2:1**). It was replaced, so its CAN ID is **not confirmed** (V1 was 18). (2) The slider MAXPlanetary is now **5:1 + 4:1 = 20:1** (REV-21-2103 + REV-21-2102; V1 CAD had 5:1 only), followed by a spur stage (2× 24T steel 20 DP, 1× 44T 20 DP on 3/8" hex, plus 2× 10T 10 DP and 2× 20T generated gears, which are probably rack pinions). The full slider chain (inches per motor rotation) is still unpaired. The V2 CAD still labels the slider motor NEO V1.1. The team confirmed it's a **NEO 2.0** (2026-06-16); that answer was not revisited on 2026-09-29.
@@ -284,7 +284,7 @@ Three tiers per motor: **Conservative START** (write these first — team prefer
 | Steer ×4 (1,4,7,10) | Kraken X44 | St 30 / Sup 20 | St 40 / Sup 25 | St 60 / Sup 40 | Brake |
 | Flywheel ×3 (V2, CAN TBD) | Kraken X60 | St 40 / Sup 25 | St 80 / Sup 30 | St 120 / Sup 40 | **Coast** ⚠ |
 | Feeder (V2, CAN TBD; replaces CIM kicker) | Kraken X60 | St 30 / Sup 20 *(proposed)* | St 40 / Sup 20 | St 80 / Sup 40 | Coast |
-| Intake front rollers (V2, CAN TBD) | **Kraken X60** (TalonFX; was X44) | St 30 / Sup 20 *(proposed)* | St 40 / Sup 25 | St 80 / Sup 40 | Coast |
+| Intake front rollers (V2, CAN 16) | **Kraken X60** (TalonFX; was X44) | St 30 / Sup 20 *(proposed)* | St 40 / Sup 25 | St 80 / Sup 40 | Coast |
 | Hood (V2, CAN TBD) | **Kraken X44** (TalonFX; was NEO 550) | **St 20 / Sup 15** *(proposed — needs team OK)* | St 30 / Sup 20 | St 40 / Sup 25 | **Brake** |
 | Hopper A/B (20?, 21?) | NEO 2.0 | 20 | 40 | 60 | Coast |
 | Intake slider/jackshaft (22) | **NEO 2.0** (was labeled V1.1) | 20 | 30–40 | 60 | **Brake** |
@@ -451,7 +451,7 @@ Neither the old code nor the CAD pins these down. Get them before/while writing 
 ### 11.0 V2 open items (2026-09-29) — highest priority
 
 **Blocking code (the team will supply these):**
-- **V2-1. CAN IDs** for the 3 flywheel X60s, the feeder X60, the hood X44, and the intake-roller X60. Also confirm the hopper is still 20/21, and whether the leftover 4th SPARK MAX (probably the old hood, CAN 19) is still on the bus.
+- **V2-1. CAN IDs** for the 3 flywheel X60s, the feeder X60 and the hood X44. *(Intake roller X60 = **CAN 16**, team-stated 2026-09-30. It was V1 flywheel D; the robot code still configures 16 as a flywheel follower. Is CAN 18 now empty?)* Also confirm the hopper is still 20/21, and whether the leftover 4th SPARK MAX (probably the old hood, CAN 19) is still on the bus.
 - **V2-2. Hood position sensing.** Is there an encoder (possibly on the 23T pulley on the hood pinion shaft), or only the X44 rotor, which requires homing? What is the homing reference (hardstop or stow pose)?
 - **V2-3. Hood sector tooth count.** CAD says 170T, but with a PCD that doesn't match 10 DP. The count sets the 42.5:1 ratio. **Hood travel** (min/max angle) is also needed; the V2 CAD has no mate limits.
 - **V2-4. Hopper pinion teeth** (12T by geometry vs 10T in old notes) → 3.889:1 vs 4.667:1.

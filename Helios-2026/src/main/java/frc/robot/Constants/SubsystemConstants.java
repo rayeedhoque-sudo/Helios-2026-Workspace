@@ -153,7 +153,7 @@ public class SubsystemConstants {
         }
 
         public static class IntakeSubsystemConstants{
-            public static final int INTAKE_MOTOR_ID = 18;
+            public static final int INTAKE_MOTOR_ID = 16;
             public static final int INTAKE_PIVOT_MOTOR_ID = 22;
 
             //HARDWARE CONSTANTS

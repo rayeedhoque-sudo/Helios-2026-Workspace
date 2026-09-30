@@ -23,7 +23,7 @@ Single CAN bus = default roboRIO bus (`rio`, CAN 2.0). Motor models in **bold** 
 | TBD | Launcher flywheel R (mirrored) | TalonFX | **Kraken X60** | Flywheel (V2) |
 | TBD | Launcher feeder (replaces CIM kicker) | TalonFX | **Kraken X60** | 3-roller feed, 2.5:1 |
 | TBD | Launcher hood (replaces NEO 550) | TalonFX | **Kraken X44** | Hood sector, ~42.5:1 |
-| TBD (V1: 18) | Intake front rollers | TalonFX | **Kraken X60** (was X44) | Intake rollers, 2:1 |
+| **16** | Intake front rollers | TalonFX | **Kraken X60** (was X44 on 18) | Intake rollers, 2:1. Team-stated 2026-09-30: the V1 flywheel-D motor (CAN 16) now drives the intake rollers. **Robot code still treats 16 as flywheel D** |
 | 20? | Hopper A | SPARK MAX | **NEO 2.0** | Hopper belt floor (V2), confirm ID |
 | 21? | Hopper B | SPARK MAX | **NEO 2.0** | Hopper belt floor (V2), confirm ID |
 | 22 | Intake slider / jackshaft | SPARK MAX | **NEO 2.0** (CAD label V1.1) | Intake slider, MAXPlanetary 20:1 |
