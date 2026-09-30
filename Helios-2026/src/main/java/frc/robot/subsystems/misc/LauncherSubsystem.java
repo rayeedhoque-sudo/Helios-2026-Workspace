@@ -69,6 +69,7 @@ public class LauncherSubsystem extends SubsystemBase {
         private HoodState hoodState = HoodState.WAITING_FOR_ENABLE;
         private double hoodTargetDeg = 0;
         private boolean wasEnabled = false;
+        private double homingStartDeg = 0;
         private final Timer homingTimer = new Timer();
         private Debouncer homingStopDebouncer;
         private Debouncer hoodStallDebouncer;
@@ -92,6 +93,7 @@ public class LauncherSubsystem extends SubsystemBase {
         private final GenericEntry hoodAmpsEntry = tab.add("Hood Current (A)", 0.0).getEntry();
         private final GenericEntry hoodVoltsEntry = tab.add("Hood Volts (cmd)", 0.0).getEntry();
         private final GenericEntry hoodRawEntry = tab.add("Hood Encoder Raw (rot)", 0.0).getEntry();
+        private final GenericEntry homingTravelEntry = tab.add("Hood Homing Travel (deg)", 0.0).getEntry();
 
     public LauncherSubsystem(){
         // Flywheels: V1's team-tuned 50 A stator / 25 A supply on EACH motor (followers enforce
@@ -193,6 +195,13 @@ public class LauncherSubsystem extends SubsystemBase {
                 && statorAmps >= LauncherConstants.HOOD_HOMING_STOP_AMPS;
         }
 
+        /** Hood stall cutoff test (before debounce): pinned = well off target, not moving, current near the cap. */
+        static boolean hoodPinned(double errorDeg, double speedDegPerSec, double statorAmps){
+            return Math.abs(errorDeg) >= LauncherConstants.HOOD_STALL_MIN_ERROR_DEG
+                && Math.abs(speedDegPerSec) < LauncherConstants.HOOD_STALL_MAX_SPEED_DEG_PER_SEC
+                && statorAmps >= LauncherConstants.HOOD_STALL_AMPS;
+        }
+
     //Getters
         public boolean isShooting(){ return shooting; }
         /** Belt gate: flywheels AND feeder at speed (team spec 2026-09-30). */
@@ -257,6 +266,7 @@ public class LauncherSubsystem extends SubsystemBase {
             boolean enabled = DriverStation.isEnabled();
             if (enabled && !wasEnabled) {
                 hoodState = HoodState.HOMING;
+                homingStartDeg = getHoodDeg();
                 homingTimer.restart();
                 homingStopDebouncer = new Debouncer(LauncherConstants.HOOD_HOMING_DEBOUNCE_SEC, Debouncer.DebounceType.kRising);
                 hoodStallDebouncer = new Debouncer(LauncherConstants.HOOD_STALL_DEBOUNCE_SEC, Debouncer.DebounceType.kRising);
@@ -268,6 +278,9 @@ public class LauncherSubsystem extends SubsystemBase {
             switch (hoodState) {
                 case HOMING:
                     if (homingStopDebouncer.calculate(homingSawStop(homingTimer.get(), hoodAmps))) {
+                        // How far it actually travelled down before stopping: ~0 means it never
+                        // broke away at HOMING_VOLTS and "home" is just where it started.
+                        homingTravelEntry.setDouble(homingStartDeg - hoodDeg);
                         hood.setPosition(0);
                         hoodTargetDeg = 0;
                         hoodState = HoodState.HOMED;
@@ -281,8 +294,8 @@ public class LauncherSubsystem extends SubsystemBase {
                     }
                     break;
                 case HOMED:
-                    boolean awayFromTarget = Math.abs(hoodDeg - hoodTargetDeg) > LauncherConstants.HOOD_STALL_MIN_ERROR_DEG;
-                    if (hoodStallDebouncer.calculate(awayFromTarget && hoodAmps >= LauncherConstants.HOOD_STALL_AMPS)) {
+                    double hoodSpeedDps = hood.getVelocity().getValueAsDouble() * 360.0;
+                    if (hoodStallDebouncer.calculate(hoodPinned(hoodDeg - hoodTargetDeg, hoodSpeedDps, hoodAmps))) {
                         hoodState = HoodState.STALL_FAULT;
                         hood.setControl(hoodNeutral);
                         DriverStation.reportWarning("Hood stalled short of its target -- hood locked until next enable", false);
@@ -317,7 +330,7 @@ public class LauncherSubsystem extends SubsystemBase {
             hoodAngleEntry.setDouble(hoodDeg);
             hoodTargetEntry.setDouble(hoodTargetDeg);
             hoodReachedEntry.setBoolean(hoodState == HoodState.HOMED
-                && Math.abs(hoodDeg - hoodTargetDeg) <= LauncherConstants.HOOD_STALL_MIN_ERROR_DEG);
+                && Math.abs(hoodDeg - hoodTargetDeg) <= LauncherConstants.HOOD_REACHED_TOL_DEG);
             hoodAmpsEntry.setDouble(hoodAmps);
             hoodVoltsEntry.setDouble(hood.getMotorVoltage().getValueAsDouble());
             hoodRawEntry.setDouble(hood.getRotorPosition().getValueAsDouble());

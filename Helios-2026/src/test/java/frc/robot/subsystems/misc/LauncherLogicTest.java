@@ -63,4 +63,17 @@ class LauncherLogicTest {
         assertTrue(LauncherConstants.HOOD_HOMING_STOP_AMPS < LauncherConstants.HOOD_STATOR_A);
         assertTrue(LauncherConstants.HOOD_STALL_AMPS < LauncherConstants.HOOD_STATOR_A);
     }
+
+    /**
+     * Stall cutoff: a normal P-loop settle a couple of degrees short (~15 A standing still) must
+     * NOT latch a fault; a hood pinned 5 deg short at the 20 A cap must.
+     */
+    @Test
+    void hoodStallCutoffOnlyFiresWhenPinned() {
+        assertFalse(LauncherSubsystem.hoodPinned(-2.0, 0.0, 15.0), "ordinary settle error");
+        assertFalse(LauncherSubsystem.hoodPinned(-5.0, 20.0, 20.0), "still moving toward target");
+        assertFalse(LauncherSubsystem.hoodPinned(-5.0, 0.0, 10.0), "not pushing hard");
+        assertTrue(LauncherSubsystem.hoodPinned(-5.0, 0.0, 20.0), "pinned against a stop");
+        assertTrue(LauncherSubsystem.hoodPinned(5.0, 0.5, 19.0), "either direction");
+    }
 }

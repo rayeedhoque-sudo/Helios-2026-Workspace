@@ -306,12 +306,18 @@ public class SubsystemConstants {
                 public static final double HOOD_ACCEL_RPS2 = 1.0;
                 public static final double HOOD_kP = 150;  // V per hood rot: 5 deg error ~ 2 V. TODO tune
                 public static final double HOOD_kV = 4.0;  // ~12 V / (125.5 rps / 42.5)
-                // Stall cutoff during normal moves: current pegged while still away from the
-                // target = pushing a hard stop (wrong travel, sign, or ratio). Latches a fault;
-                // the hood goes neutral (brake) until the next enable re-homes it.
-                public static final double HOOD_STALL_AMPS = 15;          // [assumed] TODO tune
-                public static final double HOOD_STALL_DEBOUNCE_SEC = 0.25;
-                public static final double HOOD_STALL_MIN_ERROR_DEG = 1.0;
+                // Stall cutoff during normal moves = the hood is PINNED against something (wrong
+                // travel, sign, or ratio): well away from target, not moving, and current near the
+                // 20 A cap, for 0.5 s. Deliberately NOT "any current while off target" -- a
+                // stationary X44 draws ~23 A per volt (0.044 ohm), so a normal P-loop settle ~1.6 deg
+                // short already reads ~15 A. Latches a fault; the hood goes neutral (brake) until
+                // the next enable re-homes it. A stop within ~3 deg of target isn't flagged, but the
+                // motor is capped at 20 A (~12.5 N*m at the sector) either way.
+                public static final double HOOD_STALL_AMPS = 18;          // [assumed] TODO tune
+                public static final double HOOD_STALL_DEBOUNCE_SEC = 0.5;
+                public static final double HOOD_STALL_MIN_ERROR_DEG = 3.0;
+                public static final double HOOD_STALL_MAX_SPEED_DEG_PER_SEC = 2.0;
+                public static final double HOOD_REACHED_TOL_DEG = 1.0;   // dashboard "reached" only
         }
 
         public static class ShooterSubsystemConstants{
