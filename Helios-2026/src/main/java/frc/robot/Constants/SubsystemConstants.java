@@ -187,33 +187,9 @@ public class SubsystemConstants {
         public static class HopperSubsystemConstants{
             public static final int HOPPER_ID_A = 20;
             public static final int HOPPER_ID_B = 21;
-            // Kicker Victor SPX at CAN 17 -- VERIFIED LIVE on the bus 2026-07-16 via the
-            // Phoenix diagnostics server (Victor SPX, fw 22.1, "Running Application").
-            // Earlier "kicker not working" was NOT the ID: the kicker only fires when the
-            // flywheels are at speed (ShooterSubsystem.isReadyToShoot), and the shooter was disabled.
-            public static final int KICKER_MOTOR_ID = 17;
+            // (Kicker Victor SPX at CAN 17 REMOVED 2026-09-30 -- V2 feeder is LauncherConstants.FEEDER_ID.)
             
             //SPEED CONSTANTS
-                public static final double INDEXER_SPEED = 0.75;
-                // Kicker duty for a SHOT (B feed shot / RT / RB) -- team request 2026-08-29,
-                // asked as "is it safe, and if so do it". 0.75 doubled is 1.5, so this pins at
-                // full output: the real increase is 1.33x, not 2x.
-                //
-                // WHY IT IS ACCEPTABLE, written down because the kicker is the one motor on this
-                // robot with NO current sensing at all (CIM on a Victor SPX, breaker size still
-                // unverified -- data sheet sec.11). A CIM's locked-rotor current is ~131 A at
-                // 12 V and scales with duty, so a JAM already pulls ~98 A at 0.75 -- far above
-                // any plausible breaker. Full output makes that existing failure arrive sooner
-                // and hotter; it does not introduce a new one, and no software protection is
-                // lost because there was never any to lose. The run is bounded by the trigger
-                // hold, and configOpenloopRamp(0.25) limits the inrush.
-                //
-                // WHAT DOES GET WORSE: the reverse-to-forward transition during spin-up, which
-                // becomes -0.3 -> +1.0 instead of -0.3 -> +0.75. That is why UNJAM_SPEED (the
-                // reverse) is deliberately NOT doubled -- a faster reverse would both fight the
-                // now-full-speed belts harder and make that plugging step more severe.
-                // ON-ROBOT WATCH ITEM: the breaker at the reverse-to-forward flip.
-                public static final double KICKER_SHOT_SPEED = Math.min(1.0, INDEXER_SPEED * 2.0);
                 //                                                                                                                                                                          Belt duty. Conservative start (old code ran 0.8, never verified on robot);
                 // direction test 2026-07-14 confirmed both motors agree, positive = tested
                 // direction. TODO raise toward 0.8 once feed direction + throughput verified.
@@ -234,10 +210,8 @@ public class SubsystemConstants {
                 // do not actually run faster, that limit is the thing to raise, and raising it
                 // is a team decision, not a side effect of this one.
                 public static final double HOPPER_SHOT_SPEED = Math.min(1.0, HOPPER_SPEED * 2.0);
-                // Reverse duty for the unjam button (belts + kicker together, held).
+                // Reverse duty for the unjam button (belts, held; the feeder has its own).
                 public static final double UNJAM_SPEED = 0.3;
-                // Slow duty for the (unbound) kicker-only test (bypasses the at-speed gate).
-                public static final double KICKER_TEST_SPEED = 0.3;
                 // Slow duty for the single-belt direction tests (VIEW / DPAD-DOWN): slow enough
                 // that even a full stall sits well under the 20 A smart limit.
                 public static final double DIRECTION_TEST_SPEED = 0.05;
@@ -247,11 +221,6 @@ public class SubsystemConstants {
                 // flywheels: CIM stall at 12 V is ~131 A and the Victor SPX has no current
                 // sensing, so duty is the only software knob -- see manualRunCommand.)
                 
-                // Some variable that AI made, change value to make it work.
-                // Back to 2.0 s (team request 2026-08-24): this is now BOTH the delay before the
-                // kicker feeds forward AND the window it spends running in REVERSE while the
-                // flywheels wind up.
-                public static final double KICKER_SPINUP_DELAY_SEC = 2.0;
                 public static final int HOPPER_CURRENT_LIMIT_A = 5;
                 public static final int HOPPER_SHOT_CURRENT_LIMIT_A = (int)(HOPPER_CURRENT_LIMIT_A * 1.2);
                 // Belt limit while B (manual hopper run) is held -- team request 2026-08-27
@@ -259,6 +228,90 @@ public class SubsystemConstants {
                 // breaker, so the software limit now acts before the breaker does, and stays
                 // under the data-sheet 60 A cap for a hopper NEO 2.0.
                 public static final int HOPPER_MANUAL_CURRENT_LIMIT_A = 40;
+        }
+
+        // V2 LAUNCHER (drum shooter, 2026-09-30). Hardware: Hardware-Data-Sheet sec.4.2 [CAD-v2].
+        // Replaces ShooterSubsystemConstants below, which is the V1 shooter (kept for its RB
+        // auto-aim code only -- ShooterSubsystem is no longer constructed).
+        public static class LauncherConstants{
+            // CAN IDs -- team-assigned 2026-09-30. 15 = top X60 on the 4-motor panel (belts the
+            // flywheel), 14 = the X60 under it (belted 1:1 motor-to-motor to 15), 13 = the single
+            // X60 on the other panel, 18 = hood X44 (the old intake-roller Kraken).
+            public static final int FLYWHEEL_LEADER_ID = 15;
+            public static final int FLYWHEEL_BELTED_ID = 14;
+            public static final int FLYWHEEL_RIGHT_ID = 13;
+            public static final int HOOD_ID = 18;
+            // Feeder = the BRAND-NEW X60 (lowest on the 4-motor panel). 24 is the first ID never
+            // used on this robot. TODO team: set this motor to CAN 24 in Phoenix Tuner X --
+            // until then the feeder reads 0 rpm, the belt gate never opens, and RT won't feed.
+            public static final int FEEDER_ID = 24;
+
+            //FLYWHEEL
+                // 18T motor pulley -> 26T flywheel pulley = 1.444 motor rot per flywheel rot [CAD-v2].
+                public static final double FLYWHEEL_MOTOR_ROT_PER_FLYWHEEL_ROT = 26.0 / 18.0;
+                // RT target in FLYWHEEL rpm (team 2026-09-30): start 2000, DPAD L/R -/+100,
+                // clamped 0-4000. 4000 is ~X60 free speed through 26:18 -- not reachable under load.
+                public static final double FLYWHEEL_START_RPM = 2000;
+                public static final double FLYWHEEL_STEP_RPM = 100;
+                public static final double FLYWHEEL_MAX_RPM = 4000;
+                // "At speed" band in flywheel rpm. [assumed] TODO tune: if the belts never start,
+                // widen this before touching gains (V1's too-tight band never latched).
+                public static final double FLYWHEEL_AT_SPEED_TOL_RPM = 100;
+                // Velocity gains in MOTOR rps -- V1's X60 values as a starting point. TODO tune.
+                public static final double FLYWHEEL_kP = 0.2;
+                public static final double FLYWHEEL_kD = 0.01;
+                public static final double FLYWHEEL_kV = 0.12625;
+                // Current limits: V1's team-tuned 50 A stator / 25 A supply, per motor (now x3).
+                public static final double FLYWHEEL_STATOR_A = 50;
+                public static final double FLYWHEEL_SUPPLY_A = 25;
+                // TODO verify on robot: spin 15 alone and check it drives the flywheel the
+                // SHOOTING direction; flip this if not.
+                public static final boolean FLYWHEEL_LEADER_INVERTED = false;
+                // Follower alignment relative to 15 [CAD-inferred, NOT verified]: 14 faces the same
+                // way and is belted 1:1 -> Aligned; 13 is mirrored on the other panel -> Opposed.
+                // A wrong 14 makes 14 and 15 fight at the current limit -- spin-test first.
+                public static final boolean FLYWHEEL_BELTED_OPPOSED = false;
+                public static final boolean FLYWHEEL_RIGHT_OPPOSED = true;
+
+            //FEEDER (X60 -> 12T:30T = 2.5:1 -> 3 tube rollers)
+                public static final double FEEDER_TARGET_MOTOR_RPM = 3000; // team 2026-09-30
+                public static final double FEEDER_AT_SPEED_FRACTION = 0.10; // within 10% = at speed
+                public static final double FEEDER_kP = 0.1;   // motor rps; [assumed] TODO tune
+                public static final double FEEDER_kV = 0.12;  // ~12 V / 96.7 rps X60 free speed
+                public static final double FEEDER_STATOR_A = 30; // team-approved 2026-09-30
+                public static final double FEEDER_SUPPLY_A = 20;
+                public static final double FEEDER_RAMP_SEC = 0.25;
+                public static final double FEEDER_UNJAM_DUTY = 0.3; // same as the old kicker unjam
+                public static final boolean FEEDER_INVERTED = false; // TODO verify feed direction
+
+            //HOOD (X44 -> 12T:30T -> 10T pinion -> 170T sector = 42.5:1) [CAD-v2; sector teeth unconfirmed]
+                public static final double HOOD_MOTOR_ROT_PER_HOOD_ROT = 2.5 * 17.0;
+                public static final double HOOD_MAX_DEG = 30;   // above the homed bottom stop (team 2026-09-30)
+                public static final double HOOD_STEP_DEG = 5;   // DPAD up/down per press
+                public static final double HOOD_STATOR_A = 20;  // team-approved 2026-09-30
+                public static final double HOOD_SUPPLY_A = 15;
+                // TODO verify on robot: negative output must move the hood DOWN. Watch the first
+                // homing after every deploy -- if the hood moves UP, disable and flip this.
+                public static final boolean HOOD_INVERTED = false;
+                // Homing (every enable): drive down at a low voltage until the stator current
+                // shows the bottom stop. The grace window keeps startup inrush from reading as
+                // "hit the stop" before the hood has moved (same idea as the slider's grace).
+                public static final double HOOD_HOMING_VOLTS = 1.5;
+                public static final double HOOD_HOMING_GRACE_SEC = 0.3;
+                public static final double HOOD_HOMING_STOP_AMPS = 12;     // [assumed] TODO tune
+                public static final double HOOD_HOMING_DEBOUNCE_SEC = 0.1;
+                public static final double HOOD_HOMING_TIMEOUT_SEC = 3.0;
+                // Motion Magic in HOOD rotations (SensorToMechanismRatio = 42.5).
+                public static final double HOOD_CRUISE_RPS = 0.25;  // 90 deg/s
+                public static final double HOOD_ACCEL_RPS2 = 1.0;
+                public static final double HOOD_kP = 150;  // V per hood rot: 5 deg error ~ 2 V. TODO tune
+                public static final double HOOD_kV = 4.0;  // ~12 V / (125.5 rps / 42.5)
+                // Stall cutoff during normal moves: current pegged while still away from the
+                // target = pushing a hard stop (wrong travel, sign, or ratio). Latches a fault;
+                // the hood goes neutral (brake) until the next enable re-homes it.
+                public static final double HOOD_STALL_AMPS = 15;          // [assumed] TODO tune
+                public static final double HOOD_STALL_DEBOUNCE_SEC = 0.25;
+                public static final double HOOD_STALL_MIN_ERROR_DEG = 1.0;
         }
 
         public static class ShooterSubsystemConstants{

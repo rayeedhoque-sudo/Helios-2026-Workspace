@@ -46,6 +46,12 @@ import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.commands.CommandSwerveDrivetrain;
 import frc.robot.subsystems.utility.LimelightHelpers;
 
+/**
+ * V1 SHOOTER -- DO NOT CONSTRUCT ON THE V2 ROBOT (2026-09-30). The V2 launcher is
+ * LauncherSubsystem. This class is kept only for the RB auto-aim code (unbound for now) and
+ * its tests. Building it would drive CAN 13-15 with V1 follower alignments and a V1 flywheel
+ * ratio, and look for a NEO 550 hood on CAN 19 that no longer exists.
+ */
 public class ShooterSubsystem extends SubsystemBase{
 
     //Type
