@@ -351,10 +351,10 @@ function buildMechanisms(host: HTMLElement): void {
   host.appendChild(h('div', 'mech-head', 'Shooter'));
   const shg = h('div', 'kv-grid');
   host.appendChild(shg);
-  mShotVel = kv(shg, 'Velocity');
-  mShotTgt = kv(shg, 'Target');
+  mShotVel = kv(shg, 'Flywheel RPM');
+  mShotTgt = kv(shg, 'Target RPM');
   mShotAt = kv(shg, 'At Speed');
-  mShotState = kv(shg, 'State');
+  mShotState = kv(shg, 'Shooting');
 
   host.appendChild(h('div', 'mech-head', 'Intake'));
   const ing = h('div', 'kv-grid');
@@ -393,10 +393,10 @@ function ensureMechSubs(): void {
     }
   });
   onValue(SHOOTER + '/Subsystem State', (v) => {
-    // Published as a BOOLEAN by ShooterSubsystem (enableSubsystem flag), not a string.
+    // V2 (LauncherSubsystem): true while RT is held -- not an enable flag any more.
     if (typeof v === 'boolean') {
-      setText(mShotState, v ? 'ENABLED' : 'DISABLED');
-      setLevel(mShotState, v ? 'ok' : 'warn');
+      setText(mShotState, v ? 'YES (RT)' : 'no');
+      setLevel(mShotState, v ? 'ok' : 'dim');
     }
   });
   // Intake
