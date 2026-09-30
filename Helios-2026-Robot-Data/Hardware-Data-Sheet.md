@@ -51,12 +51,12 @@ Single CAN bus = default RIO bus (`kCANBus = new CANBus("", "./logs/example.hoot
 | 10 | Front Left Steer | TalonFX | Kraken X44 (`[inferred]`) | Swerve steer FL | `kFrontLeftSteerMotorId` | `[verified-in-code]` |
 | 11 | Front Left Drive | TalonFX | Kraken X60 (`[inferred]`) | Swerve drive FL | `kFrontLeftDriveMotorId` | `[verified-in-code]` |
 | 12 | Front Left CANcoder | CANcoder | — | Swerve azimuth FL | `kFrontLeftEncoderId` | `[verified-in-code]` |
-| **TBD** | Launcher flywheel L1 (left, belted 1:1 to L2) | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | CAN ID **not assigned yet** (team will provide) |
-| **TBD** | Launcher flywheel L2 (left, drives flywheel belt) | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | CAN ID **not assigned yet** |
-| **TBD** | Launcher flywheel R (right side, mirrored) | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | CAN ID **not assigned yet** |
-| **TBD** | Launcher feeder (3-roller tube stack) — replaces the V1 CIM kicker | TalonFX | **Kraken X60** (`[CAD-v2]`) | Feed into flywheel | — | CAN ID **not assigned yet** |
-| **TBD** | Launcher hood — replaces the V1 NEO 550 | **TalonFX** | **Kraken X44** (`[CAD-v2]`) | Hood sector | — | CAN ID **not assigned yet** |
-| **TBD** | Intake **front rollers** | TalonFX | **Kraken X60** (`[CAD-v2]` + team 2026-09-29 "CAD is right"; was a photo-confirmed X44 on CAN 18 in V1) | Intake front roller drive | `IntakeSubsystemConstants.INTAKE_MOTOR_ID` | replaced motor → CAN ID **not confirmed** (V1 was 18) |
+| **14** | Launcher flywheel L1 (left, belted 1:1 to L2) | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | CAN ID **not assigned yet** (team will provide) |
+| **15** | Launcher flywheel L2 (left, drives flywheel belt) — code leader | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | CAN ID **not assigned yet** |
+| **13** | Launcher flywheel R (right side, mirrored) | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | CAN ID **not assigned yet** |
+| **24** (new; team to set on the device) | Launcher feeder (3-roller tube stack) — replaces the V1 CIM kicker | TalonFX | **Kraken X60** (`[CAD-v2]`) | Feed into flywheel | — | CAN ID **not assigned yet** |
+| **18** (the old intake-roller X44) | Launcher hood — replaces the V1 NEO 550 | **TalonFX** | **Kraken X44** (`[CAD-v2]`) | Hood sector | — | CAN ID **not assigned yet** |
+| **16** | Intake **front rollers** | TalonFX | **Kraken X60** (`[CAD-v2]` + team 2026-09-29 "CAD is right"; was a photo-confirmed X44 on CAN 18 in V1) | Intake front roller drive | `IntakeSubsystemConstants.INTAKE_MOTOR_ID` | replaced motor → CAN ID **not confirmed** (V1 was 18) |
 | 20? | Hopper A | SparkMax | **NEO 2.0** (`[CAD-v2]`, REV-21-1653) | Hopper belt floor | `HopperSubsystemConstants.HOPPER_ID_A` | V1 ID 20 — **confirm it survived the hopper rebuild** |
 | 21? | Hopper B | SparkMax | **NEO 2.0** (`[CAD-v2]`, REV-21-1653) | Hopper belt floor | `HopperSubsystemConstants.HOPPER_ID_B` | V1 ID 21 — **confirm** |
 | 22 | Intake slider / jackshaft | SparkMax | **NEO 2.0** (team-confirmed 2026-06-16; CAD mislabeled it NEO V1.1 / REV-21-1650; swapped from a Kraken post-CAD, IMG_2880) | Intake slider/pivot — **this motor IS the jackshaft** (confirmed 2026-07-21; not a separate 3rd motor, no CAN ID ever missing) | `IntakeSubsystemConstants.INTAKE_PIVOT_MOTOR_ID` | `[user-verified]` model + relationship |
@@ -282,10 +282,10 @@ Three tiers per motor: **Conservative START** (write these first — team prefer
 |---|---|---|---|---|---|
 | Drive ×4 (2,5,8,11) | Kraken X60 | St 40 / Sup 30 | St 120 / Sup 60 | St 120 / Sup 70 | **Brake** |
 | Steer ×4 (1,4,7,10) | Kraken X44 | St 30 / Sup 20 | St 40 / Sup 25 | St 60 / Sup 40 | Brake |
-| Flywheel ×3 (V2, CAN TBD) | Kraken X60 | St 40 / Sup 25 | St 80 / Sup 30 | St 120 / Sup 40 | **Coast** ⚠ |
-| Feeder (V2, CAN TBD; replaces CIM kicker) | Kraken X60 | St 30 / Sup 20 *(proposed)* | St 40 / Sup 20 | St 80 / Sup 40 | Coast |
+| Flywheel ×3 (V2, CAN 15/14/13) — code runs the V1-tuned St 50 / Sup 25 | Kraken X60 | St 40 / Sup 25 | St 80 / Sup 30 | St 120 / Sup 40 | **Coast** ⚠ |
+| Feeder (V2, CAN 24; replaces CIM kicker) | Kraken X60 | St 30 / Sup 20 *(team-approved 2026-09-30)* | St 40 / Sup 20 | St 80 / Sup 40 | Coast |
 | Intake front rollers (V2, CAN 16) | **Kraken X60** (TalonFX; was X44) | St 30 / Sup 20 *(proposed)* | St 40 / Sup 25 | St 80 / Sup 40 | Coast |
-| Hood (V2, CAN TBD) | **Kraken X44** (TalonFX; was NEO 550) | **St 20 / Sup 15** *(proposed — needs team OK)* | St 30 / Sup 20 | St 40 / Sup 25 | **Brake** |
+| Hood (V2, CAN 18) | **Kraken X44** (TalonFX; was NEO 550) | **St 20 / Sup 15** *(team-approved 2026-09-30)* | St 30 / Sup 20 | St 40 / Sup 25 | **Brake** |
 | Hopper A/B (20?, 21?) | NEO 2.0 | 20 | 40 | 60 | Coast |
 | Intake slider/jackshaft (22) | **NEO 2.0** (was labeled V1.1) | 20 | 30–40 | 60 | **Brake** |
 
@@ -451,7 +451,7 @@ Neither the old code nor the CAD pins these down. Get them before/while writing 
 ### 11.0 V2 open items (2026-09-29) — highest priority
 
 **Blocking code (the team will supply these):**
-- **V2-1. CAN IDs** for the 3 flywheel X60s, the feeder X60 and the hood X44. *(Intake roller X60 = **CAN 16**, team-stated 2026-09-30. It was V1 flywheel D; the robot code still configures 16 as a flywheel follower. Is CAN 18 now empty?)* Also confirm the hopper is still 20/21, and whether the leftover 4th SPARK MAX (probably the old hood, CAN 19) is still on the bus.
+- **V2-1. CAN IDs — ASSIGNED 2026-09-30:** flywheels 15 (leader) / 14 / 13, hood 18, intake roller 16, feeder **24** (brand-new motor; the team still has to set 24 on the device in Tuner X). CAN 17/19 unused. Open: is anything left on the bus at 17/19, or a leftover SPARK MAX?
 - **V2-2. Hood position sensing.** Is there an encoder (possibly on the 23T pulley on the hood pinion shaft), or only the X44 rotor, which requires homing? What is the homing reference (hardstop or stow pose)?
 - **V2-3. Hood sector tooth count.** CAD says 170T, but with a PCD that doesn't match 10 DP. The count sets the 42.5:1 ratio. **Hood travel** (min/max angle) is also needed; the V2 CAD has no mate limits.
 - **V2-4. Hopper pinion teeth** (12T by geometry vs 10T in old notes) → 3.889:1 vs 4.667:1.
@@ -466,7 +466,7 @@ Neither the old code nor the CAD pins these down. Get them before/while writing 
 - **V2-12. Intake not re-examined in depth.** The V2 intake (doc `13ee3700…`, v `c8eef8ca…`, e `a55e4e29…`) was only read through the top-level BOM. The slider stroke (~11.2") and the unpaired slider spur/rack chain still come from the V1 intake pull. Re-pull its assembly definition if the slider needs inches per rotation.
 - **V2-11. Orange Pi 5** in the CAD: is it on the robot, and what does it run?
 
-**Robot-code constants invalidated by V2** (don't edit them until V2-1..V2-4 are answered; that's a separate, team-directed change): flywheel `FLYWHEEL_ROTATIONS_PER_MOTOR_ROTATION` 1.5 → 18/26; 4 → 3 flywheel motors and their follower alignments; the kicker is no longer a Victor SPX/CIM (now a TalonFX X60 feeder); the hood is no longer a SPARK MAX NEO 550 with an absolute encoder (now a TalonFX X44, 42.5:1, encoder TBD); all hood raw-unit anchors/ceilings (e.g. 290, the 240→192 B-feed value); the shot tables and shot-model fits; the hopper ratio; the intake-roller motor model (X44 → X60 limits).
+**Robot code for V2 — DONE 2026-09-30 (commit 2305b49):** new `LauncherSubsystem` (flywheels/feeder/hood with homing, soft limits 0–30°, stall cutoff), RT/DPAD controls, kicker removed from the hopper, V1 `ShooterSubsystem` no longer constructed. Still open on the robot: V2-2..V2-6 (hood sector teeth, direction/inversions, follower alignments), gains, and the flywheel/feeder at-speed bands.
 
 **Gear ratios (V1 list — items marked resolved below refer to V1 hardware):**
 1. ✅ **Shooter hood — RESOLVED: 187.5:1** = UltraPlanetary 2× 5:1 (25:1) × 24T→180T sector (7.5:1). No longer open.
