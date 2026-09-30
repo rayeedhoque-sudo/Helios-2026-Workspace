@@ -172,6 +172,8 @@ public class SubsystemConstants {
                 public static final double SLIDER_STALL_DEBOUNCE_SEC = 0.15; // velocity path (was 0.25; tightened for faster cutoff 2026-07-16)
                 public static final double SLIDER_GRACE_SEC = 0.3;          // covers spin-up from rest (encoder reads 0 rpm at move start; must outlast the 0.25 s ramp)
                 public static final double SLIDER_MOVE_TIMEOUT_SEC = 2.5;   // backstop only (was 3.0; travel is ~33% shorter at 0.45 duty); TODO measure real travel time
+                // RT shot agitation: extend this long, then retract to stow, repeat (team 2026-09-30).
+                public static final double SLIDER_CYCLE_EXTEND_SEC = 0.5;
 
             //SPEED CONSTANTS
                 // Roller duty cycles (driver-tuned 2026-07-10: 35% intake was too fast;

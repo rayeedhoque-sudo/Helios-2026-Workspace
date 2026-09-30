@@ -205,7 +205,7 @@ public class RobotContainer {
         //   A (hold)    = manual hopper belts only
         //   VIEW (hold) = unjam: reverse belts + launcher feeder
         //   RT (hold)   = SHOT: flywheels at the DPAD-set rpm + feeder; belts ONLY while both are
-        //                 at speed; intake slider cycles in/out (rollers off); drive at 10%.
+        //                 at speed; slider extends 0.5 s then stows, repeating (rollers off); drive 10%.
         //                 Release: flywheels/feeder coast, slider stows. Hood NOT commanded.
         //   DPAD L/R    = RT flywheel target -/+ 100 flywheel RPM (start 2000, 0-4000)
         //   DPAD UP/DN  = hood target +/- 5 deg (0-30 deg above the bottom stop; the hood
@@ -310,7 +310,7 @@ public class RobotContainer {
             // RT (hold) = SHOT. The launcher spins the flywheels (DPAD-set rpm) and the feeder
             // together; the hopper belts run ONLY while both are at speed, re-checked every loop,
             // so a ball dipping the wheels pauses the belts until they recover. The intake
-            // slider cycles out and in (rollers off) for the whole hold. The drivetrain is NOT
+            // slider extends for 0.5 s, retracts to full stow, and repeats (rollers off) for the whole hold. The drivetrain is NOT
             // required -- the default drive keeps running at 10% (driveScale). kCancelIncoming:
             // releasing RT is the only way out. Release: flywheels/feeder coast, slider stows.
             joystick2.rightTrigger().and(RobotModeTriggers.teleop())

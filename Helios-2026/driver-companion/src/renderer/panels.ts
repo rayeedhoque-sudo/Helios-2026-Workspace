@@ -568,7 +568,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
   {
     group: 'Launcher (V2) — RT shoots; DPAD sets speed and hood',
     rows: [
-      { btn: 'RT', desc: 'Hold: SHOT — flywheels spin to the DPAD-set speed and the feeder spins up; hopper belts run ONLY while both are at speed. The intake slider cycles out and in (rollers off). Drive still works at 10% speed. Release = flywheels/feeder coast, slider stows. The hood is not moved by RT' },
+      { btn: 'RT', desc: 'Hold: SHOT — flywheels spin to the DPAD-set speed and the feeder spins up; hopper belts run ONLY while both are at speed. The intake slider extends for 0.5 s, pulls back to full stow, and repeats (rollers off). Drive still works at 10% speed. Release = flywheels/feeder coast, slider stows. The hood is not moved by RT' },
       { btn: 'DPAD ← / →', desc: 'Press: flywheel target −/+ 100 flywheel RPM (starts at 2000, range 0–4000). Works mid-shot; resets to 2000 on redeploy' },
       { btn: 'DPAD ↑ / ↓', desc: 'Press: hood up / down 5° (0–30° above the bottom stop). The hood homes itself on every enable and ignores the DPAD until homed — watch “Hood State” on the Shooter tab' },
       { btn: 'RB', desc: 'Not bound — the old auto-aim shot needs re-tuning for the V2 hood/flywheel', off: 'unbound' },

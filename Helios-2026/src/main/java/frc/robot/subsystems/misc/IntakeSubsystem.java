@@ -222,14 +222,17 @@ public class IntakeSubsystem extends SubsystemBase {
             );
         }
 
-        // RT SHOT (team spec 2026-09-30): rollers OFF, slider cycles out and in for the whole
-        // hold. Each leg is the same stall-stopped move as extend/retract (pulley-snap guard
-        // intact), so the slider taps both hard stops every cycle -- watch that pulley.
-        // The RT binding's onFalse(stowCommand) brings it home on release.
+        // RT SHOT (team spec 2026-09-30): rollers OFF; the slider extends for only
+        // SLIDER_CYCLE_EXTEND_SEC (a partial stroke, never to the outer stop), then retracts
+        // fully to the stow stop, and repeats for the whole hold. Both legs are the same
+        // stall-stopped move as extend/retract (pulley-snap guard intact); the extend leg is
+        // just cut short by the timeout. The RT binding's onFalse(stowCommand) brings it home.
         public Command sliderCycleCommand(){
             return Commands.sequence(
                     Commands.runOnce(this::stopRollers),
-                    Commands.repeatingSequence(extendSliderCommand(), retractSliderCommand())
+                    Commands.repeatingSequence(
+                        extendSliderCommand().withTimeout(IntakeSubsystemConstants.SLIDER_CYCLE_EXTEND_SEC),
+                        retractSliderCommand())
             );
         }
 
