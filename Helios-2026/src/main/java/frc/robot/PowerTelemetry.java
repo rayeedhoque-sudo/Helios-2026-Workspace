@@ -37,11 +37,11 @@ public class PowerTelemetry {
     // Publish order/labels -- index-aligned with stator/supply/temp below.
     private static final String[] NAMES = {
         "DriveFL", "SteerFL", "DriveFR", "SteerFR", "DriveBL", "SteerBL", "DriveBR", "SteerBR",
-        "ShooterA", "ShooterB", "ShooterC", "ShooterD", "Hood",
+        "ShooterA", "ShooterB", "ShooterC", "Unused", "Hood",
         "IntakeRoller", "IntakeSlider", "HopperA", "HopperB"
     };
 
-    // TalonFX motors (13: 8 swerve + 4 shooter flywheels + 1 intake roller) and the NAMES
+    // TalonFX motors (12: 8 swerve + 3 shooter flywheels + 1 intake roller) and the NAMES
     // index each one publishes into.
     private final TalonFX[] talons;
     private final int[] talonSlots;
@@ -88,10 +88,12 @@ public class PowerTelemetry {
             drivetrain.getModule(1).getDriveMotor(), drivetrain.getModule(1).getSteerMotor(),
             drivetrain.getModule(2).getDriveMotor(), drivetrain.getModule(2).getSteerMotor(),
             drivetrain.getModule(3).getDriveMotor(), drivetrain.getModule(3).getSteerMotor(),
-            flywheels[0], flywheels[1], flywheels[2], flywheels[3],
+            flywheels[0], flywheels[1], flywheels[2],
             intakeSS.getRollerMotor()
         };
-        talonSlots = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13 };
+        // Slot 11 (old ShooterD) left empty: CAN 16 is now the intake roller (slot 13). Keeps the
+        // companion's fixed 17-slot layout.
+        talonSlots = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13 };
 
         sparks = new SparkMax[] {
             shooterSS.getHoodMotor(), intakeSS.getSliderMotor(), hopperMotors[0], hopperMotors[1]

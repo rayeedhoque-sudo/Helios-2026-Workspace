@@ -268,7 +268,6 @@ public class SubsystemConstants {
             public static final int SHOOTER_ID_A = 13;
             public static final int SHOOTER_ID_B = 14;
             public static final int SHOOTER_ID_C = 15;
-            public static final int SHOOTER_ID_D = 16;
             // HOOD ANGLE UNITS (2026-08-27, team request: "make the hood angle the exact same as
             // the raw encoder angle"). The tracked hood angle is now the RAW ENCODER READING --
             // 1 hood unit = 1 raw encoder unit, and the enable-time datum is the raw value itself

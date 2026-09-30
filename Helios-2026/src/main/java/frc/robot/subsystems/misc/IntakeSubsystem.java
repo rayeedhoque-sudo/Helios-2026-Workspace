@@ -61,7 +61,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public IntakeSubsystem(){
 
         // Conservative-start current limits + neutral mode (Hardware-Data-Sheet sec.7). TODO tune on robot.
-            // Front rollers: Kraken X44 - stator 40A / supply 25A, Coast (bumped 2026-07-10 from
+            // Front rollers: Kraken X60 (was X44; CAN 16 since 2026-09-30) - stator 40A / supply 25A, Coast (bumped 2026-07-10 from
             // the conservative 30/15 start; matches Hardware-Data-Sheet sec.7 mid column, max is
             // 60/40 if grab torque is still short). Stator = grab torque; supply caps battery
             // draw. Worst-case steady supply = duty x stator: 0.5 x 40 = 20 A < 25 A, so the
@@ -196,7 +196,7 @@ public class IntakeSubsystem extends SubsystemBase {
             return moveSliderUntilStall(IntakeSubsystemConstants.SLIDER_DUTY);
         }
 
-        // ROLLER-ONLY TEST: spin the rollers (Kraken X44, CAN 18) while held, stop on release.
+        // ROLLER-ONLY TEST: spin the rollers (Kraken X60, CAN 16) while held, stop on release.
         // Never commands the slider -- it stays wherever it is (brake mode holds it).
         public Command rollerTestCommand(boolean inward){
             return startEnd(

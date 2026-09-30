@@ -55,7 +55,7 @@ public class ShooterSubsystem extends SubsystemBase{
         private final TalonFX shooterA = new TalonFX(ShooterSubsystemConstants.SHOOTER_ID_A);
           private final TalonFX shooterB = new TalonFX(ShooterSubsystemConstants.SHOOTER_ID_B);
         private final TalonFX shooterC = new TalonFX(ShooterSubsystemConstants.SHOOTER_ID_C);
-          private final TalonFX shooterD = new TalonFX(ShooterSubsystemConstants.SHOOTER_ID_D);
+          // Flywheel D (CAN 16) removed 2026-09-30: that motor now drives the intake rollers.
         private final SparkMax shooterAngle = new SparkMax(ShooterSubsystemConstants.SHOOTER_ANGLE_ID, com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless);
             private final SparkAbsoluteEncoder shooterAngleEncoder = shooterAngle.getAbsoluteEncoder();
 
@@ -263,7 +263,7 @@ public class ShooterSubsystem extends SubsystemBase{
                 flywheelLimits.SupplyCurrentLimitEnable = true;
                 MotorOutputConfigs flywheelOutput = new MotorOutputConfigs();
                 flywheelOutput.NeutralMode = NeutralModeValue.Coast;
-                for (TalonFX flywheel : new TalonFX[] { shooterA, shooterB, shooterC, shooterD }) {
+                for (TalonFX flywheel : new TalonFX[] { shooterA, shooterB, shooterC }) {
                     flywheel.getConfigurator().apply(flywheelLimits);
                     flywheel.getConfigurator().apply(flywheelOutput);
                 }
@@ -275,14 +275,13 @@ public class ShooterSubsystem extends SubsystemBase{
                 hoodConfig.idleMode(IdleMode.kBrake);
                 shooterAngle.configure(hoodConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
-                // Follower alignments. All 4 must drive the flywheel the same physical direction.
-                // B Aligned, D (CAN 16) Opposed (spun wrong way Aligned, 2026-07-16). C (CAN 15)
+                // Follower alignments. All 3 must drive the flywheel the same physical direction.
+                // B Aligned. (D, CAN 16, removed 2026-09-30 -- now the intake roller.) C (CAN 15)
                 // set Opposed 2026-07-17: team observed it spinning opposite the array while
                 // Aligned (likely rewired/remounted since the 2026-07-16 test that had it Aligned).
                 // TODO on-robot: confirm C no longer fights/skips -- if it does, revert to Aligned.
                 shooterB.setControl(new Follower(shooterA.getDeviceID(), MotorAlignmentValue.Aligned));
                 shooterC.setControl(new Follower(shooterA.getDeviceID(), MotorAlignmentValue.Opposed));
-                shooterD.setControl(new Follower(shooterA.getDeviceID(), MotorAlignmentValue.Opposed));
 
             //Initializing Drivetrain
                 this.drivetrain = drivetrain;
@@ -1756,7 +1755,7 @@ public class ShooterSubsystem extends SubsystemBase{
 
     // Read-only motor access for PowerTelemetry (no control).
     public TalonFX[] getFlywheelMotors(){
-        return new TalonFX[] { shooterA, shooterB, shooterC, shooterD };
+        return new TalonFX[] { shooterA, shooterB, shooterC };
     }
 
     // Read-only motor access for PowerTelemetry (no control).
