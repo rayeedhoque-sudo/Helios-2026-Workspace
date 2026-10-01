@@ -692,6 +692,11 @@ function drawTags(): void {
       // Hub face tag: push the number straight out past the hub along its own radial.
       labX = hub.x + (dx / r) * TAG_LABEL_HUB_R_M;
       labY = hub.y + (dy / r) * TAG_LABEL_HUB_R_M;
+    } else if (Math.abs(dx) < 0.5) {
+      // Trench tag: each trench has one tag per face, 7.5 cm apart — split the pair's
+      // labels to their own side (toward the face) so both IDs show instead of stacking.
+      labX = xM + Math.sign(dx) * 0.35;
+      labY = yM + (yM < FIELD_H_M / 2 ? 0.45 : -0.45);
     } else {
       labX = xM + (xM < FIELD_W_M / 2 ? 0.45 : -0.45);
       labY = yM + (yM < FIELD_H_M / 2 ? 0.45 : -0.45);
