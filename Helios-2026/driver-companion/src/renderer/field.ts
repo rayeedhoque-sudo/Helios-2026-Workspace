@@ -42,19 +42,28 @@ const MARGIN = 18;
 // ---- pure geometry (DOM-free; exported for the geometry self-check) -----------
 export type FieldMode = 'full' | 'driverBlue' | 'driverRed';
 export type Layout = { mode: FieldMode; s: number; ox: number; oy: number; cssW: number; cssH: number };
+// Extra CSS px kept clear on each side (on top of MARGIN) for the DOM overlays that float
+// over the canvas — the field is fit and centred in what's left, so nothing covers it.
+export type Insets = { l: number; r: number; t: number; b: number };
+const NO_INSETS: Insets = { l: 0, r: 0, t: 0, b: 0 };
 
 // Letterbox the field into a canvas of cssW x cssH, leaving a MARGIN-px inset on all
 // sides. Full mode is landscape; both driver modes are portrait (field's long axis is
 // vertical). Scale is fit to the inset area; the field is then centred in the FULL
 // canvas, so ox/oy are always >= MARGIN (the guarantee the clipping fix relies on).
-export function computeLayout(mode: FieldMode, cssW: number, cssH: number): Layout {
+export function computeLayout(mode: FieldMode, cssW: number, cssH: number, ins: Insets = NO_INSETS): Layout {
   const portrait = mode !== 'full';
   const wd = portrait ? FIELD_H_M : FIELD_W_M; // display width in meters
   const hd = portrait ? FIELD_W_M : FIELD_H_M; // display height in meters
-  const availW = Math.max(1, cssW - 2 * MARGIN);
-  const availH = Math.max(1, cssH - 2 * MARGIN);
+  const availW = Math.max(1, cssW - 2 * MARGIN - ins.l - ins.r);
+  const availH = Math.max(1, cssH - 2 * MARGIN - ins.t - ins.b);
   const s = Math.min(availW / wd, availH / hd);
-  return { mode, s, ox: (cssW - wd * s) / 2, oy: (cssH - hd * s) / 2, cssW, cssH };
+  return {
+    mode, s,
+    ox: MARGIN + ins.l + (availW - wd * s) / 2,
+    oy: MARGIN + ins.t + (availH - hd * s) / 2,
+    cssW, cssH,
+  };
 }
 
 // Meters (blue-origin: +x toward red wall, +y toward blue's left, y=0 at blue's
@@ -263,6 +272,9 @@ const STATIONS: { s: Station; cls: string }[] = [
   { s: 'B1', cls: 'stn-blue' }, { s: 'B2', cls: 'stn-blue' }, { s: 'B3', cls: 'stn-blue' },
 ];
 let pickerEl: HTMLElement | null = null;
+let stationOverlayEl: HTMLElement | null = null; // left picker column (resizeField keeps the field clear of it)
+let fieldToggleEl: HTMLElement | null = null;
+let tagsBtnEl: HTMLElement | null = null;
 let pickerButtons: HTMLButtonElement[] = [];
 let pickerNote: HTMLElement | null = null;
 let pickerLocked = false;
@@ -439,6 +451,7 @@ function buildStationPicker(container: HTMLElement): void {
   overlay.appendChild(note);
   buildStartPicker(overlay);
   container.appendChild(overlay);
+  stationOverlayEl = overlay;
   pickerEl = picker;
   pickerNote = note;
 }
@@ -604,6 +617,7 @@ export function mountField(container: HTMLElement): void {
   toggle.textContent = driverPerspective ? 'FULL FIELD' : 'DRIVER VIEW';
   toggle.classList.toggle('active', driverPerspective);
   container.appendChild(toggle);
+  fieldToggleEl = toggle;
 
   const tagsBtn = document.createElement('button');
   tagsBtn.className = 'pane-toggle field-tags-toggle';
@@ -611,6 +625,7 @@ export function mountField(container: HTMLElement): void {
   tagsBtn.textContent = 'TAGS';
   tagsBtn.classList.toggle('active', showTags);
   container.appendChild(tagsBtn);
+  tagsBtnEl = tagsBtn;
   tagsBtn.addEventListener('click', () => {
     showTags = !showTags;
     tagsBtn.classList.toggle('active', showTags);
@@ -646,6 +661,7 @@ export function mountField(container: HTMLElement): void {
   fieldRo?.disconnect();
   fieldRo = new ResizeObserver(() => resizeField());
   fieldRo.observe(canvas.parentElement ?? canvas);
+  if (stationOverlayEl) fieldRo.observe(stationOverlayEl); // lock note / picks change its size
   window.addEventListener('resize', resizeField);
   resizeField();
   applyPicker(); // sync the freshly-built picker to current lock/active state
@@ -653,6 +669,39 @@ export function mountField(container: HTMLElement): void {
 
 let fieldRo: ResizeObserver | null = null;
 let mapRo: ResizeObserver | null = null;
+
+// Keep the field clear of every overlay: the picker column (top-left), the orientation
+// toggle + canvas vision badge (top-right) and TAGS (bottom-right). Two ways to clear them —
+// side gutters, or a top/bottom band — and whichever leaves the bigger field wins
+// (portrait driver view usually takes the gutters, landscape full field the band).
+const VISION_BADGE_W = 120; // widest canvas badge ("📡 n TAGS"), drawn at y=36..56
+const GAP = 6;
+function overlayInsets(canvasRect: DOMRect): Insets {
+  const rel = (el: HTMLElement | null) => {
+    if (!el) return { r: 0, b: 0, w: 0, h: 0 };
+    const b = el.getBoundingClientRect();
+    return { r: b.right - canvasRect.left, b: b.bottom - canvasRect.top, w: b.width, h: b.height };
+  };
+  const left = rel(stationOverlayEl);
+  const toggle = rel(fieldToggleEl);
+  const tags = rel(tagsBtnEl);
+  const sides: Insets = {
+    l: left.r ? left.r + GAP - MARGIN : 0,
+    r: Math.max(toggle.w, tags.w, VISION_BADGE_W) + 8 + GAP - MARGIN,
+    t: 0,
+    b: 0,
+  };
+  const band: Insets = {
+    l: 0,
+    r: 0,
+    t: Math.max(left.b, 56) + GAP - MARGIN,
+    b: tags.h ? tags.h + 8 + GAP - MARGIN : 0,
+  };
+  const mode = currentMode();
+  const w = Math.max(1, Math.round(canvasRect.width));
+  const h = Math.max(1, Math.round(canvasRect.height));
+  return computeLayout(mode, w, h, sides).s >= computeLayout(mode, w, h, band).s ? sides : band;
+}
 
 // Backing store = element size x devicePixelRatio; draw space stays in CSS px.
 export function resizeField(): void {
@@ -664,7 +713,7 @@ export function resizeField(): void {
   canvas.width = Math.round(cssW * dpr);
   canvas.height = Math.round(cssH * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  layout = computeLayout(currentMode(), cssW, cssH);
+  layout = computeLayout(currentMode(), cssW, cssH, overlayInsets(rect));
   dirty = true;
 }
 
