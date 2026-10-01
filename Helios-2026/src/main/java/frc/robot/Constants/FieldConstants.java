@@ -3,11 +3,16 @@ package frc.robot.Constants;
 
 import com.pathplanner.lib.util.FlippingUtil;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
-// 2026 REBUILT field geometry used by the drivetrain (field bounds + auto start pose).
+// 2026 REBUILT field geometry used by the drivetrain (field bounds + auto start spots).
 // Every number here is dumped/derived from the official WPILib 2026-rebuilt-welded.json tag
 // layout (apriltag-java-2026.2.1.jar) via the shot-math derivation of 2026-07-16 -- cited per
 // constant. Tunables (team strategy choices / on-robot unknowns) are non-final per team convention.
@@ -17,25 +22,62 @@ public class FieldConstants {
         public static final double FIELD_LENGTH_METERS = 16.541;
         public static final double FIELD_WIDTH_METERS = 8.069;
 
-    //AUTO START POSE (blue-origin), used by the odometry autos' start/end pose reset.
-        // The robot starts these autos in the RIGHT TRENCH. The exact field coordinates have
-        // NOT been measured -- this is a deliberate do-nothing placeholder, not a value.
-        // TODO MEASURE ON THE FIELD: blue-alliance right-trench start pose (x m, y m, heading).
-        // WHILE THIS IS ZERO the reset writes (0, 0, 0 deg) into odometry, which makes every
-        // pose-based feature wrong (auto-aim bearing, G407 zone legality). Do not run these
-        // autos in a match until it is filled in.
-        // Reference for whoever fills it in: the BLUE trench tags sit at x = 4.588/4.663 m,
-        // y = 0.644 m (driver's right) and y = 7.425 m (left) in 2026-rebuilt-welded.json.
-        public static Pose2d AUTO_START_POSE_BLUE = Pose2d.kZero;
+    //AUTO START SPOT (blue-origin), picked per match on the driver-companion Field tab.
+        // The companion publishes one of these names to /Companion/StartSpot; at auto start
+        // the robot resets odometry (X, Y AND heading) to that spot. No pick = NO reset.
+        // Every spot: robot FACING THE NEUTRAL ZONE (heading 0 deg on blue -- team 2026-09-30),
+        // bumpers flush against the named field element.
+        // TODO MEASURE ON THE FIELD: all coordinates below are [inferred], not measured.
+        //   Trench y = the trench tag y (2026-rebuilt-welded.json tags 17/22/23/28); hub face
+        //   x = tags 25/26 (4.022 m). Bump extents were read off the companion's field image
+        //   (assets/2026-field.png, calibrated by 2026-rebuilt.json): x 3.99..5.19 m,
+        //   left bump y 4.67..6.79 m, right bump y 1.31..3.43 m.
+        // ROBOT_HALF_LENGTH: half of the 0.9779 m with-bumpers length (PathPlanner config,
+        // team confirmed 2026-09-30 it includes bumpers and is front-to-back).
+        public static final double ROBOT_HALF_LENGTH_METERS = 0.9779 / 2.0;
+        public static final double HUB_X_METERS = 4.626;            // TODO [inferred] trench/hub centerline x
+        public static final double HUB_ALLIANCE_FACE_X_METERS = 4.022; // TODO [inferred] tags 25/26
+        public static final double BUMP_ALLIANCE_EDGE_X_METERS = 3.99;  // TODO [inferred] field image
+
+        /** Start spots. Left/right are from OUR driver station's view (blue: left = +Y). */
+        public enum StartSpot {
+            LEFT_TRENCH(HUB_X_METERS, 7.425),   // TODO [inferred] under the trench, tag 22/23 y
+            LEFT_BUMP(BUMP_ALLIANCE_EDGE_X_METERS - ROBOT_HALF_LENGTH_METERS, 5.73), // TODO [inferred]
+            HUB(HUB_ALLIANCE_FACE_X_METERS - ROBOT_HALF_LENGTH_METERS, 4.035),       // TODO [inferred]
+            RIGHT_BUMP(BUMP_ALLIANCE_EDGE_X_METERS - ROBOT_HALF_LENGTH_METERS, 2.37), // TODO [inferred]
+            RIGHT_TRENCH(HUB_X_METERS, 0.644);  // TODO [inferred] under the trench, tag 17/28 y
+
+            /** Blue-alliance pose, facing the neutral zone (+X). */
+            public final Pose2d bluePose;
+
+            StartSpot(double xMeters, double yMeters) {
+                this.bluePose = new Pose2d(xMeters, yMeters, Rotation2d.kZero);
+            }
+        }
 
         /**
-         * Auto start pose for the current alliance: the blue value, mirrored by PathPlanner's
-         * FlippingUtil on red (same flip AutoBuilder uses for paths, so both stay consistent).
-         * TODO verify FlippingUtil.symmetryType matches the 2026 field once the pose is real.
+         * Pure lookup: the pose for a start-spot name on the given alliance, or empty for a
+         * blank/unknown name. Red is the blue pose rotated by PathPlanner's FlippingUtil (same
+         * flip AutoBuilder uses for paths), which keeps "left" = the red driver's left.
          */
-        public static Pose2d autoStartPose() {
-            return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
-                ? FlippingUtil.flipFieldPose(AUTO_START_POSE_BLUE)
-                : AUTO_START_POSE_BLUE;
+        public static Optional<Pose2d> startPose(String spotName, boolean isRed) {
+            for (StartSpot spot : StartSpot.values()) {
+                if (spot.name().equals(spotName)) {
+                    return Optional.of(isRed ? FlippingUtil.flipFieldPose(spot.bluePose) : spot.bluePose);
+                }
+            }
+            return Optional.empty();
+        }
+
+        // Lazy holder so loading FieldConstants (e.g. in unit tests) never touches NT.
+        private static final class StartSpotTopic {
+            static final StringSubscriber SUB = NetworkTableInstance.getDefault()
+                .getStringTopic("/Companion/StartSpot").subscribe("");
+        }
+
+        /** The companion-picked start pose for the current alliance, or empty if none picked. */
+        public static Optional<Pose2d> autoStartPose() {
+            return startPose(StartSpotTopic.SUB.get(),
+                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red);
         }
 }

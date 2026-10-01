@@ -24,7 +24,7 @@
 // fieldToCanvasAt(), so rotation AND the field->canvas reflection are handled once,
 // correctly, for all modes. The exported fieldToCanvas/resizeField API is preserved.
 import { onSettings, getSettings, updateSettings, type Station } from './store';
-import { onValue, onConnection, decodeSwerveModuleStates, TOPICS } from './nt';
+import { onValue, onConnection, ntPublish, decodeSwerveModuleStates, TOPICS } from './nt';
 
 // Authoritative 2026 REBUILT field size (WPILib 2026-rebuilt-welded.json). The image
 // crop below was calibrated against the field PNG's own metadata (16.535) — the 6 mm
@@ -342,6 +342,61 @@ function onDsStatus(s: { found: boolean; dsStation: Station | null }): void {
   }
 }
 
+// ---- start-spot picker (under the station picker) ------------------------------
+// Publishes where the robot starts this match; the robot resets its pose (X, Y, heading
+// facing the neutral zone) to that spot at auto start (FieldConstants.StartSpot). Names
+// must match the Java enum exactly. Left/right = from OUR driver station. ntPublish's
+// replay cache re-sends the pick after a robot reboot. Highlighted while the FMS is
+// attached (FMSControlData 0x10) so it isn't forgotten on a real field.
+const START_SPOTS: { id: string; label: string }[] = [
+  { id: 'LEFT_TRENCH', label: 'L TRENCH' },
+  { id: 'LEFT_BUMP', label: 'L BUMP' },
+  { id: 'HUB', label: 'HUB' },
+  { id: 'RIGHT_BUMP', label: 'R BUMP' },
+  { id: 'RIGHT_TRENCH', label: 'R TRENCH' },
+];
+let startSpot = ''; // last value seen on the topic (ours, echoed back) — '' = none picked
+let fmsAttached = false;
+let startPickerEl: HTMLElement | null = null;
+let startButtons: HTMLButtonElement[] = [];
+
+function applyStartPicker(): void {
+  for (const b of startButtons) b.classList.toggle('active', b.dataset.spot === startSpot);
+  if (startPickerEl) {
+    startPickerEl.classList.toggle('fms', fmsAttached);
+    startPickerEl.classList.toggle('unset', !startSpot);
+  }
+}
+
+function buildStartPicker(overlay: HTMLElement): void {
+  const picker = document.createElement('div');
+  picker.id = 'start-picker';
+  picker.setAttribute('role', 'group');
+  picker.setAttribute('aria-label', 'Robot start spot');
+  picker.title = 'Where the robot starts — its pose is reset here when auto begins';
+  const lab = document.createElement('span');
+  lab.className = 'start-lab';
+  lab.textContent = 'START';
+  picker.appendChild(lab);
+  startButtons = [];
+  for (const { id, label } of START_SPOTS) {
+    const b = document.createElement('button');
+    b.className = 'stn stn-start';
+    b.dataset.spot = id;
+    b.textContent = label;
+    b.addEventListener('click', () => {
+      startSpot = id;
+      ntPublish(TOPICS.startSpot, 'string', id);
+      applyStartPicker();
+    });
+    picker.appendChild(b);
+    startButtons.push(b);
+  }
+  overlay.appendChild(picker);
+  startPickerEl = picker;
+  applyStartPicker();
+}
+
 // Build the station-picker overlay inside a panel container (rebuilt fresh each mount).
 function buildStationPicker(container: HTMLElement): void {
   const overlay = document.createElement('div');
@@ -382,6 +437,7 @@ function buildStationPicker(container: HTMLElement): void {
 
   overlay.appendChild(picker);
   overlay.appendChild(note);
+  buildStartPicker(overlay);
   container.appendChild(overlay);
   pickerEl = picker;
   pickerNote = note;
@@ -429,7 +485,15 @@ function ensureFieldSubs(): void {
   });
   onValue(TOPICS.fmsControl, (v) => {
     fmsDsAttached = (Number(v) & 0x20) !== 0;
+    fmsAttached = (Number(v) & 0x10) !== 0;
     reconcileFollow();
+    applyStartPicker();
+  });
+  onValue(TOPICS.startSpot, (v) => {
+    if (typeof v === 'string') {
+      startSpot = v;
+      applyStartPicker();
+    }
   });
 
   // DS-ini soft-sync feed (see onDsStatus). Pull once to seed, then track pushes.

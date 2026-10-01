@@ -188,6 +188,7 @@ export const TOPICS = {
   moduleTargets: '/DriveState/ModuleTargets', // struct:SwerveModuleState[] raw (CTRE commanded states)
   isRedAlliance: '/FMSInfo/IsRedAlliance',
   stationNumber: '/FMSInfo/StationNumber',
+  startSpot: '/Companion/StartSpot', // string, published BY the companion: robot resets its pose here at auto start
   fmsControl: '/FMSInfo/FMSControlData', // int control word: 0x10 = FMS attached, 0x20 = DS attached
   autoChooser: '/SmartDashboard/Auto Chooser', // subkeys /options /default /active /selected
   telemetry: '/CompanionTelemetry', // subkeys /names /stator /supply /temp /volts /voltage

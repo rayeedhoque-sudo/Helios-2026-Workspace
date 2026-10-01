@@ -1093,6 +1093,44 @@ button {
   background: rgba(14, 10, 20, 0.82);
   backdrop-filter: blur(2px);
 }
+/* Start-spot picker (under the station picker). Accent ring while the FMS is attached;
+   pulses if a real match is on and nothing is picked yet. */
+#start-picker {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(14, 10, 20, 0.82);
+  backdrop-filter: blur(2px);
+}
+#start-picker .start-lab {
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  padding: 0 6px 0 4px;
+}
+#start-picker .stn-start {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+.stn-start.active {
+  color: #fff;
+  background: rgba(181, 123, 255, 0.22);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 12px rgba(181, 123, 255, 0.35);
+}
+#start-picker.fms {
+  border-color: var(--accent);
+}
+#start-picker.fms.unset {
+  animation: start-unset 1s ease-in-out infinite alternate;
+}
+@keyframes start-unset {
+  from { box-shadow: 0 0 0 0 rgba(181, 123, 255, 0); }
+  to { box-shadow: 0 0 0 3px rgba(181, 123, 255, 0.55); }
+}
 .field-station-overlay .stn-lock-note {
   background: rgba(11, 8, 18, 0.78);
   border: 1px solid var(--line-soft);

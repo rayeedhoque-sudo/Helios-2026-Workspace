@@ -363,9 +363,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
     }
 
-    /** Reset odometry to the alliance auto start pose (X, Y AND heading). Start of auto only. */
+    /**
+     * Reset odometry to the companion-picked start spot (X, Y AND heading). Start of auto only.
+     * No spot picked = no reset (with a DS warning) -- never a guessed pose.
+     */
     public Command resetToAutoStartPose() {
-        return this.runOnce(() -> this.resetPose(FieldConstants.autoStartPose()));
+        return this.runOnce(this::resetToStartSpot);
+    }
+
+    /** Immediate form of resetToAutoStartPose(), for Robot.autonomousInit. */
+    public void resetToStartSpot() {
+        FieldConstants.autoStartPose().ifPresentOrElse(this::resetPose,
+            () -> DriverStation.reportWarning("No start spot picked on the companion Field tab -- pose NOT reset", false));
     }
 
     /**
@@ -375,9 +384,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * fuses X/Y only and the MT1 boot-seed is latched off at the first enable.
      */
     public Command resetAutoEndTranslation() {
-        return this.runOnce(() -> this.resetPose(new Pose2d(
-            FieldConstants.autoStartPose().getTranslation(),
-            this.getState().Pose.getRotation())));
+        return this.runOnce(() -> FieldConstants.autoStartPose().ifPresent(start -> this.resetPose(new Pose2d(
+            start.getTranslation(),
+            this.getState().Pose.getRotation()))));
     }
 
     // ---- Simple drive-forward autonomous with stall abort ----
