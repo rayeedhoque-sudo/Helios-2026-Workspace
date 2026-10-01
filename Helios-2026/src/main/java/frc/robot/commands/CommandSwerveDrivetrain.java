@@ -24,6 +24,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringSubscriber;
@@ -35,6 +36,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.TunerConstants;
+import frc.robot.Constants.SubsystemConstants.DriveLimitConstants;
 import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.Constants.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.utility.LimelightHelpers;
@@ -206,8 +209,44 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return run(() -> this.setControl(request.get()));
     }
 
+    // Low-battery drive cut state (see DriveLimitConstants).
+    private boolean driveLimitsCut = false;
+    private final Debouncer lowBatteryDebounce =
+        new Debouncer(DriveLimitConstants.LOW_BATTERY_CUT_SEC, Debouncer.DebounceType.kRising);
+    private final Debouncer recoveredBatteryDebounce =
+        new Debouncer(DriveLimitConstants.LOW_BATTERY_RESTORE_SEC, Debouncer.DebounceType.kRising);
+    private final BooleanPublisher driveLimitsCutPub = NetworkTableInstance.getDefault()
+        .getTable("Drive").getBooleanTopic("lowBatteryLimitCut").publish();
+
+    /** Next cut state: cut once the battery has been low; restore only once it has recovered. */
+    static boolean nextDriveLimitsCut(boolean cut, boolean lowDebounced, boolean recoveredDebounced) {
+        return cut ? !recoveredDebounced : lowDebounced;
+    }
+
+    /** Halve (or restore) the 4 drive motors' current limits when the battery crosses the thresholds. */
+    private void updateLowBatteryDriveCut() {
+        double volts = RobotController.getBatteryVoltage();
+        boolean next = nextDriveLimitsCut(driveLimitsCut,
+            lowBatteryDebounce.calculate(volts < DriveLimitConstants.LOW_BATTERY_CUT_VOLTS),
+            recoveredBatteryDebounce.calculate(volts > DriveLimitConstants.LOW_BATTERY_RESTORE_VOLTS));
+        if (next != driveLimitsCut) {
+            driveLimitsCut = next;
+            // Applied only on the transition (config writes block briefly), never every loop.
+            var limits = TunerConstants.driveCurrentLimits(
+                next ? DriveLimitConstants.LOW_BATTERY_LIMIT_SCALE : 1.0);
+            for (var module : getModules()) {
+                module.getDriveMotor().getConfigurator().apply(limits, 0.02);
+            }
+            DriverStation.reportWarning(next
+                ? "Battery below " + DriveLimitConstants.LOW_BATTERY_CUT_VOLTS + " V -- drive current limits halved"
+                : "Battery recovered -- drive current limits restored", false);
+        }
+        driveLimitsCutPub.set(driveLimitsCut);
+    }
+
     @Override
     public void periodic() {
+        updateLowBatteryDriveCut();
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
@@ -418,7 +457,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         for (var module : getModules()) {
             double driveAmps = Math.abs(module.getDriveMotor().getStatorCurrent().getValueAsDouble());
             double steerAmps = Math.abs(module.getSteerMotor().getStatorCurrent().getValueAsDouble());
-            if (driveAmps >= kAutoDriveStallAmps || steerAmps >= kAutoSteerStallAmps) {
+            // Scaled with the low-battery cut: halved limits cap stator at 60 A, below the 90 A trip.
+            double driveTrip = kAutoDriveStallAmps
+                * (driveLimitsCut ? DriveLimitConstants.LOW_BATTERY_LIMIT_SCALE : 1.0);
+            if (driveAmps >= driveTrip || steerAmps >= kAutoSteerStallAmps) {
                 return true;
             }
         }

@@ -13,6 +13,20 @@ public class SubsystemConstants {
          */
         public static final boolean TUNING_MODE = true;
 
+        // LOW-BATTERY DRIVE CUT (team request 2026-09-30): when the battery drops below
+        // LOW_BATTERY_CUT_VOLTS the 4 drive motors' current limits (stator + supply) are scaled
+        // by LOW_BATTERY_LIMIT_SCALE. They come back only once the battery is above
+        // LOW_BATTERY_RESTORE_VOLTS for LOW_BATTERY_RESTORE_SEC -- without that gap, cutting the
+        // current lets the voltage recover, which would restore the limits, which sags it again
+        // (the limits would flap on and off every loop). [assumed] TODO tune restore on robot.
+        public static class DriveLimitConstants{
+            public static final double LOW_BATTERY_CUT_VOLTS = 9.0;
+            public static final double LOW_BATTERY_CUT_SEC = 0.1;      // must stay below for this long
+            public static final double LOW_BATTERY_RESTORE_VOLTS = 10.0;
+            public static final double LOW_BATTERY_RESTORE_SEC = 1.0;
+            public static final double LOW_BATTERY_LIMIT_SCALE = 0.5;  // "cut in half"
+        }
+
         public static class Vision{
             public static final String CAM_LIMELIGHT = "limelight-knight";
 
