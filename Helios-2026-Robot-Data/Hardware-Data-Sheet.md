@@ -286,7 +286,7 @@ Three tiers per motor: **Conservative START** (write these first — team prefer
 | Feeder (V2, CAN 24; replaces CIM kicker) | Kraken X60 | St 30 / Sup 20 *(team-approved 2026-09-30)* | St 40 / Sup 20 | St 80 / Sup 40 | Coast |
 | Intake front rollers (V2, CAN 16) | **Kraken X60** (TalonFX; was X44) | St 30 / Sup 20 *(proposed)* | St 40 / Sup 25 | St 80 / Sup 40 | Coast |
 | Hood (V2, CAN 18) | **Kraken X44** (TalonFX; was NEO 550) | **St 20 / Sup 15** *(team-approved 2026-09-30)* | St 30 / Sup 20 | St 40 / Sup 25 | **Brake** |
-| Hopper A/B (20?, 21?) | NEO 2.0 | 20 | 40 | 60 | Coast |
+| Hopper A/B (20?, 21?) | NEO 2.0 | 20 — **code (team, 2026-09-30): 20 A normal / 24 A RT shot / 40 A while A held** | 40 | 60 | Coast |
 | Intake slider/jackshaft (22) | **NEO 2.0** (was labeled V1.1) | 20 | 30–40 | 60 | **Brake** |
 
 > **V2 rows marked *(proposed)* are new starting points written 2026-09-29, not yet approved by the team.** Why they matter:

@@ -150,7 +150,7 @@ public class SubsystemConstants {
                 // stay at HOPPER_SPEED, which is what the team asked for.
                 //
                 // WATCH THE CURRENT LIMIT, not the duty: the belts run at
-                // HOPPER_SHOT_CURRENT_LIMIT_A (6 A) during a shot, so under real fuel load the
+                // HOPPER_SHOT_CURRENT_LIMIT_A (24 A since 2026-09-30) during a shot, so under real fuel load the
                 // smart limit -- not this number -- may be what decides the speed. If the belts
                 // do not actually run faster, that limit is the thing to raise, and raising it
                 // is a team decision, not a side effect of this one.
@@ -166,6 +166,8 @@ public class SubsystemConstants {
                 // flywheels: CIM stall at 12 V is ~131 A and the Victor SPX has no current
                 // sensing, so duty is the only software knob -- see manualRunCommand.)
                 
+                // Belt smart current limits (team, 2026-09-30): 5 -> 20 A normal, so the RT shot
+                // limit (x1.2) is 24 A. Manual (A held) stays 40 A. Data sheet sec.7 cap is 60 A.
                 public static final int HOPPER_CURRENT_LIMIT_A = 20;
                 public static final int HOPPER_SHOT_CURRENT_LIMIT_A = (int)(HOPPER_CURRENT_LIMIT_A * 1.2);
                 // Belt limit while B (manual hopper run) is held -- team request 2026-08-27
