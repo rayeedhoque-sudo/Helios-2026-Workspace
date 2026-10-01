@@ -15,7 +15,7 @@
 import { mountLimelight } from './limelight';
 import { mountField, mountLaptopMap } from './field';
 import { mountVoltageGraph, mountCurrentGraph } from './graphs';
-import { mountPowerBars, mountVision, mountMechanisms, mountAutoChooser, mountControls } from './panels';
+import { mountPowerBars, mountMechanisms, mountAutoChooser, mountControls } from './panels';
 import { mountDeploy } from './deploy';
 import { mountMotorRecorder } from './recorder';
 import { mountShooter } from './shooter';
@@ -38,7 +38,6 @@ export const PANELS: readonly PanelDef[] = [
   { id: 'power', title: 'Power', mount: mountPowerBars },
   { id: 'mechanisms', title: 'Mechanisms', mount: mountMechanisms },
   { id: 'auto-chooser', title: 'Autonomous', mount: mountAutoChooser },
-  { id: 'vision-link', title: 'Vision Link', mount: mountVision },
   { id: 'deploy', title: 'Deploy', mount: mountDeploy },
   { id: 'controls', title: 'Controls', mount: mountControls },
   { id: 'motor-recorder', title: 'Motor Recorder', mount: mountMotorRecorder }, // starts closed — open via "+ Panels"

@@ -398,8 +398,26 @@ button {
 .limelight-body {
   background: #070510;
   display: flex;
+  flex-direction: column;
+}
+/* Stream area: everything that used to fill the whole panel, now above the diag strip. */
+.ll-view {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
+}
+/* Vision/link diagnostics strip along the bottom of the Limelight panel. */
+.ll-diag.kv-grid {
+  flex: none;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 6px 10px;
+  border-top: 1px solid var(--line);
+  overflow: visible;
 }
 #limelight-stream {
   width: 100%;

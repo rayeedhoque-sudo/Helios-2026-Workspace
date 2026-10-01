@@ -1,7 +1,8 @@
 // Panels (M5): four independent dockview panels (were one diagnostics column) —
 //   power        per-motor stator-current bars + temp badges, grouped, with a
 //                latched BROWNOUT RISK light.
-//   vision-link  Limelight liveness/latency/target/tags + robot NT link.
+//   (vision)     Limelight liveness/latency/target/tags + robot NT link — mounted as a
+//                strip at the bottom of the Limelight panel (limelight.ts), not its own tab.
 //   mechanisms   shooter / intake / hopper state read from Shuffleboard.
 //   auto-chooser PathPlanner auto dropdown with confirm (✓) / pending state.
 // Each mountX(container) builds its DOM into the given panel element; the NT

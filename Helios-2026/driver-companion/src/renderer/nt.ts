@@ -53,7 +53,7 @@ export function onConnection(cb: (s: ConnState) => void): () => void {
 
 // The RTT number only exists after the first timestamp round-trip, which lands AFTER
 // onConnect fires — and it drifts as the network changes. Refresh listeners once a
-// second while connected so the top-bar pip / vision-link readout show a live value
+// second while connected so the top-bar pip / Limelight-panel link readout show a live value
 // instead of the '— ms' captured at connect time.
 setInterval(() => {
   if (connected) notifyConn();
