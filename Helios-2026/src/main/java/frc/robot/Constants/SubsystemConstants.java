@@ -20,7 +20,7 @@ public class SubsystemConstants {
         // current lets the voltage recover, which would restore the limits, which sags it again
         // (the limits would flap on and off every loop). [assumed] TODO tune restore on robot.
         public static class DriveLimitConstants{
-            public static final double LOW_BATTERY_CUT_VOLTS = 9.0;
+            public static final double LOW_BATTERY_CUT_VOLTS = 8.0;   // team 2026-09-30 (was 9.0)
             public static final double LOW_BATTERY_CUT_SEC = 0.1;      // must stay below for this long
             public static final double LOW_BATTERY_RESTORE_VOLTS = 10.0;
             public static final double LOW_BATTERY_RESTORE_SEC = 1.0;
