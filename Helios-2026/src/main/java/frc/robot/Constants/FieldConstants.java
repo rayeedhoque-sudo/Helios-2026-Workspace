@@ -7,10 +7,6 @@ import java.util.Optional;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringSubscriber;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 // 2026 REBUILT field geometry used by the drivetrain (field bounds + auto start spots).
 // Every number here is dumped/derived from the official WPILib 2026-rebuilt-welded.json tag
@@ -67,17 +63,5 @@ public class FieldConstants {
                 }
             }
             return Optional.empty();
-        }
-
-        // Lazy holder so loading FieldConstants (e.g. in unit tests) never touches NT.
-        private static final class StartSpotTopic {
-            static final StringSubscriber SUB = NetworkTableInstance.getDefault()
-                .getStringTopic("/Companion/StartSpot").subscribe("");
-        }
-
-        /** The companion-picked start pose for the current alliance, or empty if none picked. */
-        public static Optional<Pose2d> autoStartPose() {
-            return startPose(StartSpotTopic.SUB.get(),
-                DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red);
         }
 }

@@ -26,6 +26,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -241,6 +242,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final DoublePublisher visionTagCountPub = NetworkTableInstance.getDefault()
         .getTable("Pose").getDoubleTopic("visionTagCount").publish();
 
+    // Start spot picked on the companion Field tab. Subscribed at BOOT (not at first read):
+    // a remote client's value only lands locally once a subscription exists, so subscribing
+    // inside autonomousInit would read "" and skip the reset.
+    private final StringSubscriber startSpotSub = NetworkTableInstance.getDefault()
+        .getStringTopic("/Companion/StartSpot").subscribe("");
+
+    /** The companion-picked start pose for the current alliance, or empty if none picked. */
+    private Optional<Pose2d> autoStartPose() {
+        return FieldConstants.startPose(startSpotSub.get(),
+            DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red);
+    }
+
     /**
      * AprilTag pose correction, two layers (both BLUE-origin -- PathPlanner and this
      * drivetrain keep the origin on the blue side for both alliances):
@@ -373,7 +386,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     /** Immediate form of resetToAutoStartPose(), for Robot.autonomousInit. */
     public void resetToStartSpot() {
-        FieldConstants.autoStartPose().ifPresentOrElse(this::resetPose,
+        autoStartPose().ifPresentOrElse(this::resetPose,
             () -> DriverStation.reportWarning("No start spot picked on the companion Field tab -- pose NOT reset", false));
     }
 
@@ -384,7 +397,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * fuses X/Y only and the MT1 boot-seed is latched off at the first enable.
      */
     public Command resetAutoEndTranslation() {
-        return this.runOnce(() -> FieldConstants.autoStartPose().ifPresent(start -> this.resetPose(new Pose2d(
+        return this.runOnce(() -> autoStartPose().ifPresent(start -> this.resetPose(new Pose2d(
             start.getTranslation(),
             this.getState().Pose.getRotation()))));
     }
