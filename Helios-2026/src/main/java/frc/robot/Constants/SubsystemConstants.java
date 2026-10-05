@@ -221,10 +221,16 @@ public class SubsystemConstants {
                 // "At speed" band in flywheel rpm. [assumed] TODO tune: if the belts never start,
                 // widen this before touching gains (V1's too-tight band never latched).
                 public static final double FLYWHEEL_AT_SPEED_TOL_RPM = 100;
-                // Velocity gains in MOTOR rps -- V1's X60 values as a starting point. TODO tune.
-                public static final double FLYWHEEL_kP = 0.2;
-                public static final double FLYWHEEL_kD = 0.01;
+                // BANG-BANG flywheel control (team request 2026-10-05; WPILib BangBangController,
+                // the pattern from the WPILib docs): volts = (below target ? 12 : 0) + FF_SCALE *
+                // kV * target. The feedforward is held under 100% so it can never over-speed the
+                // wheel on its own -- bang-bang only pushes forward, it can't slow the wheel down.
+                // kV in volts per MOTOR rps (X60: ~12 V / 96.7 rps; V1's measured 0.12625).
+                // Tune: if the speed overshoots on its own, lower FF_SCALE; if recovery between
+                // balls is slow, the 25 A supply limit (not this) is what caps it.
                 public static final double FLYWHEEL_kV = 0.12625;
+                public static final double FLYWHEEL_BANG_BANG_FF_SCALE = 0.9;
+                public static final double FLYWHEEL_BANG_BANG_VOLTS = 12.0;
                 // Current limits: V1's team-tuned 50 A stator / 25 A supply, per motor (now x3).
                 public static final double FLYWHEEL_STATOR_A = 50;
                 public static final double FLYWHEEL_SUPPLY_A = 25;

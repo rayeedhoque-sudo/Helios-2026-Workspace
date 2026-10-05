@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import edu.wpi.first.math.controller.BangBangController;
 import frc.robot.Constants.SubsystemConstants.LauncherConstants;
 
 /** Pins the V2 launcher's pure logic (LauncherSubsystem static helpers). */
@@ -36,6 +37,19 @@ class LauncherLogicTest {
             LauncherSubsystem.flywheelRpmToMotorRps(1800)), 1e-9);
         // The 4000 ceiling is right at X60 free speed (~96.7 rps) -- keep it that way.
         assertTrue(LauncherSubsystem.flywheelRpmToMotorRps(LauncherConstants.FLYWHEEL_MAX_RPM) <= 97);
+    }
+
+    /** Bang-bang flywheel: full voltage below target, only the 90% feedforward at/above it, never negative. */
+    @Test
+    void flywheelBangBangVolts() {
+        double target = 40.0; // motor rps
+        double ff = LauncherConstants.FLYWHEEL_BANG_BANG_FF_SCALE * LauncherConstants.FLYWHEEL_kV * target;
+        assertEquals(12.0, LauncherSubsystem.flywheelBangBangVolts(new BangBangController(), 30.0, target), 1e-9,
+            "below target = full voltage (clamped to 12 V)");
+        assertEquals(ff, LauncherSubsystem.flywheelBangBangVolts(new BangBangController(), 41.0, target), 1e-9,
+            "above target = feedforward only, no braking");
+        assertTrue(ff < LauncherConstants.FLYWHEEL_kV * target, "feedforward alone must stay under the target speed");
+        assertTrue(LauncherSubsystem.flywheelBangBangVolts(new BangBangController(), 100.0, target) >= 0);
     }
 
     /** Belt gate: a zero target is never "at speed", and the band is inclusive. */

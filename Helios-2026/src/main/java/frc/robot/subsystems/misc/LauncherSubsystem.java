@@ -19,6 +19,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -52,7 +53,9 @@ public class LauncherSubsystem extends SubsystemBase {
         private final TalonFX hood = new TalonFX(LauncherConstants.HOOD_ID);
 
     //Control requests (reused every loop)
-        private final VelocityVoltage flywheelVelocity = new VelocityVoltage(0);
+        // Flywheels: WPILib bang-bang on the RIO + 90% feedforward, sent as plain volts.
+        private final BangBangController flywheelBangBang = new BangBangController();
+        private final VoltageOut flywheelVolts = new VoltageOut(0);
         private final VelocityVoltage feederVelocity = new VelocityVoltage(0);
         // "Off" = coast down freely, never VelocityVoltage(0), which would brake the wheels.
         private final CoastOut coast = new CoastOut();
@@ -106,11 +109,9 @@ public class LauncherSubsystem extends SubsystemBase {
                 .withMotorOutput(new MotorOutputConfigs()
                     .withNeutralMode(NeutralModeValue.Coast)
                     .withInverted(LauncherConstants.FLYWHEEL_LEADER_INVERTED
-                        ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive))
-                .withSlot0(new Slot0Configs()
-                    .withKP(LauncherConstants.FLYWHEEL_kP)
-                    .withKD(LauncherConstants.FLYWHEEL_kD)
-                    .withKV(LauncherConstants.FLYWHEEL_kV));
+                        ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive));
+            // COAST IS MANDATORY for bang-bang (WPILib docs): in brake, every "off" pulse would
+            // brake the wheel and fight the controller into destructive oscillation.
             flywheelLeader.getConfigurator().apply(leaderConfig);
             TalonFXConfiguration followerConfig = new TalonFXConfiguration()
                 .withCurrentLimits(flywheelLimits)
@@ -122,6 +123,8 @@ public class LauncherSubsystem extends SubsystemBase {
             flywheelRight.setControl(new Follower(flywheelLeader.getDeviceID(),
                 LauncherConstants.FLYWHEEL_RIGHT_OPPOSED ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
             flywheelLeader.setControl(coast);
+            // Bang-bang runs on the RIO every 20 ms, so make sure each loop reads a fresh speed.
+            flywheelLeader.getVelocity().setUpdateFrequency(100);
 
         // Feeder: 30 A stator / 20 A supply (team-approved), Coast, 0.25 s closed-loop ramp to
         // soften spin-up inrush. A jam drops it out of the at-speed band, which stops the belts.
@@ -180,6 +183,16 @@ public class LauncherSubsystem extends SubsystemBase {
             return motorRps * 60.0 / LauncherConstants.FLYWHEEL_MOTOR_ROT_PER_FLYWHEEL_ROT;
         }
 
+        /**
+         * Bang-bang flywheel voltage (motor rps in, volts out): full voltage while below the
+         * target, plus FF_SCALE x kV x target. Never negative -- it only pushes forward.
+         */
+        static double flywheelBangBangVolts(BangBangController bangBang, double measuredRps, double targetRps){
+            double volts = bangBang.calculate(measuredRps, targetRps) * LauncherConstants.FLYWHEEL_BANG_BANG_VOLTS
+                + LauncherConstants.FLYWHEEL_BANG_BANG_FF_SCALE * LauncherConstants.FLYWHEEL_kV * targetRps;
+            return MathUtil.clamp(volts, 0, LauncherConstants.FLYWHEEL_BANG_BANG_VOLTS);
+        }
+
         /** True only for a nonzero target with the measurement inside the band. */
         static boolean atSpeed(double measured, double target, double tolerance){
             return target != 0 && Math.abs(measured - target) <= tolerance;
@@ -225,8 +238,14 @@ public class LauncherSubsystem extends SubsystemBase {
             return runEnd(
                 () -> {
                     shooting = true;
-                    flywheelLeader.setControl(flywheelVelocity.withVelocity(
-                        flywheelRpmToMotorRps(flywheelTargetRpm)));
+                    // Bang-bang every loop; a 0 target coasts instead (0 V would still be a command).
+                    double targetRps = flywheelRpmToMotorRps(flywheelTargetRpm);
+                    if (targetRps <= 0) {
+                        flywheelLeader.setControl(coast);
+                    } else {
+                        flywheelLeader.setControl(flywheelVolts.withOutput(flywheelBangBangVolts(
+                            flywheelBangBang, flywheelLeader.getVelocity().getValueAsDouble(), targetRps)));
+                    }
                     feeder.setControl(feederVelocity.withVelocity(
                         LauncherConstants.FEEDER_TARGET_MOTOR_RPM / 60.0));
                 },
