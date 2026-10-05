@@ -52,6 +52,14 @@ class LauncherLogicTest {
         assertTrue(LauncherSubsystem.flywheelBangBangVolts(new BangBangController(), 100.0, target) >= 0);
     }
 
+    /** CAN 14 has a 22T pulley onto 15's 18T: it runs 18/22 as fast, so it gets 18/22 of the voltage. */
+    @Test
+    void beltedMotorGetsScaledVoltage() {
+        assertEquals(18.0 / 22.0, LauncherConstants.FLYWHEEL_BELTED_SPEED_RATIO, 1e-12);
+        assertEquals(12.0 * 18.0 / 22.0, LauncherSubsystem.beltedMotorVolts(12.0), 1e-9);
+        assertEquals(0.0, LauncherSubsystem.beltedMotorVolts(0.0), 1e-9);
+    }
+
     /** Belt gate: a zero target is never "at speed", and the band is inclusive. */
     @Test
     void atSpeedGate() {

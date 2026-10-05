@@ -56,6 +56,8 @@ public class LauncherSubsystem extends SubsystemBase {
         // Flywheels: WPILib bang-bang on the RIO + 90% feedforward, sent as plain volts.
         private final BangBangController flywheelBangBang = new BangBangController();
         private final VoltageOut flywheelVolts = new VoltageOut(0);
+        // CAN 14 (22T pulley, turns 18/22 as fast as 15): its own scaled voltage, not a Follower.
+        private final VoltageOut beltedVolts = new VoltageOut(0);
         private final VelocityVoltage feederVelocity = new VelocityVoltage(0);
         // "Off" = coast down freely, never VelocityVoltage(0), which would brake the wheels.
         private final CoastOut coast = new CoastOut();
@@ -116,10 +118,16 @@ public class LauncherSubsystem extends SubsystemBase {
             TalonFXConfiguration followerConfig = new TalonFXConfiguration()
                 .withCurrentLimits(flywheelLimits)
                 .withMotorOutput(new MotorOutputConfigs().withNeutralMode(NeutralModeValue.Coast));
-            flywheelBelted.getConfigurator().apply(followerConfig);
+            // 14 is driven directly (see FLYWHEEL_BELTED_SPEED_RATIO): same direction as 15
+            // unless FLYWHEEL_BELTED_OPPOSED, set through its own inversion.
+            flywheelBelted.getConfigurator().apply(new TalonFXConfiguration()
+                .withCurrentLimits(flywheelLimits)
+                .withMotorOutput(new MotorOutputConfigs()
+                    .withNeutralMode(NeutralModeValue.Coast)
+                    .withInverted(LauncherConstants.FLYWHEEL_LEADER_INVERTED ^ LauncherConstants.FLYWHEEL_BELTED_OPPOSED
+                        ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive)));
+            flywheelBelted.setControl(coast);
             flywheelRight.getConfigurator().apply(followerConfig);
-            flywheelBelted.setControl(new Follower(flywheelLeader.getDeviceID(),
-                LauncherConstants.FLYWHEEL_BELTED_OPPOSED ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
             flywheelRight.setControl(new Follower(flywheelLeader.getDeviceID(),
                 LauncherConstants.FLYWHEEL_RIGHT_OPPOSED ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
             flywheelLeader.setControl(coast);
@@ -193,6 +201,11 @@ public class LauncherSubsystem extends SubsystemBase {
             return MathUtil.clamp(volts, 0, LauncherConstants.FLYWHEEL_BANG_BANG_VOLTS);
         }
 
+        /** CAN 14's voltage: the leader's, scaled by its 18/22 speed ratio (22T pulley). */
+        static double beltedMotorVolts(double leaderVolts){
+            return leaderVolts * LauncherConstants.FLYWHEEL_BELTED_SPEED_RATIO;
+        }
+
         /** True only for a nonzero target with the measurement inside the band. */
         static boolean atSpeed(double measured, double target, double tolerance){
             return target != 0 && Math.abs(measured - target) <= tolerance;
@@ -242,9 +255,12 @@ public class LauncherSubsystem extends SubsystemBase {
                     double targetRps = flywheelRpmToMotorRps(flywheelTargetRpm);
                     if (targetRps <= 0) {
                         flywheelLeader.setControl(coast);
+                        flywheelBelted.setControl(coast);
                     } else {
-                        flywheelLeader.setControl(flywheelVolts.withOutput(flywheelBangBangVolts(
-                            flywheelBangBang, flywheelLeader.getVelocity().getValueAsDouble(), targetRps)));
+                        double volts = flywheelBangBangVolts(
+                            flywheelBangBang, flywheelLeader.getVelocity().getValueAsDouble(), targetRps);
+                        flywheelLeader.setControl(flywheelVolts.withOutput(volts));
+                        flywheelBelted.setControl(beltedVolts.withOutput(beltedMotorVolts(volts)));
                     }
                     feeder.setControl(feederVelocity.withVelocity(
                         LauncherConstants.FEEDER_TARGET_MOTOR_RPM / 60.0));
@@ -252,6 +268,7 @@ public class LauncherSubsystem extends SubsystemBase {
                 () -> {
                     shooting = false;
                     flywheelLeader.setControl(coast);
+                    flywheelBelted.setControl(coast);
                     feeder.setControl(coast);
                 });
         }

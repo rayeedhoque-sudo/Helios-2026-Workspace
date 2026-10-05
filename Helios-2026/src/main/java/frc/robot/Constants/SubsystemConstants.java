@@ -237,10 +237,16 @@ public class SubsystemConstants {
                 // TODO verify on robot: spin 15 alone and check it drives the flywheel the
                 // SHOOTING direction; flip this if not.
                 public static final boolean FLYWHEEL_LEADER_INVERTED = false;
-                // Follower alignment relative to 15 [CAD-inferred, NOT verified]: 14 faces the same
-                // way and is belted 1:1 -> Aligned; 13 is mirrored on the other panel -> Opposed.
+                // Direction relative to 15 [CAD-inferred, NOT verified]: 14 faces the same way as
+                // 15 -> same sign; 13 is mirrored on the other panel -> Opposed.
                 // A wrong 14 makes 14 and 15 fight at the current limit -- spin-test first.
                 public static final boolean FLYWHEEL_BELTED_OPPOSED = false;
+                // HARDWARE != CAD (team, 2026-10-05): CAN 14's pulley is 22T, not the CAD's 18T. It
+                // belts to the 18T on 15's shaft, so 14 turns 18/22 = 0.818x as fast as 15. 14 is
+                // therefore NOT a plain follower: it gets the leader's voltage x this ratio, which
+                // puts both motors at the same fraction of free speed so they share the load
+                // instead of 14 pushing while 15 brakes.
+                public static final double FLYWHEEL_BELTED_SPEED_RATIO = 18.0 / 22.0;
                 public static final boolean FLYWHEEL_RIGHT_OPPOSED = true;
 
             //FEEDER (X60 -> 12T:30T = 2.5:1 -> 3 tube rollers)
