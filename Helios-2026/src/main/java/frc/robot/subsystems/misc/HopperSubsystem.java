@@ -11,6 +11,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -175,6 +176,9 @@ public class HopperSubsystem extends SubsystemBase{
             .beforeStarting(() -> setBeltCurrentLimit(HopperSubsystemConstants.HOPPER_MANUAL_CURRENT_LIMIT_A));
     }
 
+    // Shot start reverse (team request 2026-10-05): restarted on every RT press.
+    private final Timer shotReverseTimer = new Timer();
+
     /**
      * SHOT FEED (RT, hold): belts run at HOPPER_SHOT_SPEED only while beltsOn -- the launcher's
      * flywheels AND feeder at speed (team spec 2026-09-30) -- re-checked every loop, so a dip
@@ -185,7 +189,12 @@ public class HopperSubsystem extends SubsystemBase{
     public Command feedShooterCommand(BooleanSupplier beltsOn){
         return runEnd(
             () -> {
-                if (beltsOn.getAsBoolean()) { indexFuelForShot(); } else { stopIndex(); }
+                // First HOPPER_SHOT_REVERSE_SEC of every shot: belts BACKWARD at the unjam duty,
+                // pulling fuel away from the feeder while the wheels spin up. Then the normal
+                // at-speed-gated feed.
+                if (!shotReverseTimer.hasElapsed(HopperSubsystemConstants.HOPPER_SHOT_REVERSE_SEC)) {
+                    setBelts(-HopperSubsystemConstants.UNJAM_SPEED);
+                } else if (beltsOn.getAsBoolean()) { indexFuelForShot(); } else { stopIndex(); }
             },
             () -> {
                 stopIndex();
@@ -193,7 +202,10 @@ public class HopperSubsystem extends SubsystemBase{
             })
             // Raise the belt limit 20% for the shot only (team request 2026-08-22), restored
             // in end() above -- runs once per press, not every loop.
-            .beforeStarting(() -> setBeltCurrentLimit(HopperSubsystemConstants.HOPPER_SHOT_CURRENT_LIMIT_A));
+            .beforeStarting(() -> {
+                setBeltCurrentLimit(HopperSubsystemConstants.HOPPER_SHOT_CURRENT_LIMIT_A);
+                shotReverseTimer.restart();
+            });
     }
 
     /**

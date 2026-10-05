@@ -203,8 +203,8 @@ public class RobotContainer {
         //   X           = manual stow
         //   A (hold)    = manual hopper belts only
         //   VIEW (hold) = unjam: reverse belts + launcher feeder
-        //   RT (hold)   = SHOT: flywheels at the DPAD-set rpm + feeder; belts ONLY while both are
-        //                 at speed; slider extends 0.5 s then stows, repeating (rollers off); drive 10%.
+        //   RT (hold)   = SHOT: flywheels at the DPAD-set rpm + feeder; belts reverse for the first
+        //                 1 s, then run ONLY while both are at speed; slider extends 0.5 s then stows, repeating (rollers off); drive 10%.
         //                 Release: flywheels/feeder coast, slider stows. Hood NOT commanded.
         //   DPAD L/R    = RT flywheel target -/+ 100 flywheel RPM (start 2000, 0-4000)
         //   DPAD UP/DN  = hood target +/- 5 deg (0-30 deg above the bottom stop; the hood

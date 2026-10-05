@@ -171,6 +171,9 @@ public class SubsystemConstants {
                 public static final double HOPPER_SHOT_SPEED = Math.min(1.0, HOPPER_SPEED * 2.0);
                 // Reverse duty for the unjam button (belts, held; the feeder has its own).
                 public static final double UNJAM_SPEED = 0.3;
+                // RT shot: belts run backward at UNJAM_SPEED for this long at the start of every
+                // shot, then feed normally (team request 2026-10-05).
+                public static final double HOPPER_SHOT_REVERSE_SEC = 1.0;
                 // Slow duty for the single-belt direction tests (VIEW / DPAD-DOWN): slow enough
                 // that even a full stall sits well under the 20 A smart limit.
                 public static final double DIRECTION_TEST_SPEED = 0.05;
