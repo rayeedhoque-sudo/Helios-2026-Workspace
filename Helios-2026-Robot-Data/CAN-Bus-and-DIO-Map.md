@@ -18,7 +18,7 @@ Single CAN bus = default roboRIO bus (`rio`, CAN 2.0). Motor models in **bold** 
 | 10 | Front Left Steer | TalonFX | **Kraken X44** | Swerve steer FL |
 | 11 | Front Left Drive | TalonFX | **Kraken X60** | Swerve drive FL |
 | 12 | Front Left CANcoder | CANcoder | — | Swerve azimuth FL |
-| **14** | Launcher flywheel (X60 under 15 on the 4-motor panel, belted 1:1 to 15) | TalonFX | **Kraken X60** | Flywheel follower, Aligned *(CAD-inferred)* |
+| **14** | Launcher flywheel (X60 under 15 on the 4-motor panel; **22T pulley** belted to 15's 18T, so it turns 18/22 as fast) | TalonFX | **Kraken X60** | Driven at 18/22 of 15's voltage, same direction *(CAD-inferred)* |
 | **15** | Launcher flywheel (top X60 on the 4-motor panel) | TalonFX | **Kraken X60** | Flywheel LEADER, 18T→26T |
 | **13** | Launcher flywheel (single X60 on the other panel) | TalonFX | **Kraken X60** | Flywheel follower, Opposed *(CAD-inferred)* |
 | **24** *(team to set in Tuner X)* | Launcher feeder (brand-new X60, lowest on the 4-motor panel) | TalonFX | **Kraken X60** | 3-roller feed, 2.5:1 |

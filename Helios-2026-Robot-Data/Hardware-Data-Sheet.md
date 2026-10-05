@@ -51,7 +51,7 @@ Single CAN bus = default RIO bus (`kCANBus = new CANBus("", "./logs/example.hoot
 | 10 | Front Left Steer | TalonFX | Kraken X44 (`[inferred]`) | Swerve steer FL | `kFrontLeftSteerMotorId` | `[verified-in-code]` |
 | 11 | Front Left Drive | TalonFX | Kraken X60 (`[inferred]`) | Swerve drive FL | `kFrontLeftDriveMotorId` | `[verified-in-code]` |
 | 12 | Front Left CANcoder | CANcoder | — | Swerve azimuth FL | `kFrontLeftEncoderId` | `[verified-in-code]` |
-| **14** | Launcher flywheel L1 (left, belted 1:1 to L2) | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | CAN ID **not assigned yet** (team will provide) |
+| **14** | Launcher flywheel L1 (left, belted to L2) | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | **22T motor pulley (team 2026-10-05; CAD shows 18T)** → turns 18/22 = 0.818× L2; code drives it at 18/22 of the leader voltage (not a follower) |
 | **15** | Launcher flywheel L2 (left, drives flywheel belt) — code leader | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | CAN ID **not assigned yet** |
 | **13** | Launcher flywheel R (right side, mirrored) | TalonFX | **Kraken X60** (`[CAD-v2]`) | Flywheel | — | CAN ID **not assigned yet** |
 | **24** (new; team to set on the device) | Launcher feeder (3-roller tube stack) — replaces the V1 CIM kicker | TalonFX | **Kraken X60** (`[CAD-v2]`) | Feed into flywheel | — | CAN ID **not assigned yet** |
@@ -159,7 +159,7 @@ Single CAN bus = default RIO bus (`kCANBus = new CANBus("", "./logs/example.hoot
 
 | Motor | Model | Drive path | Motor rot : mechanism rot | Tag |
 |---|---|---|---|---|
-| Flywheel L1 | Kraken X60 | 18T SplineXS → **50T belt → 18T on L2's shaft (1:1, motor-to-motor)** — L1 helps drive through L2's pulley | (same as L2) | `[CAD-v2]` |
+| Flywheel L1 (CAN 14) | Kraken X60 | **22T** SplineXS (**hardware, team-stated 2026-10-05 — CAD shows 18T**) → belt → 18T on L2's shaft, so L1 turns **18/22 = 0.818×** L2 | L1 rot : L2 rot = 0.818 : 1 (flywheel ratio unchanged: 26:18 from L2) | `[user-verified]` pulley; belt length not re-checked |
 | Flywheel L2 | Kraken X60 | 18T SplineXS (15 mm) → 60T×8 mm belt → **26T** custom pulley on flywheel shaft | **26:18 = 1.444 : 1** (flywheel slower than motor) | `[CAD-v2]` (generator feature `ptooth1=26, ptooth2=18`) |
 | Flywheel R | Kraken X60 | mirrored on the right side, faces +x; 18T → 60T belt → 26T | **1.444 : 1** | `[CAD-v2]` |
 | Feeder | Kraken X60 | 12T SplineXS → 105T belt → **30T** on the bottom tube roller; 3 tube rollers chained **20T:20T (1:1)** with 40T belts | **30:12 = 2.5 : 1** | `[CAD-v2]` |
