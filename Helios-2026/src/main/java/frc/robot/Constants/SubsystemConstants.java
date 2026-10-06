@@ -234,9 +234,10 @@ public class SubsystemConstants {
                 // Current limits: V1's team-tuned 50 A stator / 25 A supply, per motor (now x3).
                 public static final double FLYWHEEL_STATOR_A = 50;
                 public static final double FLYWHEEL_SUPPLY_A = 25;
-                // TODO verify on robot: spin 15 alone and check it drives the flywheel the
-                // SHOOTING direction; flip this if not.
-                public static final boolean FLYWHEEL_LEADER_INVERTED = false;
+                // Flywheel direction. Flipped false -> true 2026-10-05 (team: the flywheels spun the
+                // wrong way on the robot). 14 inherits this (XOR its own flag) and 13 follows 15's
+                // actual direction, so this one constant reverses all three together.
+                public static final boolean FLYWHEEL_LEADER_INVERTED = true;
                 // Direction relative to 15 [CAD-inferred, NOT verified]: 14 faces the same way as
                 // 15 -> same sign; 13 is mirrored on the other panel -> Opposed.
                 // A wrong 14 makes 14 and 15 fight at the current limit -- spin-test first.
