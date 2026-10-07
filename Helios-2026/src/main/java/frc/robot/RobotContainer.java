@@ -207,7 +207,7 @@ public class RobotContainer {
         //                 1 s, then run ONLY while both are at speed; slider extends 0.5 s then stows, repeating (rollers off); drive 10%.
         //                 Release: flywheels/feeder coast, slider stows. Hood NOT commanded.
         //   DPAD L/R    = RT flywheel target -/+ 100 flywheel RPM (start 2000, 0-4000)
-        //   DPAD UP/DN  = (hold) hood up/down at 15 deg/s (0-30 deg above the bottom stop; the hood
+        //   DPAD UP/DN  = (hold) hood up/down at 1 deg/s (0-30 deg above the bottom stop; the hood
         //                 re-homes on every enable and ignores the DPAD until homed)
         //   MENU        = manual heading re-zero
         //   RB          = UNBOUND for now (V1 auto-aim; needs re-tuning for the V2 hood/flywheel)
