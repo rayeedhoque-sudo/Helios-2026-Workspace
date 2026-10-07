@@ -20,11 +20,11 @@ class LauncherLogicTest {
         assertEquals(2000, LauncherSubsystem.clampFlywheelRpm(LauncherConstants.FLYWHEEL_START_RPM), 1e-9);
     }
 
-    /** Hood: 0 deg (homed bottom stop) to the 30 deg travel limit, nothing outside. */
+    /** Hood: 0 deg (homed bottom stop) to the 29 deg travel limit, nothing outside. */
     @Test
     void hoodTargetIsClamped() {
         assertEquals(0, LauncherSubsystem.clampHoodDeg(-5), 1e-9);
-        assertEquals(30, LauncherSubsystem.clampHoodDeg(35), 1e-9);
+        assertEquals(29, LauncherSubsystem.clampHoodDeg(35), 1e-9);
         assertEquals(15, LauncherSubsystem.clampHoodDeg(15), 1e-9);
     }
 
