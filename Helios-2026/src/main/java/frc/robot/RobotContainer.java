@@ -207,7 +207,7 @@ public class RobotContainer {
         //                 1 s, then run ONLY while both are at speed; slider extends 0.5 s then stows, repeating (rollers off); drive 10%.
         //                 Release: flywheels/feeder coast, slider stows. Hood NOT commanded.
         //   DPAD L/R    = RT flywheel target -/+ 100 flywheel RPM (start 2000, 0-4000)
-        //   DPAD UP/DN  = hood target +/- 5 deg (0-30 deg above the bottom stop; the hood
+        //   DPAD UP/DN  = (hold) hood up/down at 15 deg/s (0-30 deg above the bottom stop; the hood
         //                 re-homes on every enable and ignores the DPAD until homed)
         //   MENU        = manual heading re-zero
         //   RB          = UNBOUND for now (V1 auto-aim; needs re-tuning for the V2 hood/flywheel)
@@ -319,16 +319,16 @@ public class RobotContainer {
                         intakeSS.sliderCycleCommand())
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming))
                 .onFalse(intakeSS.stowCommand());
-            // DPAD LEFT/RIGHT (press) = RT flywheel target -/+ one step. DPAD UP/DOWN (press) =
-            // hood +/- one step. No subsystem requirement, so they work mid-shot.
+            // DPAD LEFT/RIGHT (press) = RT flywheel target -/+ one step. DPAD UP/DOWN (hold) =
+            // hood moves up/down at a constant rate. No subsystem requirement, so they work mid-shot.
             joystick2.povLeft().and(RobotModeTriggers.teleop())
                 .onTrue(launcherSS.stepFlywheelRpmCommand(-LauncherConstants.FLYWHEEL_STEP_RPM));
             joystick2.povRight().and(RobotModeTriggers.teleop())
                 .onTrue(launcherSS.stepFlywheelRpmCommand(LauncherConstants.FLYWHEEL_STEP_RPM));
             joystick2.povUp().and(RobotModeTriggers.teleop())
-                .onTrue(launcherSS.stepHoodCommand(LauncherConstants.HOOD_STEP_DEG));
+                .whileTrue(launcherSS.jogHoodCommand(LauncherConstants.HOOD_JOG_DEG_PER_SEC));
             joystick2.povDown().and(RobotModeTriggers.teleop())
-                .onTrue(launcherSS.stepHoodCommand(-LauncherConstants.HOOD_STEP_DEG));
+                .whileTrue(launcherSS.jogHoodCommand(-LauncherConstants.HOOD_JOG_DEG_PER_SEC));
             // RB: intentionally unbound (team 2026-09-30). The V1 auto-aim binding and its
             // ShooterSubsystem logic are in git history (commit ccd5075) -- both target the V1
             // hood/flywheel and need re-deriving for V2.

@@ -23,6 +23,7 @@ import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -285,11 +286,11 @@ public class LauncherSubsystem extends SubsystemBase {
             return Commands.runOnce(() -> flywheelTargetRpm = clampFlywheelRpm(flywheelTargetRpm + deltaRpm));
         }
 
-        /** DPAD up/down: hood target +/- one step. Ignored unless homed. No requirement. */
-        public Command stepHoodCommand(double deltaDeg){
-            return Commands.runOnce(() -> {
+        /** DPAD up/down (hold): hood target moves at degPerSec while held. Ignored unless homed. No requirement. */
+        public Command jogHoodCommand(double degPerSec){
+            return Commands.run(() -> {
                 if (hoodState == HoodState.HOMED) {
-                    hoodTargetDeg = clampHoodDeg(hoodTargetDeg + deltaDeg);
+                    hoodTargetDeg = clampHoodDeg(hoodTargetDeg + degPerSec * TimedRobot.kDefaultPeriod);
                 }
             });
         }

@@ -264,7 +264,7 @@ public class SubsystemConstants {
             //HOOD (X44 -> 12T:30T -> 10T pinion -> 170T sector = 42.5:1) [CAD-v2; sector teeth unconfirmed]
                 public static final double HOOD_MOTOR_ROT_PER_HOOD_ROT = 2.5 * 17.0;
                 public static final double HOOD_MAX_DEG = 30;   // above the homed bottom stop (team 2026-09-30)
-                public static final double HOOD_STEP_DEG = 5;   // DPAD up/down per press
+                public static final double HOOD_JOG_DEG_PER_SEC = 15; // DPAD up/down hold rate (0->30 in 2 s). TODO tune feel
                 public static final double HOOD_STATOR_A = 20;  // team-approved 2026-09-30
                 public static final double HOOD_SUPPLY_A = 15;
                 // TODO verify on robot: negative output must move the hood DOWN. Watch the first
