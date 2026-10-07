@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.SubsystemConstants.HopperSubsystemConstants;
 import frc.robot.Constants.SubsystemConstants.LauncherConstants;
 
 /**
@@ -77,6 +78,7 @@ public class LauncherSubsystem extends SubsystemBase {
         private boolean wasEnabled = false;
         private double homingStartDeg = 0;
         private final Timer homingTimer = new Timer();
+        private final Timer shotReverseTimer = new Timer(); // restarted at the start of every RT shot
         private Debouncer homingStopDebouncer;
         private Debouncer hoodStallDebouncer;
 
@@ -246,6 +248,7 @@ public class LauncherSubsystem extends SubsystemBase {
         /**
          * RT (hold): flywheels at the DPAD-set rpm and the feeder at its fixed speed, re-read
          * every loop so a DPAD change mid-hold applies at once. Hood is NOT commanded.
+         * First HOPPER_SHOT_REVERSE_SEC: feeder runs backward at FEEDER_SHOT_REVERSE_DUTY instead.
          * Release: both coast down.
          */
         public Command shootCommand(){
@@ -263,15 +266,22 @@ public class LauncherSubsystem extends SubsystemBase {
                         flywheelLeader.setControl(flywheelVolts.withOutput(volts));
                         flywheelBelted.setControl(beltedVolts.withOutput(beltedMotorVolts(volts)));
                     }
-                    feeder.setControl(feederVelocity.withVelocity(
-                        LauncherConstants.FEEDER_TARGET_MOTOR_RPM / 60.0));
+                    // Same window as the hopper's shot reverse: feeder backward super slowly,
+                    // then up to its normal feed speed.
+                    if (!shotReverseTimer.hasElapsed(HopperSubsystemConstants.HOPPER_SHOT_REVERSE_SEC)) {
+                        feeder.set(-LauncherConstants.FEEDER_SHOT_REVERSE_DUTY);
+                    } else {
+                        feeder.setControl(feederVelocity.withVelocity(
+                            LauncherConstants.FEEDER_TARGET_MOTOR_RPM / 60.0));
+                    }
                 },
                 () -> {
                     shooting = false;
                     flywheelLeader.setControl(coast);
                     flywheelBelted.setControl(coast);
                     feeder.setControl(coast);
-                });
+                })
+                .beforeStarting(shotReverseTimer::restart);
         }
 
         /** Feeder backward at a low duty (VIEW unjam, with the hopper belts). */

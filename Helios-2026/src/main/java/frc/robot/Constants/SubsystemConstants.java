@@ -171,8 +171,9 @@ public class SubsystemConstants {
                 public static final double HOPPER_SHOT_SPEED = Math.min(1.0, HOPPER_SPEED * 2.0);
                 // Reverse duty for the unjam button (belts, held; the feeder has its own).
                 public static final double UNJAM_SPEED = 0.3;
-                // RT shot: belts run backward at UNJAM_SPEED for this long at the start of every
-                // shot, then feed normally (team request 2026-10-05).
+                // RT shot: belts run backward at UNJAM_SPEED (and the launcher feeder backward at
+                // FEEDER_SHOT_REVERSE_DUTY) for this long at the start of every shot, then feed
+                // normally (team request 2026-10-05; feeder added 2026-10-07). Tunable.
                 public static final double HOPPER_SHOT_REVERSE_SEC = 1.0;
                 // Slow duty for the single-belt direction tests (VIEW / DPAD-DOWN): slow enough
                 // that even a full stall sits well under the 20 A smart limit.
@@ -259,12 +260,15 @@ public class SubsystemConstants {
                 public static final double FEEDER_SUPPLY_A = 20;
                 public static final double FEEDER_RAMP_SEC = 0.25;
                 public static final double FEEDER_UNJAM_DUTY = 0.3; // same as the old kicker unjam
+                // Feeder duty BACKWARD during the HOPPER_SHOT_REVERSE_SEC window at the start of
+                // every RT shot -- "super slow" (team 2026-10-07). [assumed] TODO tune on robot.
+                public static final double FEEDER_SHOT_REVERSE_DUTY = 0.05;
                 public static final boolean FEEDER_INVERTED = false; // TODO verify feed direction
 
             //HOOD (X44 -> 12T:30T -> 10T pinion -> 170T sector = 42.5:1) [CAD-v2; sector teeth unconfirmed]
                 public static final double HOOD_MOTOR_ROT_PER_HOOD_ROT = 2.5 * 17.0;
                 public static final double HOOD_MAX_DEG = 29;   // above the homed bottom stop. Measured 2026-10-07: hard top = 29.7 deg above the bottom (4.13 -> 33.84 deg); 0.7 deg margin so Motion Magic never drives into the stop
-                public static final double HOOD_JOG_DEG_PER_SEC = 1; // DPAD up/down hold rate (0->30 in 30 s), team 2026-10-07
+                public static final double HOOD_JOG_DEG_PER_SEC = 15; // DPAD up/down hold rate (0->30 in 30 s), team 2026-10-07
                 public static final double HOOD_STATOR_A = 20;  // team-approved 2026-09-30
                 public static final double HOOD_SUPPLY_A = 15;
                 // TODO verify on robot: negative output must move the hood DOWN. Watch the first
