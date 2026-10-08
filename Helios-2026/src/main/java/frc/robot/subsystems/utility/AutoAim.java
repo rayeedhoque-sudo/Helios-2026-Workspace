@@ -55,6 +55,11 @@ public class AutoAim {
         aimValid = false;
     }
 
+    /** RB released: clear "Aimed At Target" so the dashboard never shows a stale true. */
+    public void stop(){
+        aimedEntry.setBoolean(false);
+    }
+
     /**
      * One aim pass. Returns the blue-origin field heading (deg) the drivetrain should face:
      * the filtered hub heading, or the CURRENT heading when there is no target (hold still

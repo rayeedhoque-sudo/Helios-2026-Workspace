@@ -346,7 +346,8 @@ public class RobotContainer {
             // AutoAim.aimHeadingDegrees for the sign history).
             joystick2.rightBumper().and(RobotModeTriggers.teleop())
                 .whileTrue(drivetrain.aimUntilAligned(autoAim::update, () -> false)
-                    .beforeStarting(autoAim::reset));
+                    .beforeStarting(autoAim::reset)
+                    .finallyDo(autoAim::stop));
     }
 
     /**
