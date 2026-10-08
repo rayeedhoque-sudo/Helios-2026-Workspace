@@ -284,10 +284,10 @@ public class LauncherSubsystem extends SubsystemBase {
                 .beforeStarting(shotReverseTimer::restart);
         }
 
-        /** Feeder backward at a low duty (VIEW unjam, with the hopper belts). */
+        /** Feeder backward super slowly (VIEW unjam) -- same duty as the shot's reverse window. */
         public Command feederUnjamCommand(){
             return runEnd(
-                () -> feeder.set(-LauncherConstants.FEEDER_UNJAM_DUTY),
+                () -> feeder.set(-LauncherConstants.FEEDER_SHOT_REVERSE_DUTY),
                 () -> feeder.setControl(coast));
         }
 

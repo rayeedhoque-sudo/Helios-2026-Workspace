@@ -174,7 +174,7 @@ public class SubsystemConstants {
                 // RT shot: belts run backward at UNJAM_SPEED (and the launcher feeder backward at
                 // FEEDER_SHOT_REVERSE_DUTY) for this long at the start of every shot, then feed
                 // normally (team request 2026-10-05; feeder added 2026-10-07). Tunable.
-                public static final double HOPPER_SHOT_REVERSE_SEC = 1.0;
+                public static final double HOPPER_SHOT_REVERSE_SEC = 0.5;
                 // Slow duty for the single-belt direction tests (VIEW / DPAD-DOWN): slow enough
                 // that even a full stall sits well under the 20 A smart limit.
                 public static final double DIRECTION_TEST_SPEED = 0.05;
@@ -259,9 +259,9 @@ public class SubsystemConstants {
                 public static final double FEEDER_STATOR_A = 30; // team-approved 2026-09-30
                 public static final double FEEDER_SUPPLY_A = 20;
                 public static final double FEEDER_RAMP_SEC = 0.25;
-                public static final double FEEDER_UNJAM_DUTY = 0.3; // same as the old kicker unjam
                 // Feeder duty BACKWARD during the HOPPER_SHOT_REVERSE_SEC window at the start of
-                // every RT shot -- "super slow" (team 2026-10-07). [assumed] TODO tune on robot.
+                // every RT shot, and while VIEW unjam is held -- "super slow" (team 2026-10-07).
+                // [assumed] TODO tune on robot.
                 public static final double FEEDER_SHOT_REVERSE_DUTY = 0.05;
                 public static final boolean FEEDER_INVERTED = false; // TODO verify feed direction
 

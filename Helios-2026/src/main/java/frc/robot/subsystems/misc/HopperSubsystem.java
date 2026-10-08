@@ -136,7 +136,7 @@ public class HopperSubsystem extends SubsystemBase{
 
     /**
      * UNJAM: reverse both belts while held, to back a jammed ball out. (The VIEW binding
-     * pairs this with LauncherSubsystem.feederUnjamCommand, as the old kicker reverse did.)
+     * pairs this with LauncherSubsystem.feederUnjamCommand + the intake slider cycle.)
      */
     public Command unjamCommand(){
         return runEnd(

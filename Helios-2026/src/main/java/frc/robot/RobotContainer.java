@@ -202,7 +202,7 @@ public class RobotContainer {
         //   Y (hold)    = outtake (same choreography, rollers out); release = stow
         //   X           = manual stow
         //   A (hold)    = manual hopper belts only
-        //   VIEW (hold) = unjam: reverse belts + launcher feeder
+        //   VIEW (hold) = unjam: reverse belts + feeder (slow) + slider agitation; release = stow
         //   RT (hold)   = SHOT: flywheels at the DPAD-set rpm + feeder; belts (and feeder, slowly) reverse for the first
         //                 HOPPER_SHOT_REVERSE_SEC, then run ONLY while both are at speed; slider extends 0.5 s then stows, repeating (rollers off); drive 10%.
         //                 Release: flywheels/feeder coast, slider stows. Hood NOT commanded.
@@ -298,12 +298,16 @@ public class RobotContainer {
             // A (hold) = MANUAL hopper run: belts ONLY, kicker stays OFF (team spec 2026-08-22).
             // Moved off B 2026-08-29 to give B the feed shot.
             joystick2.a().and(RobotModeTriggers.teleop()).whileTrue(hopperSS.manualRunCommand());
-            // VIEW (hold) = UNJAM: reverse belts + kicker at low duty to back a stuck ball out.
+            // VIEW (hold) = UNJAM: same as the RT shot's reverse window, held -- belts backward,
+            // feeder backward super slowly, slider agitating (team 2026-10-07). Release stows.
             // (Direction-test diagnostics removed 2026-07-18 after the fix was confirmed: the
             // belts were fighting from opposite flashed inversion; both motors now same-sign.)
             // V2: the kicker is gone, so the launcher feeder reverses with the belts instead.
             joystick2.back().and(RobotModeTriggers.teleop())
-                .whileTrue(hopperSS.unjamCommand().alongWith(launcherSS.feederUnjamCommand()));
+                .whileTrue(hopperSS.unjamCommand().alongWith(
+                    launcherSS.feederUnjamCommand(),
+                    intakeSS.sliderCycleCommand()))
+                .onFalse(intakeSS.stowCommand());
 
         //LAUNCHER (V2, team spec 2026-09-30)
             // RT (hold) = SHOT. The launcher spins the flywheels (DPAD-set rpm) and the feeder
