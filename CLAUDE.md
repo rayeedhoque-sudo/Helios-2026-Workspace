@@ -77,6 +77,6 @@ Past sessions kept introducing new bugs while fixing old ones. Every code change
 - **2026-09-30: robot code updated for V2** — `LauncherSubsystem` (flywheels 15/14/13, hood X44 = 18
   homed on every enable, feeder = NEW CAN 24 the team must set in Tuner X), intake roller = 16, RT/DPAD
   controls per the team spec. The V1 `ShooterSubsystem` (incl. RB auto-aim) and other dead code were
-  DELETED 2026-09-30 — recover from git (last present in commit ccd5075) if RB auto-aim is rebuilt. Before first enable, verify on the robot: flywheel follower alignments (14 Aligned,
+  DELETED 2026-09-30 — recover from git (last present in commit ccd5075) if RB auto-aim is rebuilt. **RB auto-aim REBUILT 2026-10-07 as aim-only** (`subsystems/utility/AutoAim.java` + `CommandSwerveDrivetrain.aimUntilAligned`; no shot, RT still shoots) — turn direction still needs an open-space robot check. Before first enable, verify on the robot: flywheel follower alignments (14 Aligned,
   13 Opposed are CAD-inferred), hood homing direction (must move DOWN), feeder/flywheel directions —
   see `Hardware-Data-Sheet.md` §11.0.
