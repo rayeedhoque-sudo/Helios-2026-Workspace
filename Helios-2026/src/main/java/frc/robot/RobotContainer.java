@@ -28,6 +28,7 @@ import frc.robot.subsystems.misc.HopperSubsystem;
 import frc.robot.subsystems.misc.IntakeSubsystem;
 import frc.robot.subsystems.misc.MatchStatus;
 import frc.robot.subsystems.misc.LauncherSubsystem;
+import frc.robot.subsystems.utility.AutoAim;
 import frc.robot.subsystems.utility.LimelightThermalManager;
 
 public class RobotContainer {
@@ -111,9 +112,12 @@ public class RobotContainer {
     // map and rumbles the controller 3-2-1 before each HUB swap. No motors, no bindings.
     private final MatchStatus matchStatus = new MatchStatus(joystick2.getHID());
     // Limelight LED-off + shooter-idle low-res pipeline + Hailo over-temp warning. Auto-runs
-    // via the scheduler; "shooter active" = flywheels commanded to spin (needs full-res ranging).
-    public final LimelightThermalManager limelightThermal =
-        new LimelightThermalManager(Vision.CAM_LIMELIGHT, launcherSS::isShooting);
+    // via the scheduler; "shooter active" = flywheels commanded to spin OR RB auto-aim held
+    // (both need the full-res pipeline).
+    public final LimelightThermalManager limelightThermal = new LimelightThermalManager(
+        Vision.CAM_LIMELIGHT, () -> launcherSS.isShooting() || joystick2.getHID().getRightBumperButton());
+    // RB auto-aim (aim only). Not a subsystem -- the RB drivetrain command drives it.
+    private final AutoAim autoAim = new AutoAim(drivetrain);
 
     public RobotContainer() {
         // Build the auto chooser AFTER the drivetrain constructor has run AutoBuilder.configure.
@@ -210,8 +214,9 @@ public class RobotContainer {
         //   DPAD UP/DN  = (hold) hood up/down at 1 deg/s (0-29 deg above the bottom stop; the hood
         //                 re-homes on every enable and ignores the DPAD until homed)
         //   MENU        = manual heading re-zero
-        //   RB          = UNBOUND for now (V1 auto-aim; needs re-tuning for the V2 hood/flywheel)
-        // REMOVED 2026-09-30: LB hood-to-floor, B feed shot, RB auto-aim, old DPAD trim/hood steps.
+        //   RB (hold)   = AUTO-AIM, aim only: robot pivots in place to face the hub centre
+        //                 (sticks locked out). No shot -- use RT for that, RB + RT together works.
+        // REMOVED 2026-09-30: LB hood-to-floor, B feed shot, old DPAD trim/hood steps.
 
         //DRIVE SUBSYSTEM
             // Note that X is defined as forward according to WPILib convention,
@@ -333,9 +338,15 @@ public class RobotContainer {
                 .whileTrue(launcherSS.jogHoodCommand(LauncherConstants.HOOD_JOG_DEG_PER_SEC));
             joystick2.povDown().and(RobotModeTriggers.teleop())
                 .whileTrue(launcherSS.jogHoodCommand(-LauncherConstants.HOOD_JOG_DEG_PER_SEC));
-            // RB: intentionally unbound (team 2026-09-30). The V1 auto-aim binding and its
-            // ShooterSubsystem logic are in git history (commit ccd5075) -- both target the V1
-            // hood/flywheel and need re-deriving for V2.
+            // RB (hold) = AUTO-AIM, aim only (team 2026-10-07; restored from commit ccd5075
+            // without the V1 hood/flywheel/kicker parts). The drivetrain servos to AutoAim's
+            // hub-centre heading every loop and never self-ends -- release hands the sticks back.
+            // RT doesn't require the drivetrain, so the driver can hold RB and shoot with RT.
+            // TODO verify on robot in open space: robot must turn TOWARD the hub (see
+            // AutoAim.aimHeadingDegrees for the sign history).
+            joystick2.rightBumper().and(RobotModeTriggers.teleop())
+                .whileTrue(drivetrain.aimUntilAligned(autoAim::update, () -> false)
+                    .beforeStarting(autoAim::reset));
     }
 
     /**

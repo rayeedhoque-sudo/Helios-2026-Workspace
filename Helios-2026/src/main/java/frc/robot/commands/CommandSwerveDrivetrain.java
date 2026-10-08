@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
@@ -38,6 +40,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.TunerConstants;
 import frc.robot.Constants.SubsystemConstants.DriveLimitConstants;
+import frc.robot.Constants.SubsystemConstants.AutoAimConstants;
 import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.Constants.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.utility.LimelightHelpers;
@@ -207,6 +210,26 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      */
     public Command applyRequest(Supplier<SwerveRequest> request) {
         return run(() -> this.setControl(request.get()));
+    }
+
+    /**
+     * Rotate IN PLACE (translation 0) toward the live blue-origin targetHeadingDeg, until
+     * aimed reports true (RB passes () -> false, so the hold is what ends it). Restored
+     * 2026-10-07 from commit ccd5075 for the RB auto-aim. Requires the drivetrain, so the
+     * driver's sticks are locked out while it runs.
+     */
+    public Command aimUntilAligned(DoubleSupplier targetHeadingDeg, BooleanSupplier aimed) {
+        var request = new SwerveRequest.FieldCentricFacingAngle();
+        // HeadingController gains default to 0 (no rotation) -- set them. Radians in, rad/s out.
+        request.HeadingController.setPID(
+            AutoAimConstants.HEADING_kP, AutoAimConstants.HEADING_kI, AutoAimConstants.HEADING_kD);
+        request.HeadingController.enableContinuousInput(-Math.PI, Math.PI); // short way round
+        request.MaxAbsRotationalRate = AutoAimConstants.MAX_ROTATION_RAD_PER_SEC;
+        // Blue-origin target -- the OperatorPerspective default would re-rotate it 180 on red.
+        request.ForwardPerspective = SwerveRequest.ForwardPerspectiveValue.BlueAlliance;
+        return this.applyRequest(() ->
+                request.withTargetDirection(Rotation2d.fromDegrees(targetHeadingDeg.getAsDouble())))
+            .until(aimed);
     }
 
     // Low-battery drive cut state (see DriveLimitConstants).

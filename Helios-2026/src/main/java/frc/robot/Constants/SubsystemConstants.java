@@ -27,6 +27,37 @@ public class SubsystemConstants {
             public static final double LOW_BATTERY_LIMIT_SCALE = 0.5;  // "cut in half"
         }
 
+        // RB AUTO-AIM (restored 2026-10-07 from commit ccd5075 -- aim only, no shot). Values
+        // are exactly the last on-robot ones; see that commit for the full tuning history.
+        public static class AutoAimConstants{
+            // Heading servo (SwerveRequest.FieldCentricFacingAngle). Radians in, rad/s out.
+            public static final double HEADING_kP = 5.0;   // TODO tune on robot
+            public static final double HEADING_kI = 0.0;
+            public static final double HEADING_kD = 0.0;
+            public static final double MAX_ROTATION_RAD_PER_SEC = 1.5 * Math.PI; // spin cap
+            // Low-pass filter on the ABSOLUTE target heading (0.25 = ~90% of a step in 8 loops).
+            // Lower if it overshoots/hunts, raise toward 1.0 if too slow. TODO tune on robot.
+            public static final double ROTATION_SCALE = 0.25;
+            // Runaway guard: the commanded turn is clamped so the tag ends no more than this
+            // far off the crosshair -- it can never sweep the tag out of frame.
+            public static final double MAX_TAG_OFFSET_DEG = 20.0;
+            // Only refresh the target while turning slower than this (vision lags a few
+            // frames; a bearing measured mid-turn is stale). TODO tune on robot.
+            public static final double AIM_UPDATE_MAX_DEG_PER_SEC = 30.0;
+            // Viewing-angle compensation (hub centre is behind the tag along the TAG's normal).
+            // SIGN STILL UNVERIFIED ON ROBOT: park off to one side and hold RB -- the aim must
+            // move toward the hub centre. If it moves the wrong way, flip the sign to +1.0.
+            public static final boolean VIEW_ANGLE_COMP_ENABLED = true;
+            public static final double VIEW_ANGLE_SIGN = -1.0;
+            // Keep chasing the last target for this long after the tag drops out; after that,
+            // hold the current heading.
+            public static final double TAG_HOLD_SEC = 1.0;
+            // TEST-ONLY: tag 17 (normally a FEED tag) counts as a scoring tag, like centred tag
+            // 10 (team kept on 2026-10-07 for practice). *** SET FALSE BEFORE COMPETITION ***
+            public static final boolean TEST_TAG_ALIAS_ENABLED = true;
+            public static final int TEST_TAG_ID = 17;
+        }
+
         public static class Vision{
             public static final String CAM_LIMELIGHT = "limelight-knight";
 

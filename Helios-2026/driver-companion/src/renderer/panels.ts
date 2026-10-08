@@ -541,7 +541,7 @@ function renderChooserStatus(): void {
 // KEEP IN SYNC with RobotContainer.java — bindings are not published over NT, so this
 // mirrors the code by hand. RE-SYNCED 2026-09-30 for the V2 launcher (team spec): RT is the
 // shot (DPAD-set flywheel rpm + feeder, belts only at speed, slider cycles, drive at 10%),
-// DPAD ← / → = flywheel rpm, DPAD ↑ / ↓ = hood ±5°, RB unbound. Every binding that no longer
+// DPAD ← / → = flywheel rpm, DPAD ↑ / ↓ = hood ±5°, RB = auto-aim (aim only, 2026-10-07). Every binding that no longer
 // exists was dropped from this table (the old "Removed" history group is gone — git has it).
 // TEST MODE bindings (RobotContainer.configureTestBindings): the SAME physical controller
 // carries a second, mode-gated binding set active ONLY in Driver Station Test mode
@@ -572,7 +572,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
       { btn: 'RT', desc: 'Hold: SHOT — flywheels spin to the DPAD-set speed and the feeder spins up; hopper belts run BACKWARD for the first 1 s, then feed ONLY while both are at speed. The intake slider extends for 0.5 s, pulls back to full stow, and repeats (rollers off). Drive still works at 10% speed. Release = flywheels/feeder coast, slider stows. The hood is not moved by RT' },
       { btn: 'DPAD ← / →', desc: 'Press: flywheel target −/+ 100 flywheel RPM (starts at 2000, range 0–4000). Works mid-shot; resets to 2000 on redeploy' },
       { btn: 'DPAD ↑ / ↓', desc: 'Press: hood up / down 5° (0–30° above the bottom stop). The hood homes itself on every enable and ignores the DPAD until homed — watch “Hood State” on the Shooter tab' },
-      { btn: 'RB', desc: 'Not bound — the old auto-aim shot needs re-tuning for the V2 hood/flywheel', off: 'unbound' },
+      { btn: 'RB', desc: 'Hold: AUTO-AIM (aim only) — robot pivots in place to face the hub centre using the Limelight; sticks locked out while held. Does NOT shoot: hold RT as well to shoot. Watch “Aimed At Target” on the Shooter tab' },
     ],
   },
   {
