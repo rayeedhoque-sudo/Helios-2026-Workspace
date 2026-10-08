@@ -32,7 +32,7 @@ public class IntakeSubsystem extends SubsystemBase {
     
     //State Machine
         public enum IntakeSSTATE{
-            INTAKE_STATE, OUTTAKE_STATE, STOW_STATE;
+            INTAKE_STATE, OUTTAKE_STATE, AGITATE_STATE, STOW_STATE;
         }
     
     //Tracker Variables
@@ -131,8 +131,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
         // True while the rollers are commanded to spin (intake OR outtake) -- the
         // drivetrain reads this to halve its translation speed while the intake is live.
+        // AGITATE (shot/unjam slow roll) does not count -- those set their own drive speed.
         public boolean rollersRunning(){
-            return desiredState != IntakeSSTATE.STOW_STATE;
+            return desiredState == IntakeSSTATE.INTAKE_STATE || desiredState == IntakeSSTATE.OUTTAKE_STATE;
         }
 
         // True while the slider motor is not actually turning (measured encoder rpm, not
@@ -222,18 +223,19 @@ public class IntakeSubsystem extends SubsystemBase {
             );
         }
 
-        // RT SHOT (team spec 2026-09-30): rollers OFF; the slider extends for only
+        // RT SHOT + VIEW UNJAM (team spec 2026-09-30, rollers 2026-10-07): rollers inward at
+        // ROLLER_AGITATE_SPEED (stopped again on end/interrupt); the slider extends for only
         // SLIDER_CYCLE_EXTEND_SEC (a partial stroke, never to the outer stop), then retracts
         // fully to the stow stop, and repeats for the whole hold. Both legs are the same
         // stall-stopped move as extend/retract (pulley-snap guard intact); the extend leg is
         // just cut short by the timeout. The RT binding's onFalse(stowCommand) brings it home.
         public Command sliderCycleCommand(){
             return Commands.sequence(
-                    Commands.runOnce(this::stopRollers),
+                    Commands.runOnce(() -> desiredState = IntakeSSTATE.AGITATE_STATE),
                     Commands.repeatingSequence(
                         extendSliderCommand().withTimeout(IntakeSubsystemConstants.SLIDER_CYCLE_EXTEND_SEC),
                         retractSliderCommand())
-            );
+            ).finallyDo(this::stopRollers);
         }
 
         public Command stowCommand(){
@@ -255,6 +257,9 @@ public class IntakeSubsystem extends SubsystemBase {
                 }
                 else if(desiredState == IntakeSSTATE.OUTTAKE_STATE){
                     outtake();
+                }
+                else if(desiredState == IntakeSSTATE.AGITATE_STATE){
+                    intakeMotor.set(IntakeSubsystemConstants.ROLLER_AGITATE_SPEED);
                 } else {
                     // STOW: actively brake (stopMotor = coast, which reads as "still rolling").
                     intakeMotor.setControl(rollerBrake);
