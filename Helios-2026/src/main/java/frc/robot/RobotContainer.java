@@ -28,7 +28,7 @@ import frc.robot.subsystems.misc.HopperSubsystem;
 import frc.robot.subsystems.misc.IntakeSubsystem;
 import frc.robot.subsystems.misc.MatchStatus;
 import frc.robot.subsystems.misc.LauncherSubsystem;
-import frc.robot.subsystems.utility.AutoAim;
+import frc.robot.subsystems.utility.ShotCalculator;
 import frc.robot.subsystems.utility.LimelightThermalManager;
 
 public class RobotContainer {
@@ -84,7 +84,14 @@ public class RobotContainer {
     // RT shot slowdown (team spec 2026-09-30): while RT is held the drive still works, but at
     // 10% of max -- translation AND rotation. Wins over the intake slowdown.
     private static final double kShotDriveFactor = 0.1;
+    // RB shoot-on-the-move translation cap (team 2026-10-09): 20% of max, ~0.8 m/s. Wins over
+    // both slowdowns above -- RB also runs the launcher, so isShooting() is true during it.
+    // TODO raise once the shot table + flight times are tuned (lead error grows with speed).
+    private static final double kSotmDriveFactor = 0.2;
+    // True while the RB shoot-on-the-move group runs; the default drive aims while it is set.
+    private boolean sotmActive = false;
     private double driveScale() {
+        if (sotmActive) return kSotmDriveFactor;
         if (launcherSS.isShooting()) return kShotDriveFactor;
         return intakeSS.rollersRunning() ? kRollerSlowFactor : 1.0;
     }
@@ -116,8 +123,8 @@ public class RobotContainer {
     // (both need the full-res pipeline).
     public final LimelightThermalManager limelightThermal = new LimelightThermalManager(
         Vision.CAM_LIMELIGHT, () -> launcherSS.isShooting() || joystick2.getHID().getRightBumperButton());
-    // RB auto-aim (aim only). Not a subsystem -- the RB drivetrain command drives it.
-    private final AutoAim autoAim = new AutoAim(drivetrain);
+    // RB shoot-on-the-move solution (virtual target, heading, table rpm/hood), every loop.
+    private final ShotCalculator shotCalc = new ShotCalculator(drivetrain);
 
     public RobotContainer() {
         // Build the auto chooser AFTER the drivetrain constructor has run AutoBuilder.configure.
@@ -214,8 +221,10 @@ public class RobotContainer {
         //   DPAD UP/DN  = (hold) hood up/down at 1 deg/s (0-29 deg above the bottom stop; the hood
         //                 re-homes on every enable and ignores the DPAD until homed)
         //   MENU        = manual heading re-zero
-        //   RB (hold)   = AUTO-AIM, aim only: robot pivots in place to face the hub centre
-        //                 (sticks locked out). No shot -- use RT for that, RB + RT together works.
+        //   RB (hold)   = SHOOT ON THE MOVE: left stick still drives (capped at 20%), the robot
+        //                 faces the lead-corrected hub, flywheel rpm + hood follow the shot
+        //                 table, and the belts feed (RT's choreography) only while aimed, hood
+        //                 at target and flywheels + feeder at speed. RB and RT exclude each other.
         // REMOVED 2026-09-30: LB hood-to-floor, B feed shot, old DPAD trim/hood steps.
 
         //DRIVE SUBSYSTEM
@@ -234,13 +243,22 @@ public class RobotContainer {
                 final java.util.function.DoubleSupplier driveRot =
                     () -> shapeAxis(-joystick2.getRightX()) * MaxAngularRate
                         * (launcherSS.isShooting() ? kShotDriveFactor : 1.0); // Rotate on RIGHT-X, counterclockwise; 10% during RT
+                // While RB runs (sotmActive) the SAME default command swaps to the aim request:
+                // same sticks + slew limiters, heading servoed to the shot. Aiming here instead
+                // of in an RB drivetrain command keeps the limiters continuous (no stop/restart
+                // dip on press or release) and leaves MENU re-zero usable mid-shot.
                 drivetrain.setDefaultCommand(
                     // Drivetrain will execute this command periodically.
-                    drivetrain.applyRequest(() ->
-                        drive.withVelocityX(driveVelX.getAsDouble())
+                    drivetrain.applyRequest(() -> {
+                        if (sotmActive) {
+                            ShotCalculator.Shot shot = shotCalc.getShot();
+                            return drivetrain.faceHeading(driveVelX.getAsDouble(), driveVelY.getAsDouble(),
+                                shot.heading(), shot.headingRateRadPerSec());
+                        }
+                        return drive.withVelocityX(driveVelX.getAsDouble())
                             .withVelocityY(driveVelY.getAsDouble())
-                            .withRotationalRate(driveRot.getAsDouble())
-                    )
+                            .withRotationalRate(driveRot.getAsDouble());
+                    })
                     // Zero the limiters every time the default command (re)starts -- after auto or
                     // any other command releases the drivetrain. SlewRateLimiter
                     // bounds change by rate*elapsed-since-last-calculate, so after a multi-second gap
@@ -338,16 +356,24 @@ public class RobotContainer {
                 .whileTrue(launcherSS.jogHoodCommand(LauncherConstants.HOOD_JOG_DEG_PER_SEC));
             joystick2.povDown().and(RobotModeTriggers.teleop())
                 .whileTrue(launcherSS.jogHoodCommand(-LauncherConstants.HOOD_JOG_DEG_PER_SEC));
-            // RB (hold) = AUTO-AIM, aim only (team 2026-10-07; restored from commit ccd5075
-            // without the V1 hood/flywheel/kicker parts). The drivetrain servos to AutoAim's
-            // hub-centre heading every loop and never self-ends -- release hands the sticks back.
-            // RT doesn't require the drivetrain, so the driver can hold RB and shoot with RT.
-            // TODO verify on robot in open space: robot must turn TOWARD the hub (see
-            // AutoAim.aimHeadingDegrees for the sign history).
+            // RB (hold) = SHOOT ON THE MOVE (redesigned 2026-10-09 after LUNATECS, Ninjas 4744
+            // and 1833). Aiming happens in the default drive while sotmActive (see above). The
+            // group is RT's shot with the table rpm/hood, and the belts also wait for aim + hood.
+            // kCancelIncoming, like RT: whichever of RB/RT is pressed first wins. Release:
+            // flywheels/feeder coast, slider stows, the drive goes back to normal sticks.
+            // TODO verify on robot in open space, Limelight mount pose set first: robot must turn
+            // TOWARD the hub, and the field map must show the robot where it really is.
             joystick2.rightBumper().and(RobotModeTriggers.teleop())
-                .whileTrue(drivetrain.aimUntilAligned(autoAim::update, () -> false)
-                    .beforeStarting(autoAim::reset)
-                    .finallyDo(autoAim::stop));
+                .whileTrue(launcherSS.autoShootCommand(
+                        () -> shotCalc.getShot().flywheelRpm(), () -> shotCalc.getShot().hoodDeg())
+                    .alongWith(
+                        hopperSS.feedShooterCommand(() -> launcherSS.isReadyToFeed()
+                            && launcherSS.isHoodAtTarget() && shotCalc.isAimed()),
+                        intakeSS.sliderCycleCommand())
+                    .beforeStarting(() -> sotmActive = true)
+                    .finallyDo(() -> sotmActive = false)
+                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming))
+                .onFalse(intakeSS.stowCommand());
     }
 
     /**

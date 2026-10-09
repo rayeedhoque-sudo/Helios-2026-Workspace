@@ -1,5 +1,7 @@
 package frc.robot.Constants;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public class SubsystemConstants {
 
@@ -27,35 +29,45 @@ public class SubsystemConstants {
             public static final double LOW_BATTERY_LIMIT_SCALE = 0.5;  // "cut in half"
         }
 
-        // RB AUTO-AIM (restored 2026-10-07 from commit ccd5075 -- aim only, no shot). Values
-        // are exactly the last on-robot ones; see that commit for the full tuning history.
+        // RB SHOOT-ON-THE-MOVE (redesigned 2026-10-09, see ShotCalculator). Replaces the
+        // tag-relative aim-only RB (its filter / tag-hold / view-angle / tag-alias tuning lives
+        // in git history, last present in commit 76fca40).
         public static class AutoAimConstants{
             // Heading servo (SwerveRequest.FieldCentricFacingAngle). Radians in, rad/s out.
-            public static final double HEADING_kP = 5.0;   // TODO tune on robot
+            // kP and the spin cap are the last on-robot values from the aim-only RB.
+            public static final double HEADING_kP = 5.0;   // TODO tune on robot (while moving now)
             public static final double HEADING_kI = 0.0;
             public static final double HEADING_kD = 0.0;
             public static final double MAX_ROTATION_RAD_PER_SEC = 1.5 * Math.PI; // spin cap
-            // Low-pass filter on the ABSOLUTE target heading (0.25 = ~90% of a step in 8 loops).
-            // Lower if it overshoots/hunts, raise toward 1.0 if too slow. TODO tune on robot.
-            public static final double ROTATION_SCALE = 0.25;
-            // Runaway guard: the commanded turn is clamped so the tag ends no more than this
-            // far off the crosshair -- it can never sweep the tag out of frame.
-            public static final double MAX_TAG_OFFSET_DEG = 20.0;
-            // Only refresh the target while turning slower than this (vision lags a few
-            // frames; a bearing measured mid-turn is stale). TODO tune on robot.
-            public static final double AIM_UPDATE_MAX_DEG_PER_SEC = 30.0;
-            // Viewing-angle compensation (hub centre is behind the tag along the TAG's normal).
-            // SIGN STILL UNVERIFIED ON ROBOT: park off to one side and hold RB -- the aim must
-            // move toward the hub centre. If it moves the wrong way, flip the sign to +1.0.
-            public static final boolean VIEW_ANGLE_COMP_ENABLED = true;
-            public static final double VIEW_ANGLE_SIGN = -1.0;
-            // Keep chasing the last target for this long after the tag drops out; after that,
-            // hold the current heading.
-            public static final double TAG_HOLD_SEC = 1.0;
-            // TEST-ONLY: tag 18 (normally a FEED tag) counts as a scoring tag, like centred tag
-            // 10 (team kept on 2026-10-07 for practice). *** SET FALSE BEFORE COMPETITION ***
-            public static final boolean TEST_TAG_ALIAS_ENABLED = true;
-            public static final int TEST_TAG_ID = 18;
+            // Rotation feedforward = this x the rate the hub bearing changes as the robot
+            // drives. 1.0 = the exact geometric rate; lower it if the heading overshoots.
+            public static final double HEADING_RATE_FF_SCALE = 1.0; // TODO tune on robot
+            // Virtual-target refinement passes (LUNATECS 10, Ninjas/1833 5; converges in ~3).
+            public static final int VIRTUAL_TARGET_ITERATIONS = 5;
+            // Launcher position from robot centre, robot frame (x fwd, y left), metres. Team
+            // 2026-10-09: ball leaves along robot +X (shooter side = front), on the centreline.
+            public static final Translation2d ROBOT_TO_LAUNCHER_METERS = new Translation2d(0.0, 0.0); // TODO measure on robot
+
+            // SHOT TABLES, keyed on distance launcher -> hub centre (m). Between rows the value
+            // is interpolated; past the ends it holds the end row.
+            // *** ALL ROWS ARE [placeholder] -- NO V2 SHOT DATA EXISTS YET (V1 tables are invalid
+            // for V2, data sheet sec.4.2). *** Flat rpm/hood = RT's start rpm and the homed
+            // bottom stop, so RB never spins or tilts further than the team already runs.
+            // HOW TO TUNE: park at a distance (read "Shot Distance (m)" on the Shooter tab), find
+            // the rpm + hood that score using RT + DPAD, add a row here. Time of flight: film a
+            // shot at 240 fps, count frames from leaving the wheel to entering the hub.
+            public static final InterpolatingDoubleTreeMap SHOT_RPM_BY_DISTANCE = new InterpolatingDoubleTreeMap();
+            public static final InterpolatingDoubleTreeMap SHOT_HOOD_DEG_BY_DISTANCE = new InterpolatingDoubleTreeMap();
+            public static final InterpolatingDoubleTreeMap TIME_OF_FLIGHT_SEC_BY_DISTANCE = new InterpolatingDoubleTreeMap();
+            static {
+                SHOT_RPM_BY_DISTANCE.put(1.0, 2000.0);       // TODO [placeholder] flywheel rpm
+                SHOT_RPM_BY_DISTANCE.put(6.0, 2000.0);       // TODO [placeholder]
+                SHOT_HOOD_DEG_BY_DISTANCE.put(1.0, 0.0);     // TODO [placeholder] deg above bottom stop
+                SHOT_HOOD_DEG_BY_DISTANCE.put(6.0, 0.0);     // TODO [placeholder]
+                // ~1 s is what the three reference robots measured at 2-4 m -- NOT Helios data.
+                TIME_OF_FLIGHT_SEC_BY_DISTANCE.put(1.0, 1.0); // TODO [placeholder] measure
+                TIME_OF_FLIGHT_SEC_BY_DISTANCE.put(6.0, 1.0); // TODO [placeholder] measure
+            }
         }
 
         public static class Vision{
@@ -332,6 +344,6 @@ public class SubsystemConstants {
                 public static final double HOOD_STALL_DEBOUNCE_SEC = 0.5;
                 public static final double HOOD_STALL_MIN_ERROR_DEG = 3.0;
                 public static final double HOOD_STALL_MAX_SPEED_DEG_PER_SEC = 2.0;
-                public static final double HOOD_REACHED_TOL_DEG = 1.0;   // dashboard "reached" only
+                public static final double HOOD_REACHED_TOL_DEG = 1.0;   // dashboard "reached" + the RB feed gate. TODO widen if RB waits on the hood
         }
 }

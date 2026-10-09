@@ -4,8 +4,6 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
@@ -212,24 +210,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return run(() -> this.setControl(request.get()));
     }
 
-    /**
-     * Rotate IN PLACE (translation 0) toward the live blue-origin targetHeadingDeg, until
-     * aimed reports true (RB passes () -> false, so the hold is what ends it). Restored
-     * 2026-10-07 from commit ccd5075 for the RB auto-aim. Requires the drivetrain, so the
-     * driver's sticks are locked out while it runs.
-     */
-    public Command aimUntilAligned(DoubleSupplier targetHeadingDeg, BooleanSupplier aimed) {
-        var request = new SwerveRequest.FieldCentricFacingAngle();
+    // RB shoot-on-the-move heading servo, reused every loop (see faceHeading).
+    private final SwerveRequest.FieldCentricFacingAngle m_faceHeading = new SwerveRequest.FieldCentricFacingAngle()
+        .withDriveRequestType(DriveRequestType.Velocity) // same closed-loop drive as the default drive
+        .withMaxAbsRotationalRate(AutoAimConstants.MAX_ROTATION_RAD_PER_SEC);
+    {
         // HeadingController gains default to 0 (no rotation) -- set them. Radians in, rad/s out.
-        request.HeadingController.setPID(
+        m_faceHeading.HeadingController.setPID(
             AutoAimConstants.HEADING_kP, AutoAimConstants.HEADING_kI, AutoAimConstants.HEADING_kD);
-        request.HeadingController.enableContinuousInput(-Math.PI, Math.PI); // short way round
-        request.MaxAbsRotationalRate = AutoAimConstants.MAX_ROTATION_RAD_PER_SEC;
-        // Blue-origin target -- the OperatorPerspective default would re-rotate it 180 on red.
-        request.ForwardPerspective = SwerveRequest.ForwardPerspectiveValue.BlueAlliance;
-        return this.applyRequest(() ->
-                request.withTargetDirection(Rotation2d.fromDegrees(targetHeadingDeg.getAsDouble())))
-            .until(aimed);
+        m_faceHeading.HeadingController.enableContinuousInput(-Math.PI, Math.PI); // short way round
+    }
+
+    /**
+     * Drive with the sticks (same OPERATOR-perspective m/s as the default FieldCentric drive)
+     * while the heading servos to a BLUE-ORIGIN heading, plus a rate feedforward (rad/s).
+     * Phoenix rotates TargetDirection by the operator-forward direction in this perspective
+     * (javap-checked, Phoenix 26.1.0), so the blue heading is handed over minus that rotation.
+     */
+    public SwerveRequest faceHeading(double vxMetersPerSec, double vyMetersPerSec,
+            Rotation2d blueHeading, double rateFeedforwardRadPerSec) {
+        return m_faceHeading
+            .withVelocityX(vxMetersPerSec)
+            .withVelocityY(vyMetersPerSec)
+            .withTargetDirection(blueHeading.minus(getOperatorForwardDirection()))
+            .withTargetRateFeedforward(rateFeedforwardRadPerSec);
     }
 
     // Low-battery drive cut state (see DriveLimitConstants).

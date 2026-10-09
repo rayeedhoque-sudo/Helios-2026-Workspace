@@ -18,6 +18,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.filter.Debouncer;
@@ -69,10 +71,12 @@ public class LauncherSubsystem extends SubsystemBase {
         private final NeutralOut hoodNeutral = new NeutralOut(); // Brake neutral holds the hood
 
     //State
-        private double flywheelTargetRpm = LauncherConstants.FLYWHEEL_START_RPM;
+        private double flywheelTargetRpm = LauncherConstants.FLYWHEEL_START_RPM; // DPAD-set RT target
+        private double shotTargetRpm = 0; // what the running shot (RT or RB) is chasing
         private boolean shooting = false;
         private boolean flywheelAtSpeed = false;
         private boolean feederAtSpeed = false;
+        private boolean hoodAtTarget = false;
         private HoodState hoodState = HoodState.WAITING_FOR_ENABLE;
         private double hoodTargetDeg = 0;
         private boolean wasEnabled = false;
@@ -235,6 +239,8 @@ public class LauncherSubsystem extends SubsystemBase {
         public boolean isShooting(){ return shooting; }
         /** Belt gate: flywheels AND feeder at speed (team spec 2026-09-30). */
         public boolean isReadyToFeed(){ return flywheelAtSpeed && feederAtSpeed; }
+        /** Hood homed and within HOOD_REACHED_TOL_DEG of its target (RB feed gate). */
+        public boolean isHoodAtTarget(){ return hoodAtTarget; }
 
         private double getFlywheelRpm(){
             return motorRpsToFlywheelRpm(flywheelLeader.getVelocity().getValueAsDouble());
@@ -252,11 +258,30 @@ public class LauncherSubsystem extends SubsystemBase {
          * Release: both coast down.
          */
         public Command shootCommand(){
+            return shootCommand(() -> flywheelTargetRpm);
+        }
+
+        /**
+         * RB shoot-on-the-move: the same shot as RT, but the flywheel rpm AND the hood target
+         * follow the shot table every loop. Hood moves only once homed; it stays where the
+         * table left it after release (DPAD jogs on from there).
+         */
+        public Command autoShootCommand(DoubleSupplier flywheelRpm, DoubleSupplier hoodDeg){
+            return shootCommand(flywheelRpm).alongWith(Commands.run(() -> {
+                if (hoodState == HoodState.HOMED) {
+                    hoodTargetDeg = clampHoodDeg(hoodDeg.getAsDouble());
+                }
+            }));
+        }
+
+        // The shot body: flywheels at targetRpm (re-read every loop), feeder per the reverse window.
+        private Command shootCommand(DoubleSupplier targetRpm){
             return runEnd(
                 () -> {
                     shooting = true;
+                    shotTargetRpm = clampFlywheelRpm(targetRpm.getAsDouble());
                     // Bang-bang every loop; a 0 target coasts instead (0 V would still be a command).
-                    double targetRps = flywheelRpmToMotorRps(flywheelTargetRpm);
+                    double targetRps = flywheelRpmToMotorRps(shotTargetRpm);
                     if (targetRps <= 0) {
                         flywheelLeader.setControl(coast);
                         flywheelBelted.setControl(coast);
@@ -356,26 +381,27 @@ public class LauncherSubsystem extends SubsystemBase {
         //At-speed gates (only meaningful while shooting)
             double flywheelRpm = getFlywheelRpm();
             double feederRpm = feeder.getVelocity().getValueAsDouble() * 60.0;
-            flywheelAtSpeed = shooting && atSpeed(flywheelRpm, flywheelTargetRpm,
+            flywheelAtSpeed = shooting && atSpeed(flywheelRpm, shotTargetRpm,
                 LauncherConstants.FLYWHEEL_AT_SPEED_TOL_RPM);
             feederAtSpeed = shooting && atSpeed(feederRpm, LauncherConstants.FEEDER_TARGET_MOTOR_RPM,
                 LauncherConstants.FEEDER_TARGET_MOTOR_RPM * LauncherConstants.FEEDER_AT_SPEED_FRACTION);
 
         //Data
-            targetRpmEntry.setDouble(flywheelTargetRpm);
+            targetRpmEntry.setDouble(shooting ? shotTargetRpm : flywheelTargetRpm);
             rpmEntry.setDouble(flywheelRpm);
             atSpeedEntry.setBoolean(flywheelAtSpeed);
             shootingEntry.setBoolean(shooting);
             motorRpmEntry.setDouble(flywheelLeader.getVelocity().getValueAsDouble() * 60.0);
-            motorTargetRpmEntry.setDouble(flywheelRpmToMotorRps(flywheelTargetRpm) * 60.0);
+            motorTargetRpmEntry.setDouble(flywheelRpmToMotorRps(shooting ? shotTargetRpm : flywheelTargetRpm) * 60.0);
             feederRpmEntry.setDouble(feederRpm);
             feederAtSpeedEntry.setBoolean(feederAtSpeed);
             readyToFeedEntry.setBoolean(isReadyToFeed());
             hoodStateEntry.setString(hoodState.name());
             hoodAngleEntry.setDouble(hoodDeg);
             hoodTargetEntry.setDouble(hoodTargetDeg);
-            hoodReachedEntry.setBoolean(hoodState == HoodState.HOMED
-                && Math.abs(hoodDeg - hoodTargetDeg) <= LauncherConstants.HOOD_REACHED_TOL_DEG);
+            hoodAtTarget = hoodState == HoodState.HOMED
+                && Math.abs(hoodDeg - hoodTargetDeg) <= LauncherConstants.HOOD_REACHED_TOL_DEG;
+            hoodReachedEntry.setBoolean(hoodAtTarget);
             hoodAmpsEntry.setDouble(hoodAmps);
             hoodVoltsEntry.setDouble(hood.getMotorVoltage().getValueAsDouble());
             hoodRawEntry.setDouble(hood.getRotorPosition().getValueAsDouble());

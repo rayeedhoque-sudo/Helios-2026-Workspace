@@ -4,7 +4,6 @@ package frc.robot.Constants;
 import com.pathplanner.lib.util.FlippingUtil;
 
 import java.util.Optional;
-import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -68,49 +67,18 @@ public class FieldConstants {
             return Optional.empty();
         }
 
-    //RB AUTO-AIM GEOMETRY (restored 2026-10-07 from commit ccd5075, values unchanged)
+    //RB SHOOT-ON-THE-MOVE GEOMETRY (hub centres unchanged from commit ccd5075)
         // Geometric hub centers = midpoints of the 4 tag face planes. NOT the mean of the 8 tag
         // positions -- the tags sit pinwheel-asymmetric on the faces (shot-math spec 1.1).
         public static final Translation2d HUB_CENTER_BLUE = new Translation2d(4.6255, 4.0346);
         public static final Translation2d HUB_CENTER_RED = new Translation2d(11.9155, 4.0346);
 
-        // Tag partition (team spec 2026-07-16). Auto-aim only uses OUR alliance's SCORE tags
-        // (never the opponent hub); FEED_TAGS is kept only so the tag-17 alias test can pin it.
-        public static final Set<Integer> FEED_TAGS = Set.of(1, 3, 4, 6, 17, 19, 20, 22);
-        public static final Set<Integer> SCORE_TAGS_RED = Set.of(2, 5, 8, 9, 10, 11);
-        public static final Set<Integer> SCORE_TAGS_BLUE = Set.of(18, 21, 24, 25, 26, 27);
-
-        // Every hub tag plane is 0.6035 m in front of the hub center along its inward normal;
-        // on each face one tag is centered and one is offset 0.3556 m to a side.
-        public static final double TAG_FACE_TO_HUB_DEPTH_METERS = 0.6035;
-        public static final double TAG_LATERAL_OFFSET_METERS = 0.3556;
-        // Per-tag sign (measured from the 2026 layout, NOT global -- the tags are pinwheel-
-        // asymmetric). Positive = hub centre to the RIGHT in the camera image of a robot facing
-        // that tag. Centred tags (2, 4, 5, 10, 18, 20, 21, 26) are absent = 0.
-        public static final java.util.Map<Integer, Double> TAG_LATERAL_OFFSET_SIGN_BY_TAG =
-            java.util.Map.of(
-                3, +1.0,  9, +1.0, 11, +1.0,   // red hub: hub centre to the camera's right
-                8, -1.0,                        // red hub: the mirrored one -- hub centre LEFT
-                19, +1.0, 25, +1.0, 27, +1.0,   // blue hub
-                24, -1.0);                      // blue hub: the mirrored one
-
-        // "Aimed At Target" dashboard tolerance (shot-math spec 6).
+        // "Aimed At Target" tolerance (shot-math spec 6) -- RB only feeds inside it. TODO tune
+        // on robot: widen if RB rarely fires while moving.
         public static final double HEADING_TOLERANCE_DEG = 2.0;
 
         // Own hub center.
         public static Translation2d ownHubCenter(Alliance alliance) {
             return alliance == Alliance.Red ? HUB_CENTER_RED : HUB_CENTER_BLUE;
-        }
-
-        // The SCORE tag set for the given alliance (never aim at the opponent hub).
-        public static Set<Integer> ownScoreTags(Alliance alliance) {
-            return alliance == Alliance.Red ? SCORE_TAGS_RED : SCORE_TAGS_BLUE;
-        }
-
-        // Signed lateral offset (m) to ADD TO CAMERA X to go from the tag to its hub centre.
-        // 0 for a centred tag and for anything not on a hub.
-        public static double tagLateralOffsetMeters(int tagId) {
-            return TAG_LATERAL_OFFSET_SIGN_BY_TAG.getOrDefault(tagId, 0.0)
-                * TAG_LATERAL_OFFSET_METERS;
         }
 }
