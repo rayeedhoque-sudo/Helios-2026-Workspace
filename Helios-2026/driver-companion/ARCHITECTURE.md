@@ -37,6 +37,7 @@ FROZEN — see that section). Follow-up agents fill panel **internals only** (th
 | `src/renderer/panels.ts` | done | power, mechanisms, auto-chooser panels + the vision strip in the Limelight panel |
 | `src/renderer/shooter.ts` | done | shooter diagnostic panel (live hood angle + derived last-move/drift/rate, live flywheel RPM); read-only NT |
 | `src/renderer/limelight.ts` | done | MJPEG stream + overlay panel |
+| `src/renderer/planner.ts` | done | Path Planner panel: vendored BLine Web editor (`vendor/bline-web` → `dist/bline-web`) in an iframe; offline |
 | `src/renderer/deploy.ts` | done | deploy panel (button, live log, status) |
 | `src/main/deploy.ts` | done | `gradlew deploy` child-process spawn/cancel/quit-kill |
 

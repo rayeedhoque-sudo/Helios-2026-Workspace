@@ -19,6 +19,7 @@ import { mountPowerBars, mountMechanisms, mountAutoChooser, mountControls } from
 import { mountDeploy } from './deploy';
 import { mountMotorRecorder } from './recorder';
 import { mountShooter } from './shooter';
+import { mountPathPlanner } from './planner';
 
 export interface PanelDef {
   /** Stable id — dockview panel id + layout key. FROZEN; never rename. */
@@ -42,6 +43,7 @@ export const PANELS: readonly PanelDef[] = [
   { id: 'controls', title: 'Controls', mount: mountControls },
   { id: 'motor-recorder', title: 'Motor Recorder', mount: mountMotorRecorder }, // starts closed — open via "+ Panels"
   { id: 'shooter', title: 'Shooter', mount: mountShooter }, // starts closed — open via "+ Panels"
+  { id: 'path-planner', title: 'Path Planner', mount: mountPathPlanner }, // starts closed — open via "+ Panels"
 
 ];
 
