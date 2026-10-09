@@ -85,3 +85,5 @@ Past sessions kept introducing new bugs while fixing old ones. Every code change
   `forward-3m-left-3m` from RIGHT_TRENCH. BLine paths are ABSOLUTE field coords — the follower refuses to run unless
   the companion start spot matches the path start. Author paths at https://bline-web.pages.dev/ (its own default
   limits are 4.5 m/s / 12 m/s² — keep `config.json` as the source of truth). Gains 5/3/2 untuned; no stall abort.
+  Every `deploy/autos/paths/*.json` is auto-added to the chooser (labelled with its start spot); `BLinePathTest` fails
+  the build if any path doesn't parse or doesn't begin at a `FieldConstants.StartSpot`. Companion tab: "Path Planner".

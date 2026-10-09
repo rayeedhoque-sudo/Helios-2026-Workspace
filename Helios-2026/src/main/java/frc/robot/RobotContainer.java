@@ -6,12 +6,17 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -96,6 +101,18 @@ public class RobotContainer {
     }
 
     /** Deadband the raw stick, then square it (sign-preserving) for finer low-speed control. */
+    /** Names (without .json) of the BLine path files in a folder, sorted; empty if the folder is missing. */
+    public static List<String> blinePathNames(File pathsDir) {
+        File[] files = pathsDir.listFiles((dir, n) -> n.endsWith(".json"));
+        if (files == null) {
+            return List.of();
+        }
+        return Arrays.stream(files)
+            .map(f -> f.getName().substring(0, f.getName().length() - ".json".length()))
+            .sorted()
+            .toList();
+    }
+
     private static double shapeAxis(double raw) {
         double v = MathUtil.applyDeadband(raw, 0.1);
         return Math.copySign(v * v, v);
@@ -179,15 +196,18 @@ public class RobotContainer {
                                         .finallyDo(intakeSS::stopRollers)))
                         .andThen(intakeSS.stowCommand())
                         .andThen(drivetrain.resetAutoEndTranslation()));
-        // BLine test path (team 2026-10-09): same two legs, but a field-coordinate path from the
-        // RIGHT_TRENCH start spot (deploy/autos/paths). Pick RIGHT_TRENCH on the companion or it
-        // refuses to move. A bad/missing file reports to the DS instead of crashing boot.
-        try {
-            Path blineTest = new Path("forward-3m-left-3m");
-            autoChooser.addOption("BLine: Forward 3 m then Left 3 m (RIGHT_TRENCH)",
-                    drivetrain.followBLinePath(blineTest));
-        } catch (RuntimeException e) {
-            DriverStation.reportError("BLine path failed to load: " + e.getMessage(), e.getStackTrace());
+        // BLine paths (team 2026-10-09): every deploy/autos/paths/*.json is added automatically,
+        // labelled with the companion start spot it begins at. Pick that spot or the path refuses
+        // to move. A bad file reports to the DS and is skipped instead of crashing boot.
+        for (String name : blinePathNames(new File(Filesystem.getDeployDirectory(), "autos/paths"))) {
+            try {
+                Path path = new Path(name);
+                String spot = CommandSwerveDrivetrain.startSpotFor(path);
+                autoChooser.addOption("BLine: " + name + " (" + (spot != null ? spot : "NO START SPOT - won't run") + ")",
+                        drivetrain.followBLinePath(path));
+            } catch (RuntimeException e) {
+                DriverStation.reportError("BLine path '" + name + "' failed to load: " + e.getMessage(), e.getStackTrace());
+            }
         }
         SmartDashboard.putData("Auto Chooser", autoChooser);
 

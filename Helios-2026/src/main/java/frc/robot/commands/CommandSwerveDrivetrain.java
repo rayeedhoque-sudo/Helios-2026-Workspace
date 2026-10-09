@@ -508,6 +508,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }, Set.of(this));
     }
 
+    /** Name of the companion start spot this path begins at (blue side), or null if none matches. */
+    public static String startSpotFor(Path path) {
+        for (FieldConstants.StartSpot spot : FieldConstants.StartSpot.values()) {
+            if (startSpotMatchesPath(path, false, Optional.of(spot.bluePose))) {
+                return spot.name();
+            }
+        }
+        return null;
+    }
+
     /** Pure check: is the start spot within tolerance of the path's (alliance-flipped) first point? */
     static boolean startSpotMatchesPath(Path path, boolean red, Optional<Pose2d> startSpot) {
         if (startSpot.isEmpty() || !path.isValid()) {

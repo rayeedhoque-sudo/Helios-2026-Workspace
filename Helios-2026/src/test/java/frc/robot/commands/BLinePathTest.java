@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -12,11 +13,12 @@ import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.hal.HAL;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.RobotContainer;
 import frc.robot.lib.BLine.Path;
 
 /**
- * Proves the BLine files in src/main/deploy/autos parse at the desk, and pins the
- * start-spot guard (CommandSwerveDrivetrain.startSpotMatchesPath).
+ * Proves every BLine file in src/main/deploy/autos parses at the desk and begins at a companion
+ * start spot (the robot auto-adds them all to the chooser), and pins the start-spot guard.
  */
 public class BLinePathTest {
     private static Path path;
@@ -49,5 +51,20 @@ public class BLinePathTest {
             FieldConstants.startPose("RIGHT_TRENCH", false)), "blue spot on red refuses");
         assertFalse(CommandSwerveDrivetrain.startSpotMatchesPath(path, false, Optional.empty()),
             "no pick refuses");
+    }
+
+    @Test
+    void everyDeployedPathParsesAndStartsAtAStartSpot() {
+        File autos = new File("src/main/deploy/autos");
+        var names = RobotContainer.blinePathNames(new File(autos, "paths"));
+        assertTrue(names.contains("forward-3m-left-3m"), "lister finds the deployed paths");
+        for (String name : names) {
+            Path p = new Path(autos, name);
+            assertTrue(p.isValid(), name + " is a valid path");
+            assertNotNull(CommandSwerveDrivetrain.startSpotFor(p),
+                name + " must begin within 0.5 m of a FieldConstants.StartSpot, or it can never run");
+        }
+        assertEquals("RIGHT_TRENCH", CommandSwerveDrivetrain.startSpotFor(path));
+        assertTrue(RobotContainer.blinePathNames(new File(autos, "missing")).isEmpty(), "no folder = no paths");
     }
 }
