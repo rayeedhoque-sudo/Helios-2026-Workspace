@@ -88,10 +88,8 @@ public class RobotContainer {
     // both slowdowns above -- RB also runs the launcher, so isShooting() is true during it.
     // TODO raise once the shot table + flight times are tuned (lead error grows with speed).
     private static final double kSotmDriveFactor = 0.2;
-    // True while the RB shoot-on-the-move group runs; the default drive aims while it is set.
-    private boolean sotmActive = false;
     private double driveScale() {
-        if (sotmActive) return kSotmDriveFactor;
+        if (shotCalc.isActive()) return kSotmDriveFactor;
         if (launcherSS.isShooting()) return kShotDriveFactor;
         return intakeSS.rollersRunning() ? kRollerSlowFactor : 1.0;
     }
@@ -243,14 +241,14 @@ public class RobotContainer {
                 final java.util.function.DoubleSupplier driveRot =
                     () -> shapeAxis(-joystick2.getRightX()) * MaxAngularRate
                         * (launcherSS.isShooting() ? kShotDriveFactor : 1.0); // Rotate on RIGHT-X, counterclockwise; 10% during RT
-                // While RB runs (sotmActive) the SAME default command swaps to the aim request:
+                // While RB runs (shotCalc.isActive()) the SAME default command swaps to the aim request:
                 // same sticks + slew limiters, heading servoed to the shot. Aiming here instead
                 // of in an RB drivetrain command keeps the limiters continuous (no stop/restart
                 // dip on press or release) and leaves MENU re-zero usable mid-shot.
                 drivetrain.setDefaultCommand(
                     // Drivetrain will execute this command periodically.
                     drivetrain.applyRequest(() -> {
-                        if (sotmActive) {
+                        if (shotCalc.isActive()) {
                             ShotCalculator.Shot shot = shotCalc.getShot();
                             return drivetrain.faceHeading(driveVelX.getAsDouble(), driveVelY.getAsDouble(),
                                 shot.heading(), shot.headingRateRadPerSec());
@@ -357,7 +355,7 @@ public class RobotContainer {
             joystick2.povDown().and(RobotModeTriggers.teleop())
                 .whileTrue(launcherSS.jogHoodCommand(-LauncherConstants.HOOD_JOG_DEG_PER_SEC));
             // RB (hold) = SHOOT ON THE MOVE (redesigned 2026-10-09 after LUNATECS, Ninjas 4744
-            // and 1833). Aiming happens in the default drive while sotmActive (see above). The
+            // and 1833). Aiming happens in the default drive while shotCalc is active (see above). The
             // group is RT's shot with the table rpm/hood, and the belts also wait for aim + hood.
             // kCancelIncoming, like RT: whichever of RB/RT is pressed first wins. Release:
             // flywheels/feeder coast, slider stows, the drive goes back to normal sticks.
@@ -370,8 +368,8 @@ public class RobotContainer {
                         hopperSS.feedShooterCommand(() -> launcherSS.isReadyToFeed()
                             && launcherSS.isHoodAtTarget() && shotCalc.isAimed()),
                         intakeSS.sliderCycleCommand())
-                    .beforeStarting(() -> sotmActive = true)
-                    .finallyDo(() -> sotmActive = false)
+                    .beforeStarting(() -> shotCalc.setActive(true))
+                    .finallyDo(() -> shotCalc.setActive(false))
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming))
                 .onFalse(intakeSS.stowCommand());
     }

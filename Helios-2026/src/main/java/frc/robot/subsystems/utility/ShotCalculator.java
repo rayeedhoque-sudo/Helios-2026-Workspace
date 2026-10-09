@@ -36,6 +36,7 @@ public class ShotCalculator extends SubsystemBase {
     private final CommandSwerveDrivetrain drivetrain;
     private Shot shot = new Shot(Translation2d.kZero, 0, Rotation2d.kZero, 0, 0, 0);
     private boolean aimed = false;
+    private boolean active = false; // RB group running
     private boolean allianceWarned = false;
 
     private final ShuffleboardTab tab = Shuffleboard.getTab("Shooter Subsystem Tab");
@@ -55,6 +56,10 @@ public class ShotCalculator extends SubsystemBase {
     /** Robot heading within HEADING_TOLERANCE_DEG of the shot heading. */
     public boolean isAimed(){ return aimed; }
 
+    /** RB shoot-on-the-move running: the default drive aims, and the dashboard shows "Aimed". */
+    public boolean isActive(){ return active; }
+    public void setActive(boolean active){ this.active = active; }
+
     @Override
     public void periodic(){
         var state = drivetrain.getState();
@@ -62,7 +67,8 @@ public class ShotCalculator extends SubsystemBase {
         double errorDeg = shot.heading().minus(state.Pose.getRotation()).getDegrees();
         aimed = Math.abs(errorDeg) <= FieldConstants.HEADING_TOLERANCE_DEG;
 
-        aimedEntry.setBoolean(aimed);
+        // Only while RB runs, so the dashboard never shows a stale true (team, commit 5a1a852).
+        aimedEntry.setBoolean(active && aimed);
         distanceEntry.setDouble(shot.distanceMeters());
         headingErrorEntry.setDouble(errorDeg);
         tableRpmEntry.setDouble(shot.flywheelRpm());
