@@ -190,9 +190,10 @@ public class SubsystemConstants {
                 // Inrush softened by the duty-cycle ramp.
                 public static final double INTAKE_SPEED = 0.254;    // driver-tuned on robot 2026-08-28
                 public static final double OUTTAKE_SPEED = 0.360;   // driver-tuned on robot 2026-08-28
-                // Rollers INWARD at this duty during the RT shot and VIEW unjam (team 2026-10-07:
-                // "5% or as slow as possible"). Stall worst case ~0.05 x 40 A stator = 2 A. TODO tune.
-                public static final double ROLLER_AGITATE_SPEED = 0.05;
+                // Rollers INWARD at this duty for the whole RT/RB shot hold (team 2026-10-07: 5%;
+                // raised to 10% 2026-10-09, "a little faster"). Stall worst case ~0.10 x 40 A
+                // stator = 4 A. TODO tune.
+                public static final double ROLLER_AGITATE_SPEED = 0.10;
 
         }
 
