@@ -55,6 +55,15 @@ class ShotCalculatorTest {
             "driving straight at the hub needs no turn");
     }
 
+    /** Practice: tag 18's (blue) hub on any alliance -- but never with an FMS attached. */
+    @Test
+    void practiceAimsAtTag18HubOnlyOffFms() {
+        var red = edu.wpi.first.wpilibj.DriverStation.Alliance.Red;
+        assertEquals(FieldConstants.HUB_CENTER_BLUE, ShotCalculator.hubToAimAt(true, false, red));
+        assertEquals(FieldConstants.HUB_CENTER_RED, ShotCalculator.hubToAimAt(true, true, red));
+        assertEquals(FieldConstants.HUB_CENTER_RED, ShotCalculator.hubToAimAt(false, false, red));
+    }
+
     /** Full solution: still robot on the hub's centreline faces it (+X), at the right distance. */
     @Test
     void calculateFacesTheHubFromStraightBehind() {

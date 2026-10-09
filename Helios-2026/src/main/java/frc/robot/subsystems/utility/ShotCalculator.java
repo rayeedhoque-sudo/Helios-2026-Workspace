@@ -63,7 +63,8 @@ public class ShotCalculator extends SubsystemBase {
     @Override
     public void periodic(){
         var state = drivetrain.getState();
-        shot = calculate(state.Pose, state.Speeds, FieldConstants.ownHubCenter(ownAlliance()));
+        shot = calculate(state.Pose, state.Speeds,
+            hubToAimAt(AutoAimConstants.PRACTICE_TAG_18_HUB, DriverStation.isFMSAttached(), ownAlliance()));
         double errorDeg = shot.heading().minus(state.Pose.getRotation()).getDegrees();
         aimed = Math.abs(errorDeg) <= FieldConstants.HEADING_TOLERANCE_DEG;
 
@@ -89,6 +90,12 @@ public class ShotCalculator extends SubsystemBase {
     }
 
     //Pure helpers (no I/O, package-private for ShotCalculatorTest)
+        /** Own hub -- or tag 18's (blue) hub while practising off-FMS. */
+        static Translation2d hubToAimAt(boolean practiceTag18, boolean fmsAttached, Alliance alliance){
+            return practiceTag18 && !fmsAttached ? FieldConstants.HUB_CENTER_BLUE
+                : FieldConstants.ownHubCenter(alliance);
+        }
+
         /** The full solution for one pose / robot-relative speed / hub. */
         static Shot calculate(Pose2d pose, ChassisSpeeds robotRelative, Translation2d hub){
             Translation2d launcher = pose.getTranslation()

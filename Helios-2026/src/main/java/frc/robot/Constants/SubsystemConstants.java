@@ -39,6 +39,10 @@ public class SubsystemConstants {
             public static final double HEADING_kI = 0.0;
             public static final double HEADING_kD = 0.0;
             public static final double MAX_ROTATION_RAD_PER_SEC = 1.5 * Math.PI; // spin cap
+            // PRACTICE (team 2026-10-09): tag 18 is the BLUE hub's centred tag in the field
+            // map, so RB aims at the blue hub (0.6035 m behind tag 18) whatever alliance the DS
+            // says -- the DS defaults to Red 1 in the shop. Ignored whenever an FMS is attached.
+            public static final boolean PRACTICE_TAG_18_HUB = true;
             // Rotation feedforward = this x the rate the hub bearing changes as the robot
             // drives. 1.0 = the exact geometric rate; lower it if the heading overshoots.
             public static final double HEADING_RATE_FF_SCALE = 1.0; // TODO tune on robot
