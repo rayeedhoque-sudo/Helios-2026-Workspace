@@ -18,6 +18,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -43,6 +44,8 @@ import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.Constants.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.utility.LimelightHelpers;
 import frc.robot.util.Tunable;
+import frc.robot.lib.BLine.FollowPath;
+import frc.robot.lib.BLine.Path;
 import frc.robot.subsystems.utility.LimelightHelpers.PoseEstimate;
 
 /**
@@ -71,6 +74,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     /* Robot-relative speeds request used by PathPlanner's AutoBuilder output. */
     private final SwerveRequest.ApplyRobotSpeeds m_applyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
+
+    /* BLine path following (added 2026-10-09). Gains = BLine README starting values. TODO tune on robot. */
+    private static final double kBLineTranslationP = 5.0; // (m/s) per m of path distance remaining
+    private static final double kBLineRotationP = 3.0;    // (rad/s) per rad of heading error
+    private static final double kBLineCrossTrackP = 2.0;  // (m/s) per m off the segment line
+    /* A BLine path only runs if the picked start spot is within this of the path's first point (m). */
+    static final double kBLineStartToleranceMeters = 0.5;
+    /* Own request so PathPlanner's wheel-force feedforwards (left on m_applyRobotSpeeds) never leak into BLine. */
+    private final SwerveRequest.ApplyRobotSpeeds m_blineRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
+    /* Flips paths for red. No per-path pose reset: autonomousInit already reset to the start spot. */
+    private final FollowPath.Builder m_blineBuilder = new FollowPath.Builder(
+        this,
+        () -> this.getState().Pose,
+        () -> this.getState().Speeds, // robot-relative
+        speeds -> this.setControl(m_blineRobotSpeeds.withSpeeds(speeds)),
+        new PIDController(kBLineTranslationP, 0.0, 0.0),
+        new PIDController(kBLineRotationP, 0.0, 0.0),
+        new PIDController(kBLineCrossTrackP, 0.0, 0.0)
+    ).withDefaultShouldFlip();
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -466,6 +488,37 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return this.runOnce(() -> autoStartPose().ifPresent(start -> this.resetPose(new Pose2d(
             start.getTranslation(),
             this.getState().Pose.getRotation()))));
+    }
+
+    /**
+     * Follow a BLine path (blue-origin field coordinates, flipped for red). Refuses to move
+     * (DS error, does nothing) unless the companion start spot is within
+     * kBLineStartToleranceMeters of the path's first point -- a missing or wrong pick would
+     * otherwise send the robot across the field toward absolute path points.
+     */
+    public Command followBLinePath(Path path) {
+        return Commands.defer(() -> {
+            boolean red = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
+            if (!startSpotMatchesPath(path, red, autoStartPose())) {
+                DriverStation.reportError(
+                    "BLine path NOT run: companion start spot missing or not at the path start", false);
+                return Commands.none();
+            }
+            return m_blineBuilder.build(path);
+        }, Set.of(this));
+    }
+
+    /** Pure check: is the start spot within tolerance of the path's (alliance-flipped) first point? */
+    static boolean startSpotMatchesPath(Path path, boolean red, Optional<Pose2d> startSpot) {
+        if (startSpot.isEmpty() || !path.isValid()) {
+            return false;
+        }
+        Path p = path.copy();
+        if (red) {
+            p.flip();
+        }
+        return p.getStartPose().getTranslation().getDistance(startSpot.get().getTranslation())
+            <= kBLineStartToleranceMeters;
     }
 
     // ---- Simple drive-forward autonomous with stall abort ----

@@ -24,6 +24,7 @@ import frc.robot.util.Tunable;
 import frc.robot.Constants.SubsystemConstants.LauncherConstants;
 import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.commands.CommandSwerveDrivetrain;
+import frc.robot.lib.BLine.Path;
 import frc.robot.subsystems.misc.HopperSubsystem;
 import frc.robot.subsystems.misc.IntakeSubsystem;
 import frc.robot.subsystems.misc.MatchStatus;
@@ -178,6 +179,16 @@ public class RobotContainer {
                                         .finallyDo(intakeSS::stopRollers)))
                         .andThen(intakeSS.stowCommand())
                         .andThen(drivetrain.resetAutoEndTranslation()));
+        // BLine test path (team 2026-10-09): same two legs, but a field-coordinate path from the
+        // RIGHT_TRENCH start spot (deploy/autos/paths). Pick RIGHT_TRENCH on the companion or it
+        // refuses to move. A bad/missing file reports to the DS instead of crashing boot.
+        try {
+            Path blineTest = new Path("forward-3m-left-3m");
+            autoChooser.addOption("BLine: Forward 3 m then Left 3 m (RIGHT_TRENCH)",
+                    drivetrain.followBLinePath(blineTest));
+        } catch (RuntimeException e) {
+            DriverStation.reportError("BLine path failed to load: " + e.getMessage(), e.getStackTrace());
+        }
         SmartDashboard.putData("Auto Chooser", autoChooser);
 
         configureBindings();
