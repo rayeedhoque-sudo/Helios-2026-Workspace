@@ -39,13 +39,16 @@ public class SubsystemConstants {
             public static final double HEADING_kI = 0.0;
             public static final double HEADING_kD = 0.0;
             public static final double MAX_ROTATION_RAD_PER_SEC = 1.5 * Math.PI; // spin cap
-            // PRACTICE (team 2026-10-09): the test tag 18 acts like front tags 26/10. Tag 18 is
-            // the BLUE hub's centred side tag in the field map (hub centre 0.6035 m behind it,
-            // same as 26/10), so RB aims at the blue hub whatever alliance the DS says (it
-            // defaults to Red 1 in the shop), and "forward" = facing tag 18, so MENU pressed
-            // facing the tag zeroes correctly. Ignored whenever an FMS is attached. Set false
-            // to practise on a full field without FMS.
-            public static final boolean PRACTICE_TAG_18_HUB = true;
+            // PRACTICE (team 2026-10-09): the test tag (tag 4; was 18) acts like front tags
+            // 26/10. Tag 4 is the RED hub's centred neutral-zone tag in the field map (hub centre
+            // 0.6035 m behind it, same as 26/10), so RB aims at the red hub whatever alliance the
+            // DS says, and "forward" = facing tag 4 (field heading 0), so MENU pressed facing the
+            // tag zeroes correctly. Ignored whenever an FMS is attached. Set false to practise on
+            // a full field without FMS. To change tag: the hub it sits on + the field heading
+            // of a robot facing it (2026-rebuilt-welded.json tag yaw + 180 deg).
+            public static final boolean PRACTICE_TEST_TAG = true;
+            public static final Translation2d TEST_TAG_HUB = FieldConstants.HUB_CENTER_RED;  // tag 4
+            public static final double TEST_TAG_FACING_DEG = 0.0; // tag 4 faces -X (yaw 180)
             // Rotation feedforward = this x the rate the hub bearing changes as the robot
             // drives. 1.0 = the exact geometric rate; lower it if the heading overshoots.
             public static final double HEADING_RATE_FF_SCALE = 1.0; // TODO tune on robot

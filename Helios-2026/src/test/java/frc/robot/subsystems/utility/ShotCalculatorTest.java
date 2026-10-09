@@ -55,22 +55,26 @@ class ShotCalculatorTest {
             "driving straight at the hub needs no turn");
     }
 
-    /** Practice: tag 18's (blue) hub on any alliance; otherwise our own hub. */
+    /** Practice: the test tag's hub on any alliance; otherwise our own hub. */
     @Test
-    void practiceAimsAtTag18Hub() {
-        var red = edu.wpi.first.wpilibj.DriverStation.Alliance.Red;
-        assertEquals(FieldConstants.HUB_CENTER_BLUE, ShotCalculator.hubToAimAt(true, red));
-        assertEquals(FieldConstants.HUB_CENTER_RED, ShotCalculator.hubToAimAt(false, red));
+    void practiceAimsAtTheTestTagHub() {
+        var blue = edu.wpi.first.wpilibj.DriverStation.Alliance.Blue;
+        assertEquals(AutoAimConstants.TEST_TAG_HUB, ShotCalculator.hubToAimAt(true, blue));
+        assertEquals(FieldConstants.HUB_CENTER_BLUE, ShotCalculator.hubToAimAt(false, blue));
     }
 
-    /** Tag 18 acts like tags 26/10: hub centre 0.6035 m straight behind the tag face. */
+    /**
+     * The test tag (4) acts like tags 26/10: hub centre 0.6035 m straight behind the tag
+     * face, and TEST_TAG_FACING_DEG is the heading of a robot facing the tag.
+     */
     @Test
-    void tag18SitsLikeTheFrontTags() {
-        var tag18 = new Translation2d(4.626, 3.431);   // 2026-rebuilt-welded.json, faces -Y
+    void testTagSitsLikeTheFrontTags() {
+        var tag4 = new Translation2d(11.312, 4.035);   // 2026-rebuilt-welded.json, faces -X
         var tag26 = new Translation2d(4.022, 4.035);   // faces -X
-        assertEquals(0.6035, tag18.getDistance(HUB), 2e-3);
+        var testHub = AutoAimConstants.TEST_TAG_HUB;
+        assertEquals(0.6035, tag4.getDistance(testHub), 2e-3);
         assertEquals(0.6035, tag26.getDistance(HUB), 2e-3);
-        assertEquals(90.0, HUB.minus(tag18).getAngle().getDegrees(), 0.2, "facing tag 18 = heading 90");
+        assertEquals(AutoAimConstants.TEST_TAG_FACING_DEG, testHub.minus(tag4).getAngle().getDegrees(), 0.2);
         assertEquals(0.0, HUB.minus(tag26).getAngle().getDegrees(), 0.2, "facing tag 26 = heading 0");
     }
 

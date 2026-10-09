@@ -305,10 +305,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            // Tag-18 practice: "forward" = facing tag 18 (field +Y), the way facing tag 26 is
+            // Test-tag practice: "forward" = facing the test tag, the way facing tag 26 is
             // forward from the blue wall -- so MENU pressed facing the tag sets the true heading.
-            if (ShotCalculator.practiceTag18()) {
-                setOperatorPerspectiveForward(Rotation2d.kCCW_90deg);
+            if (ShotCalculator.practiceTestTag()) {
+                setOperatorPerspectiveForward(Rotation2d.fromDegrees(AutoAimConstants.TEST_TAG_FACING_DEG));
                 m_hasAppliedOperatorPerspective = true;
             } else {
                 DriverStation.getAlliance().ifPresent(allianceColor -> {
