@@ -232,7 +232,7 @@ public class SubsystemConstants {
                 
                 // Belt smart current limits (team, 2026-09-30): 5 -> 20 A normal, so the RT shot
                 // limit (x1.2) is 24 A. Manual (A held) stays 40 A. Data sheet sec.7 cap is 60 A.
-                public static final int HOPPER_CURRENT_LIMIT_A = 30;
+                public static final int HOPPER_CURRENT_LIMIT_A = 25;
                 public static final int HOPPER_SHOT_CURRENT_LIMIT_A = (int)(HOPPER_CURRENT_LIMIT_A * 1.2);
                 // Belt limit while B (manual hopper run) is held -- team request 2026-08-27
                 // (30 -> 60), lowered to 40 on 2026-08-28. 40 A sits at/below the branch
