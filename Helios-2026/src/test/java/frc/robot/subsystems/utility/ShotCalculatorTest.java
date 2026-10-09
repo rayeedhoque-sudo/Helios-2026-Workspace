@@ -55,13 +55,23 @@ class ShotCalculatorTest {
             "driving straight at the hub needs no turn");
     }
 
-    /** Practice: tag 18's (blue) hub on any alliance -- but never with an FMS attached. */
+    /** Practice: tag 18's (blue) hub on any alliance; otherwise our own hub. */
     @Test
-    void practiceAimsAtTag18HubOnlyOffFms() {
+    void practiceAimsAtTag18Hub() {
         var red = edu.wpi.first.wpilibj.DriverStation.Alliance.Red;
-        assertEquals(FieldConstants.HUB_CENTER_BLUE, ShotCalculator.hubToAimAt(true, false, red));
-        assertEquals(FieldConstants.HUB_CENTER_RED, ShotCalculator.hubToAimAt(true, true, red));
-        assertEquals(FieldConstants.HUB_CENTER_RED, ShotCalculator.hubToAimAt(false, false, red));
+        assertEquals(FieldConstants.HUB_CENTER_BLUE, ShotCalculator.hubToAimAt(true, red));
+        assertEquals(FieldConstants.HUB_CENTER_RED, ShotCalculator.hubToAimAt(false, red));
+    }
+
+    /** Tag 18 acts like tags 26/10: hub centre 0.6035 m straight behind the tag face. */
+    @Test
+    void tag18SitsLikeTheFrontTags() {
+        var tag18 = new Translation2d(4.626, 3.431);   // 2026-rebuilt-welded.json, faces -Y
+        var tag26 = new Translation2d(4.022, 4.035);   // faces -X
+        assertEquals(0.6035, tag18.getDistance(HUB), 2e-3);
+        assertEquals(0.6035, tag26.getDistance(HUB), 2e-3);
+        assertEquals(90.0, HUB.minus(tag18).getAngle().getDegrees(), 0.2, "facing tag 18 = heading 90");
+        assertEquals(0.0, HUB.minus(tag26).getAngle().getDegrees(), 0.2, "facing tag 26 = heading 0");
     }
 
     /** Full solution: still robot on the hub's centreline faces it (+X), at the right distance. */

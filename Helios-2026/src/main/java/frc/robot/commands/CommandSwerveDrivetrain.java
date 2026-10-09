@@ -43,6 +43,7 @@ import frc.robot.Constants.SubsystemConstants.AutoAimConstants;
 import frc.robot.Constants.SubsystemConstants.Vision;
 import frc.robot.Constants.TunerConstants.TunerSwerveDrivetrain;
 import frc.robot.subsystems.utility.LimelightHelpers;
+import frc.robot.subsystems.utility.ShotCalculator;
 import frc.robot.util.Tunable;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
@@ -304,14 +305,21 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent(allianceColor -> {
-                setOperatorPerspectiveForward(
-                    allianceColor == Alliance.Red
-                        ? kRedAlliancePerspectiveRotation
-                        : kBlueAlliancePerspectiveRotation
-                );
+            // Tag-18 practice: "forward" = facing tag 18 (field +Y), the way facing tag 26 is
+            // forward from the blue wall -- so MENU pressed facing the tag sets the true heading.
+            if (ShotCalculator.practiceTag18()) {
+                setOperatorPerspectiveForward(Rotation2d.kCCW_90deg);
                 m_hasAppliedOperatorPerspective = true;
-            });
+            } else {
+                DriverStation.getAlliance().ifPresent(allianceColor -> {
+                    setOperatorPerspectiveForward(
+                        allianceColor == Alliance.Red
+                            ? kRedAlliancePerspectiveRotation
+                            : kBlueAlliancePerspectiveRotation
+                    );
+                    m_hasAppliedOperatorPerspective = true;
+                });
+            }
         }
         // First enable after boot latches the vision boot-seed off for good (see field doc).
         if (DriverStation.isEnabled()) {

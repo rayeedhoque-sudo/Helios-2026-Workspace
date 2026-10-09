@@ -64,7 +64,7 @@ public class ShotCalculator extends SubsystemBase {
     public void periodic(){
         var state = drivetrain.getState();
         shot = calculate(state.Pose, state.Speeds,
-            hubToAimAt(AutoAimConstants.PRACTICE_TAG_18_HUB, DriverStation.isFMSAttached(), ownAlliance()));
+            hubToAimAt(practiceTag18(), ownAlliance()));
         double errorDeg = shot.heading().minus(state.Pose.getRotation()).getDegrees();
         aimed = Math.abs(errorDeg) <= FieldConstants.HEADING_TOLERANCE_DEG;
 
@@ -74,6 +74,11 @@ public class ShotCalculator extends SubsystemBase {
         headingErrorEntry.setDouble(errorDeg);
         tableRpmEntry.setDouble(shot.flywheelRpm());
         tableHoodEntry.setDouble(shot.hoodDeg());
+    }
+
+    /** Tag-18 practice mode: switch on and no FMS attached (never in a real match). */
+    public static boolean practiceTag18(){
+        return AutoAimConstants.PRACTICE_TAG_18_HUB && !DriverStation.isFMSAttached();
     }
 
     // Own alliance; DriverStation may not know yet -- default BLUE and warn once.
@@ -91,8 +96,8 @@ public class ShotCalculator extends SubsystemBase {
 
     //Pure helpers (no I/O, package-private for ShotCalculatorTest)
         /** Own hub -- or tag 18's (blue) hub while practising off-FMS. */
-        static Translation2d hubToAimAt(boolean practiceTag18, boolean fmsAttached, Alliance alliance){
-            return practiceTag18 && !fmsAttached ? FieldConstants.HUB_CENTER_BLUE
+        static Translation2d hubToAimAt(boolean practiceTag18, Alliance alliance){
+            return practiceTag18 ? FieldConstants.HUB_CENTER_BLUE
                 : FieldConstants.ownHubCenter(alliance);
         }
 
