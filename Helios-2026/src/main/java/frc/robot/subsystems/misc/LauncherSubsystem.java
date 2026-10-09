@@ -79,6 +79,7 @@ public class LauncherSubsystem extends SubsystemBase {
         private boolean hoodAtTarget = false;
         private HoodState hoodState = HoodState.WAITING_FOR_ENABLE;
         private double hoodTargetDeg = 0;
+        private double hoodDegBeforeRb = 0; // DPAD hood target, put back when RB ends
         private boolean wasEnabled = false;
         private double homingStartDeg = 0;
         private final Timer homingTimer = new Timer();
@@ -263,15 +264,21 @@ public class LauncherSubsystem extends SubsystemBase {
 
         /**
          * RB shoot-on-the-move: the same shot as RT, but the flywheel rpm AND the hood target
-         * follow the shot table every loop. Hood moves only once homed; it stays where the
-         * table left it after release (DPAD jogs on from there).
+         * follow the shot table every loop. Hood moves only once homed. Release puts the hood
+         * back to the DPAD target it had before, so RT's manual hood is never lost to RB.
          */
         public Command autoShootCommand(DoubleSupplier flywheelRpm, DoubleSupplier hoodDeg){
             return shootCommand(flywheelRpm).alongWith(Commands.run(() -> {
                 if (hoodState == HoodState.HOMED) {
                     hoodTargetDeg = clampHoodDeg(hoodDeg.getAsDouble());
                 }
-            }));
+            }))
+            .beforeStarting(() -> hoodDegBeforeRb = hoodTargetDeg)
+            .finallyDo(() -> {
+                if (hoodState == HoodState.HOMED) {
+                    hoodTargetDeg = hoodDegBeforeRb;
+                }
+            });
         }
 
         // The shot body: flywheels at targetRpm (re-read every loop), feeder per the reverse window.
