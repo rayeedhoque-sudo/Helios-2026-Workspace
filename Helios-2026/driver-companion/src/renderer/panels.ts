@@ -579,7 +579,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
     group: 'Hopper',
     rows: [
       { btn: 'A', desc: 'Hold: manual hopper — belts only; release = stop' },
-      { btn: 'VIEW', desc: 'Hold: UNJAM — same as the start of a shot: belts backward, feeder backward very slowly, slider cycling, rollers in at 5%; release = stop, slider stows' },
+      { btn: 'VIEW', desc: 'Hold: UNJAM — belts backward, feeder backward very slowly; intake untouched; release = stop' },
     ],
   },
   {
