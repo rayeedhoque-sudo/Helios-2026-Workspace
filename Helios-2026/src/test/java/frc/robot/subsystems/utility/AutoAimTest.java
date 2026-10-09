@@ -123,21 +123,18 @@ class AutoAimTest {
     }
 
     /**
-     * TAG 17 MUST KEEP WORKING (team check 2026-08-29). It is normally a FEED tag and belongs
-     * to neither hub, so it reaches auto-aim ONLY through the test alias -- which classifyTag
-     * checks FIRST, before the alliance partition, so it works on either alliance. Its lateral
-     * offset is 0, the same as the tag 10 it stands in for, so the aim geometry matches too.
+     * The TEST alias tag (18 since 2026-10-09 -- a centred blue SCORE tag) must reach
+     * auto-aim on RED too, where it belongs to the opponent hub. Lateral offset 0, like the
+     * centred tag 10 it stands in for.
      */
     @Test
-    void tagSeventeenStillReachesAutoAim() {
-        assertTrue(AutoAim.isAliasedScoreTag(17),
-            "the alias is what makes 17 usable -- if this is false, RB does nothing on it");
-        assertTrue(FieldConstants.FEED_TAGS.contains(17), "17 is a FEED tag without the alias");
-        assertFalse(FieldConstants.ownScoreTags(Alliance.Red).contains(17));
-        assertFalse(FieldConstants.ownScoreTags(Alliance.Blue).contains(17));
+    void testAliasTagStillReachesAutoAim() {
+        assertTrue(AutoAim.isAliasedScoreTag(18),
+            "the alias is what makes 18 usable on red -- if this is false, RB does nothing on it");
+        assertFalse(FieldConstants.ownScoreTags(Alliance.Red).contains(18));
         assertEquals(FieldConstants.tagLateralOffsetMeters(10),
-            FieldConstants.tagLateralOffsetMeters(17), 1e-9,
-            "17 must aim like the tag 10 it stands in for");
+            FieldConstants.tagLateralOffsetMeters(18), 1e-9,
+            "18 must aim like the tag 10 it stands in for");
     }
 
     /** Tag 17 is aliased to a scoring tag for testing; nothing else is. */
@@ -197,8 +194,8 @@ class AutoAimTest {
         assertNull(AutoAim.pickAutoAimTag(new LimelightHelpers.RawFiducial[] {}, red));
         assertNull(AutoAim.pickAutoAimTag(null, red));
         // The test alias still gets through, on either alliance.
-        var alias = new LimelightHelpers.RawFiducial(17, 1.0, 0, 0.5, 1.8, 1.8, 0.1);
-        assertEquals(17, AutoAim.pickAutoAimTag(
+        var alias = new LimelightHelpers.RawFiducial(18, 1.0, 0, 0.5, 1.8, 1.8, 0.1);
+        assertEquals(18, AutoAim.pickAutoAimTag(
             new LimelightHelpers.RawFiducial[] {alias}, red).id);
     }
 
