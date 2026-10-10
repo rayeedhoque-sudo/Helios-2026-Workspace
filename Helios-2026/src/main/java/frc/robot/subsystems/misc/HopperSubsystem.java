@@ -222,11 +222,11 @@ public class HopperSubsystem extends SubsystemBase{
 
     /**
      * INTAKE FEED (LT/Y, runs only while the intake rollers are rolling -- never while the
-     * slider moves): belts at normal duty. End = stop the belts.
+     * slider moves): belts at HOPPER_INTAKE_SPEED (half the normal duty). End = stop the belts.
      */
     public Command intakeFeedCommand(){
         return runEnd(
-            () -> indexFuel(),
+            () -> setBelts(HopperSubsystemConstants.HOPPER_INTAKE_SPEED),
             () -> stopIndex());
     }
 

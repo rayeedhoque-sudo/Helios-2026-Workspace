@@ -561,7 +561,7 @@ const CONTROLS: { group: string; rows: CtlRow[]; testOnly?: boolean }[] = [
   {
     group: 'Intake — slider + rollers (hold-to-run; slider stows on release)',
     rows: [
-      { btn: 'LT', desc: 'Hold: intake — slider out to stall, THEN rollers in + belts; release = rollers/belts stop, then slider retracts to stall' },
+      { btn: 'LT', desc: 'Hold: intake — slider out to stall, THEN rollers in + belts at half speed; release = rollers/belts stop, then slider retracts to stall' },
       { btn: 'Y', desc: 'Hold: outtake — same choreography, rollers out' },
       { btn: 'X', desc: 'Manual stow: rollers stop immediately, then retract to stall' },
     ],

@@ -210,6 +210,9 @@ public class SubsystemConstants {
                 // direction test 2026-07-14 confirmed both motors agree, positive = tested
                 // direction. TODO raise toward 0.8 once feed direction + throughput verified.
                 public static final double HOPPER_SPEED = 1;   // +20% team request 2026-08-24
+                // Belt duty while the intake runs (LT / Y feed) -- team 2026-10-09: 50% of
+                // HOPPER_SPEED. The A manual run and the shots keep their own speeds.
+                public static final double HOPPER_INTAKE_SPEED = HOPPER_SPEED * 0.5;
                 // Belt duty for a SHOT (B feed shot / RT / RB) -- team request 2026-08-29:
                 // "twice as fast". Doubling 0.6 is 1.2, which is not a thing: 1.0 is full
                 // output, so this lands at 1.0 and the real increase is 1.67x, not 2x. Written
@@ -243,7 +246,7 @@ public class SubsystemConstants {
                 
                 // Belt smart current limits (team, 2026-09-30): 5 -> 20 A normal, so the RT shot
                 // limit (x1.2) is 24 A. Manual (A held) stays 40 A. Data sheet sec.7 cap is 60 A.
-                public static final int HOPPER_CURRENT_LIMIT_A = 25;
+                public static final int HOPPER_CURRENT_LIMIT_A = 30;
                 public static final int HOPPER_SHOT_CURRENT_LIMIT_A = (int)(HOPPER_CURRENT_LIMIT_A * 1.2);
                 // Belt limit while B (manual hopper run) is held -- team request 2026-08-27
                 // (30 -> 60), lowered to 40 on 2026-08-28. 40 A sits at/below the branch
